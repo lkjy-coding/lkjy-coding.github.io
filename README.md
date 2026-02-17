@@ -11,4 +11,12 @@
 ### 硬核版
 
 - 当硬盘扩容后，下面的状态栏会显示最新容量，然而上面的硬盘占用显示的总容量没有更新的问题
-- 把网校升到了2级仍提示“未研发”的问题
+- 把网校升级后仍提示“未研发”的问题
+
+---
+
+## 参考
+
+<https://www.luogu.com.cn/article/dcqcee1r>
+
+Also try <https://chenzheaya.github.io/OnlineJudgeMaintainerSimulator/>!
