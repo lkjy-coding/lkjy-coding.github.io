@@ -41,3 +41,15 @@
 <https://www.luogu.com.cn/article/dcqcee1r>
 
 Also try <https://chenzheaya.github.io/OnlineJudgeMaintainerSimulator/>!
+
+---
+
+# 工具箱
+
+## 文件目录
+
+- `tools_v1.html`
+
+## 体验地址
+
+V1：<https://lkjy-coding.github.io/tools_v1.html>
