@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>JCode OJ - 在线评测系统</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.15.2/ace.js"></script>
+	<style>
+		:root {
+			--primary: #3498db;
+			--primary-dark: #2980b9;
+			--secondary: #9b59b6;
+			--success: #2ecc71;
+			--danger: #e74c3c;
+			--warning: #f39c12;
+			--info: #1abc9c;
+			--dark: #2c3e50;
+			--light: #ecf0f1;
+			--admin: #9b59b6;
+			--level-0: #95a5a6;
+			--level-1: #1abc9c;
+			--level-2: #3498db;
+			--level-3: #f1c40f;
+			--level-4: #e67e22;
+			--level-5: #e74c3c;
+			--level-6: #9b59b6;
+			--bg-dark: #1e1f29;
+			--bg-darker: #15161d;
+			--bg-light: #f5f7fa;
+			--card-bg: #2a2b36;
+		}
+		
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+		}
+		
+		body {
+			background-color: var(--bg-dark);
+			color: #e0e0e0;
+			line-height: 1.6;
+		}
+		
+		.container {
+			width: 100%;
+			max-width: 1400px;
+			margin: 0 auto;
+			padding: 0 15px;
+		}
+		
+		/* 头部导航 */
+		header {
+			background-color: var(--bg-darker);
+			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+			position: sticky;
+			top: 0;
+			z-index: 1000;
+		}
+		
+		.navbar {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 15px 0;
+		}
+		
+		.logo {
+			display: flex;
+			align-items: center;
+			font-size: 28px;
+			font-weight: 800;
+			color: var(--primary);
+			text-decoration: none;
+		}
+		
+		.logo i {
+			margin-right: 10px;
+			font-size: 32px;
+		}
+		
+		.nav-links {
+			display: flex;
+			list-style: none;
+		}
+		
+		.nav-links li {
+			margin: 0 10px;
+		}
+		
+		.nav-links a {
+			text-decoration: none;
+			color: #b0b0b0;
+			font-weight: 600;
+			padding: 8px 15px;
+			border-radius: 20px;
+			transition: all 0.3s ease;
+		}
+		
+		.nav-links a:hover, .nav-links a.active {
+			background-color: var(--primary);
+			color: white;
+		}
+		
+		.user-actions {
+			display: flex;
+			align-items: center;
+		}
+		
+		.user-profile {
+			display: flex;
+			align-items: center;
+			cursor: pointer;
+			position: relative;
+		}
+		
+		.user-profile img {
+			width: 40px;
+			height: 40px;
+			border-radius: 50%;
+			margin-right: 10px;
+			object-fit: cover;
+			border: 2px solid var(--primary);
+		}
+		
+		.username {
+			font-weight: 600;
+		}
+		
+		.username.level-4 {
+			color: var(--level-4);
+		}
+		
+		/* 主内容区域 */
+		.main-content {
+			display: grid;
+			grid-template-columns: 300px 1fr;
+			gap: 20px;
+			margin-top: 30px;
+		}
+		
+		/* 功能卡片 */
+		.card {
+			background-color: var(--card-bg);
+			border-radius: 10px;
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+			margin-bottom: 20px;
+			overflow: hidden;
+		}
+		
+		.card-header {
+			padding: 15px 20px;
+			background-color: var(--primary-dark);
+			color: white;
+			font-weight: 600;
+			display: flex;
+			align-items: center;
+		}
+		
+		.card-header i {
+			margin-right: 10px;
+		}
+		
+		.card-body {
+			padding: 20px;
+		}
+		
+		/* 题目列表 */
+		.problem-list {
+			list-style: none;
+		}
+		
+		.problem-item {
+			padding: 15px;
+			border-bottom: 1px solid #3a3b45;
+			display: flex;
+			align-items: center;
+			cursor: pointer;
+			transition: background-color 0.3s;
+		}
+		
+		.problem-item:hover {
+			background-color: #343541;
+		}
+		
+		.problem-item.active {
+			background-color: #3a3b45;
+			border-left: 4px solid var(--primary);
+		}
+		
+		.problem-id {
+			width: 40px;
+			height: 40px;
+			border-radius: 50%;
+			background-color: var(--primary);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-weight: 700;
+			margin-right: 15px;
+			flex-shrink: 0;
+		}
+		
+		.problem-info {
+			flex: 1;
+		}
+		
+		.problem-title {
+			font-weight: 600;
+			margin-bottom: 5px;
+		}
+		
+		.problem-meta {
+			display: flex;
+			font-size: 13px;
+			color: #a0a0a0;
+		}
+		
+		.problem-meta span {
+			margin-right: 15px;
+			display: flex;
+			align-items: center;
+		}
+		
+		.problem-meta i {
+			margin-right: 5px;
+		}
+		
+		.difficulty {
+			padding: 3px 8px;
+			border-radius: 10px;
+			font-size: 12px;
+			font-weight: 600;
+		}
+		
+		.difficulty-easy {
+			background-color: var(--success);
+			color: white;
+		}
+		
+		.difficulty-medium {
+			background-color: var(--warning);
+			color: white;
+		}
+		
+		.difficulty-hard {
+			background-color: var(--danger);
+			color: white;
+		}
+		
+		/* 题目详情 */
+		.problem-detail {
+			display: flex;
+			flex-direction: column;
+			height: 100%;
+		}
+		
+		.problem-content {
+			flex: 1;
+			overflow-y: auto;
+			padding: 20px;
+			background-color: var(--card-bg);
+			border-radius: 10px;
+			margin-bottom: 20px;
+		}
+		
+		.problem-title-large {
+			font-size: 28px;
+			margin-bottom: 10px;
+			color: white;
+		}
+		
+		.problem-meta-large {
+			display: flex;
+			margin-bottom: 25px;
+		}
+		
+		.problem-meta-large span {
+			margin-right: 20px;
+			display: flex;
+			align-items: center;
+			font-size: 15px;
+		}
+		
+		.problem-section {
+			margin-bottom: 25px;
+		}
+		
+		.section-title {
+			font-size: 20px;
+			margin-bottom: 15px;
+			color: var(--primary);
+			border-bottom: 2px solid #3a3b45;
+			padding-bottom: 8px;
+		}
+		
+		.sample-io {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 20px;
+			margin-bottom: 15px;
+		}
+		
+		.io-box {
+			background-color: #1e1f29;
+			border-radius: 5px;
+			padding: 15px;
+			font-family: monospace;
+			white-space: pre-wrap;
+			font-size: 14px;
+			line-height: 1.5;
+		}
+		
+		.io-title {
+			font-weight: 600;
+			margin-bottom: 8px;
+			color: var(--info);
+		}
+		
+		/* 代码编辑区 */
+		.code-editor-container {
+			height: 350px;
+			background-color: #1e1f29;
+			border-radius: 5px;
+			overflow: hidden;
+			margin-bottom: 20px;
+			border: 1px solid #3a3b45;
+		}
+		
+		#code-editor {
+			height: 100%;
+			width: 100%;
+		}
+		
+		/* 按钮区域 */
+		.action-buttons {
+			display: flex;
+			gap: 15px;
+		}
+		
+		.btn {
+			padding: 12px 25px;
+			border-radius: 5px;
+			border: none;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.3s;
+			display: flex;
+			align-items: center;
+		}
+		
+		.btn i {
+			margin-right: 8px;
+		}
+		
+		.btn-run {
+			background-color: var(--info);
+			color: white;
+		}
+		
+		.btn-run:hover {
+			background-color: #16a085;
+		}
+		
+		.btn-submit {
+			background-color: var(--success);
+			color: white;
+		}
+		
+		.btn-submit:hover {
+			background-color: #27ae60;
+		}
+		
+		.btn-reset {
+			background-color: #7f8c8d;
+			color: white;
+		}
+		
+		.btn-reset:hover {
+			background-color: #6c7a7d;
+		}
+		
+		/* 评测结果 */
+		.result-container {
+			background-color: var(--card-bg);
+			border-radius: 5px;
+			padding: 20px;
+			margin-top: 20px;
+		}
+		
+		.result-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 15px;
+			padding-bottom: 10px;
+			border-bottom: 1px solid #3a3b45;
+		}
+		
+		.result-title {
+			font-size: 20px;
+			color: var(--primary);
+		}
+		
+		.result-status {
+			font-weight: 700;
+			padding: 5px 15px;
+			border-radius: 20px;
+		}
+		
+		.status-accepted {
+			background-color: rgba(46, 204, 113, 0.2);
+			color: var(--success);
+		}
+		
+		.status-wrong {
+			background-color: rgba(231, 76, 60, 0.2);
+			color: var(--danger);
+		}
+		
+		.test-cases {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+			gap: 15px;
+			margin-top: 15px;
+		}
+		
+		.test-case {
+			background-color: #1e1f29;
+			border-radius: 5px;
+			padding: 15px;
+		}
+		
+		.test-case-title {
+			font-weight: 600;
+			margin-bottom: 10px;
+			color: var(--info);
+		}
+		
+		.test-case-result {
+			display: flex;
+			align-items: center;
+			font-size: 14px;
+		}
+		
+		.test-case-result i {
+			margin-right: 5px;
+		}
+		
+		.fa-check-circle {
+			color: var(--success);
+		}
+		
+		.fa-times-circle {
+			color: var(--danger);
+		}
+		
+		.test-case-time {
+			font-size: 13px;
+			color: #a0a0a0;
+			margin-top: 8px;
+		}
+		
+		/* 页脚 */
+		footer {
+			background-color: var(--bg-darker);
+			color: white;
+			padding: 30px 0 20px;
+			margin-top: 50px;
+		}
+		
+		.footer-content {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 30px;
+		}
+		
+		.footer-column h3 {
+			margin-bottom: 20px;
+			position: relative;
+			padding-bottom: 10px;
+			color: var(--primary);
+		}
+		
+		.footer-column h3::after {
+			content: '';
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			width: 50px;
+			height: 2px;
+			background-color: var(--primary);
+		}
+		
+		.footer-links {
+			list-style: none;
+		}
+		
+		.footer-links li {
+			margin-bottom: 10px;
+		}
+		
+		.footer-links a {
+			color: #bdc3c7;
+			text-decoration: none;
+			transition: color 0.3s ease;
+		}
+		
+		.footer-links a:hover {
+			color: white;
+		}
+		
+		.copyright {
+			text-align: center;
+			padding-top: 30px;
+			margin-top: 30px;
+			border-top: 1px solid #34495e;
+			font-size: 14px;
+			color: #95a5a6;
+		}
+		
+		/* 响应式设计 */
+		@media (max-width: 992px) {
+			.main-content {
+				grid-template-columns: 1fr;
+			}
+			
+			.sample-io {
+				grid-template-columns: 1fr;
+			}
+			
+			.footer-content {
+				grid-template-columns: repeat(2, 1fr);
+			}
+		}
+		
+		@media (max-width: 768px) {
+			.nav-links {
+				display: none;
+			}
+			
+			.test-cases {
+				grid-template-columns: 1fr;
+			}
+			
+			.footer-content {
+				grid-template-columns: 1fr;
+			}
+		}
+	</style>
+</head>
+<body>
+	<!-- 头部导航 -->
+	<header>
+		<div class="container">
+			<nav class="navbar">
+				<a href="#" class="logo">
+					<i class="fas fa-code"></i>
+					JCode OJ
+				</a>
+				
+				<ul class="nav-links">
+					<li><a href="#" class="active">题库</a></li>
+					<li><a href="#">比赛</a></li>
+					<li><a href="#">题单</a></li>
+					<li><a href="#">讨论</a></li>
+					<li><a href="#">提交记录</a></li>
+					<li><a href="#">排名</a></li>
+				</ul>
+				
+				<div class="user-actions">
+					<div class="user-profile">
+						<img src="https://randomuser.me/api/portraits/men/32.jpg" alt="用户头像">
+						<div class="username level-4">CoderZhang (社区分: 2450)</div>
+					</div>
+				</div>
+			</nav>
+		</div>
+	</header>
+
+	<!-- 主内容区域 -->
+	<div class="container">
+		<div class="main-content">
+			<!-- 题目列表 -->
+			<div class="sidebar">
+				<div class="card">
+					<div class="card-header">
+						<i class="fas fa-list"></i> 题目列表
+					</div>
+					<div class="card-body">
+						<ul class="problem-list">
+							<li class="problem-item active">
+								<div class="problem-id">1</div>
+								<div class="problem-info">
+									<div class="problem-title">A + B 问题</div>
+									<div class="problem-meta">
+										<span><i class="fas fa-check-circle"></i> 通过率: 85%</span>
+										<span class="difficulty difficulty-easy">简单</span>
+									</div>
+								</div>
+							</li>
+							<li class="problem-item">
+								<div class="problem-id">2</div>
+								<div class="problem-info">
+									<div class="problem-title">两数之和</div>
+									<div class="problem-meta">
+										<span><i class="fas fa-check-circle"></i> 通过率: 62%</span>
+										<span class="difficulty difficulty-easy">简单</span>
+									</div>
+								</div>
+							</li>
+							<li class="problem-item">
+								<div class="problem-id">3</div>
+								<div class="problem-info">
+									<div class="problem-title">反转链表</div>
+									<div class="problem-meta">
+										<span><i class="fas fa-check-circle"></i> 通过率: 58%</span>
+										<span class="difficulty difficulty-medium">中等</span>
+									</div>
+								</div>
+							</li>
+							<li class="problem-item">
+								<div class="problem-id">4</div>
+								<div class="problem-info">
+									<div class="problem-title">最长回文子串</div>
+									<div class="problem-meta">
+										<span><i class="fas fa-check-circle"></i> 通过率: 42%</span>
+										<span class="difficulty difficulty-medium">中等</span>
+									</div>
+								</div>
+							</li>
+							<li class="problem-item">
+								<div class="problem-id">5</div>
+								<div class="problem-info">
+									<div class="problem-title">正则表达式匹配</div>
+									<div class="problem-meta">
+										<span><i class="fas fa-check-circle"></i> 通过率: 28%</span>
+										<span class="difficulty difficulty-hard">困难</span>
+									</div>
+								</div>
+							</li>
+							<li class="problem-item">
+								<div class="problem-id">6</div>
+								<div class="problem-info">
+									<div class="problem-title">滑动窗口最大值</div>
+									<div class="problem-meta">
+										<span><i class="fas fa-check-circle"></i> 通过率: 45%</span>
+										<span class="difficulty difficulty-hard">困难</span>
+									</div>
+								</div>
+							</li>
+						</ul>
+					</div>
+				</div>
+				
+				<div class="card">
+					<div class="card-header">
+						<i class="fas fa-filter"></i> 题目筛选
+					</div>
+					<div class="card-body">
+						<div style="margin-bottom: 15px;">
+							<label style="display: block; margin-bottom: 8px; font-weight: 600;">难度</label>
+							<div style="display: flex; gap: 10px;">
+								<button class="difficulty difficulty-easy" style="border: none; cursor: pointer;">简单</button>
+								<button class="difficulty difficulty-medium" style="border: none; cursor: pointer;">中等</button>
+								<button class="difficulty difficulty-hard" style="border: none; cursor: pointer;">困难</button>
+							</div>
+						</div>
+						
+						<div style="margin-bottom: 15px;">
+							<label style="display: block; margin-bottom: 8px; font-weight: 600;">标签</label>
+							<div style="display: flex; flex-wrap: wrap; gap: 8px;">
+								<span class="difficulty" style="background-color: #3498db; cursor: pointer;">数组</span>
+								<span class="difficulty" style="background-color: #9b59b6; cursor: pointer;">字符串</span>
+								<span class="difficulty" style="background-color: #1abc9c; cursor: pointer;">动态规划</span>
+								<span class="difficulty" style="background-color: #e67e22; cursor: pointer;">树</span>
+								<span class="difficulty" style="background-color: #f1c40f; cursor: pointer;">图</span>
+								<span class="difficulty" style="background-color: #e74c3c; cursor: pointer;">排序</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<!-- 题目详情与代码编辑 -->
+			<div class="problem-detail">
+				<div class="problem-content">
+					<h1 class="problem-title-large">1. A + B 问题</h1>
+					<div class="problem-meta-large">
+						<span><i class="fas fa-signal"></i> 难度: <span class="difficulty difficulty-easy">简单</span></span>
+						<span><i class="fas fa-tags"></i> 标签: 基础, 数学</span>
+						<span><i class="fas fa-check-circle"></i> 通过率: 85%</span>
+					</div>
+					
+					<div class="problem-section">
+						<h2 class="section-title">题目描述</h2>
+						<p>给定两个整数 <code>A</code> 和 <code>B</code>，计算它们的和 <code>A + B</code>。</p>
+					</div>
+					
+					<div class="problem-section">
+						<h2 class="section-title">输入格式</h2>
+						<p>输入包含两个整数 <code>A</code> 和 <code>B</code>，用空格分隔。</p>
+						<p>数据范围：<code>-1000 ≤ A, B ≤ 1000</code></p>
+					</div>
+					
+					<div class="problem-section">
+						<h2 class="section-title">输出格式</h2>
+						<p>输出一个整数，表示 <code>A + B</code> 的结果。</p>
+					</div>
+					
+					<div class="problem-section">
+						<h2 class="section-title">样例输入</h2>
+						<div class="sample-io">
+							<div class="io-box">
+								<div class="io-title">输入 #1</div>
+								3 4
+							</div>
+							<div class="io-box">
+								<div class="io-title">输入 #2</div>
+								-5 8
+							</div>
+						</div>
+					</div>
+					
+					<div class="problem-section">
+						<h2 class="section-title">样例输出</h2>
+						<div class="sample-io">
+							<div class="io-box">
+								<div class="io-title">输出 #1</div>
+								7
+							</div>
+							<div class="io-box">
+								<div class="io-title">输出 #2</div>
+								3
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<!-- 代码编辑器 -->
+				<div class="card">
+					<div class="card-header">
+						<i class="fas fa-code"></i> 代码编辑器
+					</div>
+					<div class="card-body">
+						<div class="code-editor-container">
+							<div id="code-editor">#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+	int a, b;
+	cin >> a >> b;
+	cout << a + b << endl;
+	return 0;
+}</div>
+						</div>
+						
+						<div class="action-buttons">
+							<button class="btn btn-run">
+								<i class="fas fa-play"></i> 运行代码
+							</button>
+							<button class="btn btn-submit">
+								<i class="fas fa-paper-plane"></i> 提交代码
+							</button>
+							<button class="btn btn-reset">
+								<i class="fas fa-redo"></i> 重置代码
+							</button>
+						</div>
+					</div>
+				</div>
+				
+				<!-- 评测结果 -->
+				<div class="result-container">
+					<div class="result-header">
+						<div class="result-title">评测结果</div>
+						<div class="result-status status-accepted">Accepted</div>
+					</div>
+					
+					<div class="problem-meta-large">
+						<span><i class="fas fa-check-circle"></i> 状态: 通过</span>
+						<span><i class="fas fa-microchip"></i> 语言: C++</span>
+						<span><i class="fas fa-clock"></i> 运行时间: 15ms</span>
+						<span><i class="fas fa-memory"></i> 内存占用: 2.1MB</span>
+					</div>
+					
+					<div class="test-cases">
+						<div class="test-case">
+							<div class="test-case-title">测试用例 #1</div>
+							<div class="test-case-result">
+								<i class="fas fa-check-circle"></i> 通过
+							</div>
+							<div class="test-case-time">执行时间: 2ms</div>
+						</div>
+						<div class="test-case">
+							<div class="test-case-title">测试用例 #2</div>
+							<div class="test-case-result">
+								<i class="fas fa-check-circle"></i> 通过
+							</div>
+							<div class="test-case-time">执行时间: 1ms</div>
+						</div>
+						<div class="test-case">
+							<div class="test-case-title">测试用例 #3</div>
+							<div class="test-case-result">
+								<i class="fas fa-check-circle"></i> 通过
+							</div>
+							<div class="test-case-time">执行时间: 2ms</div>
+						</div>
+						<div class="test-case">
+							<div class="test-case-title">测试用例 #4</div>
+							<div class="test-case-result">
+								<i class="fas fa-check-circle"></i> 通过
+							</div>
+							<div class="test-case-time">执行时间: 3ms</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 页脚 -->
+	<footer>
+		<div class="container">
+			<div class="footer-content">
+				<div class="footer-column">
+					<h3>关于JCode OJ</h3>
+					<p style="color: #bdc3c7; margin-bottom: 15px;">JCode在线评测系统提供高质量的编程题库，支持多种编程语言，帮助程序员提升算法和编程能力。</p>
+					<div style="display: flex; gap: 15px; font-size: 20px;">
+						<a href="#" style="color: #bdc3c7;"><i class="fab fa-github"></i></a>
+						<a href="#" style="color: #bdc3c7;"><i class="fab fa-weibo"></i></a>
+						<a href="#" style="color: #bdc3c7;"><i class="fab fa-qq"></i></a>
+					</div>
+				</div>
+				
+				<div class="footer-column">
+					<h3>学习资源</h3>
+					<ul class="footer-links">
+						<li><a href="#">算法入门教程</a></li>
+						<li><a href="#">数据结构精讲</a></li>
+						<li><a href="#">LeetCode题解</a></li>
+						<li><a href="#">竞赛专题训练</a></li>
+						<li><a href="#">面试题库</a></li>
+					</ul>
+				</div>
+				
+				<div class="footer-column">
+					<h3>联系我们</h3>
+					<ul class="footer-links">
+						<li><i class="fas fa-envelope"></i> xxxxxxx@jcode.com</li>
+						<li><i class="fas fa-comments"></i> 用户反馈</li>
+						<li><i class="fas fa-question-circle"></i> 帮助中心</li>
+						<li><i class="fas fa-file-alt"></i> 用户协议</li>
+					</ul>
+				</div>
+			</div>
+			
+			<div class="copyright">
+				&copy; 2023 JCode在线评测系统. 保留所有权利. 某ICP备xxxxxxxx号     [仅供娱乐]
+			</div>
+		</div>
+	</footer>
+
+	<script>
+		// 初始化代码编辑器
+		const editor = ace.edit("code-editor");
+		editor.setTheme("ace/theme/twilight");
+		editor.session.setMode("ace/mode/c_cpp");
+		editor.setOptions({
+			fontSize: "14px",
+			enableBasicAutocompletion: true,
+			enableLiveAutocompletion: true
+		});
+		
+		// 模拟提交代码
+		document.querySelector('.btn-submit').addEventListener('click', function() {
+			const resultStatus = document.querySelector('.result-status');
+			resultStatus.textContent = '评测中...';
+			resultStatus.className = 'result-status status-accepted';
+			
+			// 模拟评测过程
+			setTimeout(() => {
+				resultStatus.textContent = 'Accepted';
+				resultStatus.className = 'result-status status-accepted';
+				document.querySelector('.result-title').textContent = '评测结果 (最新)';
+				
+				// 显示社区分增加
+				const userScore = document.querySelector('.username.level-4');
+				const currentScore = parseInt(userScore.textContent.match(/\d+/)[0]);
+				userScore.textContent = `CoderZhang (社区分: ${currentScore + 15})`;
+			}, 2000);
+		});
+		
+		// 模拟运行代码
+		document.querySelector('.btn-run').addEventListener('click', function() {
+			const resultStatus = document.querySelector('.result-status');
+			resultStatus.textContent = '运行中...';
+			resultStatus.className = 'result-status status-accepted';
+			
+			// 模拟运行过程
+			setTimeout(() => {
+				resultStatus.textContent = '运行完成';
+				resultStatus.className = 'result-status status-accepted';
+				document.querySelector('.result-title').textContent = '运行结果';
+			}, 1500);
+		});
+		
+		// 重置代码
+		document.querySelector('.btn-reset').addEventListener('click', function() {
+			editor.setValue(`#include <iostream>
+using namespace std;
+
+int main() {
+	int a, b;
+	cin >> a >> b;
+	cout << a + b << endl;
+	return 0;
+}`);
+		});
+		
+		// 题目选择
+		const problemItems = document.querySelectorAll('.problem-item');
+		problemItems.forEach(item => {
+			item.addEventListener('click', function() {
+				problemItems.forEach(i => i.classList.remove('active'));
+				this.classList.add('active');
+				
+				// 更新题目内容
+				const problemId = this.querySelector('.problem-id').textContent;
+				const problemTitle = this.querySelector('.problem-title').textContent;
+				document.querySelector('.problem-title-large').textContent = `${problemId}. ${problemTitle}`;
+				
+				// 重置评测结果
+				document.querySelector('.result-status').textContent = '未提交';
+				document.querySelector('.result-title').textContent = '评测结果';
+			});
+		});
+	</script>
+</body>
+</html>
