@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<title>双人气球大战 · 移动同屏</title>
+	<style>
+		* {
+			box-sizing: border-box;
+			user-select: none;
+			-webkit-tap-highlight-color: transparent;
+		}
+		body {
+			margin: 0;
+			min-height: 100vh;
+			background: linear-gradient(145deg, #0b1c2f, #1a2f42);
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			font-family: 'Segoe UI', Roboto, sans-serif;
+			padding: 10px;
+			touch-action: pan-y pinch-zoom;
+		}
+		.game-container {
+			width: 100%;
+			max-width: 500px;
+			background: #1e3a5f;
+			border-radius: 40px;
+			padding: 20px;
+			box-shadow: 0 20px 35px #00000080;
+			border: 2px solid #4c7aa2;
+		}
+		.header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			color: #e6f0ff;
+			font-size: 1.2rem;
+			font-weight: 700;
+			margin-bottom: 15px;
+			padding: 0 10px;
+		}
+		.score-board {
+			background: #0f2a40;
+			padding: 8px 20px;
+			border-radius: 40px;
+			display: flex;
+			gap: 30px;
+		}
+		.score-left, .score-right {
+			display: flex;
+			align-items: center;
+			gap: 5px;
+		}
+		.score-left span, .score-right span {
+			font-size: 1.5rem;
+			color: #ffb347;
+		}
+		canvas {
+			display: block;
+			margin: 0 auto;
+			width: 100%;
+			aspect-ratio: 1/1;
+			border-radius: 30px;
+			background: #87CEEB;
+			box-shadow: inset 0 0 20px #00000055, 0 10px 15px black;
+			border: 4px solid #5f8db0;
+			touch-action: none;
+		}
+		.controls-row {
+			display: flex;
+			justify-content: space-between;
+			margin-top: 20px;
+			gap: 10px;
+		}
+		.player-controls {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			background: #0f2a40;
+			border-radius: 30px;
+			padding: 15px 10px;
+			border: 2px solid #3a6792;
+		}
+		.player-label {
+			color: #d7ecff;
+			font-weight: bold;
+			margin-bottom: 12px;
+			font-size: 1.1rem;
+		}
+		.player-label.left {
+			color: #3b82f6;
+		}
+		.player-label.right {
+			color: #dc2626;
+		}
+		.button-grid {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 8px;
+			width: 100%;
+		}
+		.ctrl-btn {
+			background: #2d4b6e;
+			border: none;
+			color: white;
+			font-size: 1.8rem;
+			font-weight: bold;
+			aspect-ratio: 1/1;
+			border-radius: 20px;
+			box-shadow: 0 5px 0 #0e2637;
+			transition: 0.05s;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			touch-action: manipulation;
+			cursor: pointer;
+			-webkit-tap-highlight-color: transparent;
+		}
+		.ctrl-btn:active {
+			transform: translateY(4px);
+			box-shadow: 0 1px 0 #0e2637;
+		}
+		.ctrl-btn.left-color {
+			background: #3b82f6;
+		}
+		.ctrl-btn.right-color {
+			background: #dc2626;
+		}
+		.fire-btn {
+			grid-column: span 3;
+			background: #ffb347;
+			color: #1e2f47;
+			font-size: 1.5rem;
+			padding: 12px 0;
+			aspect-ratio: auto;
+			border-radius: 30px;
+			margin-top: 5px;
+		}
+		.footer {
+			text-align: center;
+			margin-top: 15px;
+			color: #8aa9c9;
+			font-size: 0.9rem;
+		}
+	</style>
+</head>
+<body>
+	<div class="game-container">
+		<div class="header">
+			<span>🎈 双人气球大战</span>
+			<div class="score-board">
+				<div class="score-left">🔵 <span id="scoreLeft">0</span></div>
+				<div class="score-right">🔴 <span id="scoreRight">0</span></div>
+			</div>
+		</div>
+
+		<canvas id="gameCanvas" width="400" height="400"></canvas>
+
+		<!-- 双人控制区域 -->
+		<div class="controls-row">
+			<!-- 左侧玩家 (蓝色) -->
+			<div class="player-controls">
+				<div class="player-label left">👈 蓝方</div>
+				<div class="button-grid">
+					<button class="ctrl-btn left-color" id="leftUp">⬆️</button>
+					<button class="ctrl-btn left-color" id="leftDown">⬇️</button>
+					<button class="ctrl-btn left-color" id="leftLeft">⬅️</button>
+					<button class="ctrl-btn left-color" id="leftRight">➡️</button>
+					<button class="ctrl-btn left-color fire-btn" id="leftFire">🔥 开火</button>
+				</div>
+			</div>
+
+			<!-- 右侧玩家 (红色) -->
+			<div class="player-controls">
+				<div class="player-label right">👉 红方</div>
+				<div class="button-grid">
+					<button class="ctrl-btn right-color" id="rightUp">⬆️</button>
+					<button class="ctrl-btn right-color" id="rightDown">⬇️</button>
+					<button class="ctrl-btn right-color" id="rightLeft">⬅️</button>
+					<button class="ctrl-btn right-color" id="rightRight">➡️</button>
+					<button class="ctrl-btn right-color fire-btn" id="rightFire">🔥 开火</button>
+				</div>
+			</div>
+		</div>
+		<div class="footer">
+			双方各控制自己的气球，用子弹击中对方得分！
+		</div>
+	</div>
+
+	<script>
+		(function() {
+			const canvas = document.getElementById('gameCanvas');
+			const ctx = canvas.getContext('2d');
+
+			// 游戏配置
+			const config = {
+				playerRadius: 20,
+				bulletRadius: 6,
+				playerSpeed: 4,
+				bulletSpeed: 6,
+				fireCooldown: 20, // 帧数冷却
+				maxBullets: 10
+			};
+
+			// 玩家初始位置
+			let leftPlayer = { x: 80, y: 200, r: config.playerRadius };
+			let rightPlayer = { x: 320, y: 200, r: config.playerRadius };
+
+			// 子弹数组
+			let bullets = [];
+
+			// 分数
+			let leftScore = 0;
+			let rightScore = 0;
+
+			// 冷却计数器
+			let leftCooldown = 0;
+			let rightCooldown = 0;
+
+			// 移动状态 (每个玩家有上下左右四个方向)
+			const leftMove = { up: false, down: false, left: false, right: false };
+			const rightMove = { up: false, down: false, left: false, right: false };
+
+			// 获取分数显示元素
+			const scoreLeftEl = document.getElementById('scoreLeft');
+			const scoreRightEl = document.getElementById('scoreRight');
+
+			// ---------- 触摸事件绑定 ----------
+			function bindButton(btnId, playerMove, dir) {
+				const btn = document.getElementById(btnId);
+				if (!btn) return;
+				
+				btn.addEventListener('touchstart', (e) => {
+					e.preventDefault();
+					playerMove[dir] = true;
+				});
+				btn.addEventListener('touchend', (e) => {
+					e.preventDefault();
+					playerMove[dir] = false;
+				});
+				btn.addEventListener('touchcancel', (e) => {
+					e.preventDefault();
+					playerMove[dir] = false;
+				});
+				// 防止鼠标事件干扰移动端
+				btn.addEventListener('mousedown', (e) => {
+					e.preventDefault();
+					playerMove[dir] = true;
+				});
+				btn.addEventListener('mouseup', (e) => {
+					e.preventDefault();
+					playerMove[dir] = false;
+				});
+				btn.addEventListener('mouseleave', (e) => {
+					// 如果鼠标离开按钮，视为松开
+					playerMove[dir] = false;
+				});
+			}
+
+			// 绑定移动按钮
+			bindButton('leftUp', leftMove, 'up');
+			bindButton('leftDown', leftMove, 'down');
+			bindButton('leftLeft', leftMove, 'left');
+			bindButton('leftRight', leftMove, 'right');
+			bindButton('rightUp', rightMove, 'up');
+			bindButton('rightDown', rightMove, 'down');
+			bindButton('rightLeft', rightMove, 'left');
+			bindButton('rightRight', rightMove, 'right');
+
+			// 开火按钮
+			document.getElementById('leftFire').addEventListener('touchstart', (e) => {
+				e.preventDefault();
+				if (leftCooldown <= 0) {
+					fireBullet('left');
+				}
+			});
+			document.getElementById('leftFire').addEventListener('mousedown', (e) => {
+				e.preventDefault();
+				if (leftCooldown <= 0) {
+					fireBullet('left');
+				}
+			});
+
+			document.getElementById('rightFire').addEventListener('touchstart', (e) => {
+				e.preventDefault();
+				if (rightCooldown <= 0) {
+					fireBullet('right');
+				}
+			});
+			document.getElementById('rightFire').addEventListener('mousedown', (e) => {
+				e.preventDefault();
+				if (rightCooldown <= 0) {
+					fireBullet('right');
+				}
+			});
+
+			// 发射子弹
+			function fireBullet(side) {
+				if (side === 'left') {
+					bullets.push({
+						x: leftPlayer.x + 15,
+						y: leftPlayer.y,
+						vx: config.bulletSpeed,
+						vy: 0,
+						side: 'left',
+						r: config.bulletRadius
+					});
+					leftCooldown = config.fireCooldown;
+				} else {
+					bullets.push({
+						x: rightPlayer.x - 15,
+						y: rightPlayer.y,
+						vx: -config.bulletSpeed,
+						vy: 0,
+						side: 'right',
+						r: config.bulletRadius
+					});
+					rightCooldown = config.fireCooldown;
+				}
+			}
+
+			// 更新玩家位置
+			function updatePlayers() {
+				// 左玩家移动
+				if (leftMove.up) leftPlayer.y -= config.playerSpeed;
+				if (leftMove.down) leftPlayer.y += config.playerSpeed;
+				if (leftMove.left) leftPlayer.x -= config.playerSpeed;
+				if (leftMove.right) leftPlayer.x += config.playerSpeed;
+
+				// 右玩家移动
+				if (rightMove.up) rightPlayer.y -= config.playerSpeed;
+				if (rightMove.down) rightPlayer.y += config.playerSpeed;
+				if (rightMove.left) rightPlayer.x -= config.playerSpeed;
+				if (rightMove.right) rightPlayer.x += config.playerSpeed;
+
+				// 边界限制
+				leftPlayer.x = Math.max(leftPlayer.r, Math.min(canvas.width/2 - 20, leftPlayer.x));
+				leftPlayer.y = Math.max(leftPlayer.r, Math.min(canvas.height - leftPlayer.r, leftPlayer.y));
+				
+				rightPlayer.x = Math.max(canvas.width/2 + 20, Math.min(canvas.width - rightPlayer.r, rightPlayer.x));
+				rightPlayer.y = Math.max(rightPlayer.r, Math.min(canvas.height - rightPlayer.r, rightPlayer.y));
+			}
+
+			// 更新子弹
+			function updateBullets() {
+				// 移动子弹
+				for (let i = bullets.length - 1; i >= 0; i--) {
+					const b = bullets[i];
+					b.x += b.vx;
+					b.y += b.vy;
+
+					// 边界移除
+					if (b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height) {
+						bullets.splice(i, 1);
+						continue;
+					}
+
+					// 碰撞检测 (左方子弹击中右玩家)
+					if (b.side === 'left') {
+						const dx = b.x - rightPlayer.x;
+						const dy = b.y - rightPlayer.y;
+						const dist = Math.sqrt(dx*dx + dy*dy);
+						if (dist < b.r + rightPlayer.r) {
+							// 右玩家被击中
+							rightScore++;
+							scoreRightEl.innerText = rightScore;
+							bullets.splice(i, 1);
+							// 重置玩家位置
+							rightPlayer.x = 320;
+							rightPlayer.y = 200;
+							leftPlayer.x = 80;
+							leftPlayer.y = 200;
+							continue;
+						}
+					} 
+					// 右方子弹击中左玩家
+					else if (b.side === 'right') {
+						const dx = b.x - leftPlayer.x;
+						const dy = b.y - leftPlayer.y;
+						const dist = Math.sqrt(dx*dx + dy*dy);
+						if (dist < b.r + leftPlayer.r) {
+							leftScore++;
+							scoreLeftEl.innerText = leftScore;
+							bullets.splice(i, 1);
+							// 重置玩家位置
+							rightPlayer.x = 320;
+							rightPlayer.y = 200;
+							leftPlayer.x = 80;
+							leftPlayer.y = 200;
+							continue;
+						}
+					}
+				}
+
+				// 更新冷却
+				if (leftCooldown > 0) leftCooldown--;
+				if (rightCooldown > 0) rightCooldown--;
+			}
+
+			// 绘制
+			function draw() {
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+				// 绘制中线
+				ctx.strokeStyle = '#ffffff55';
+				ctx.lineWidth = 2;
+				ctx.setLineDash([10, 10]);
+				ctx.beginPath();
+				ctx.moveTo(canvas.width/2, 0);
+				ctx.lineTo(canvas.width/2, canvas.height);
+				ctx.stroke();
+				ctx.setLineDash([]);
+
+				// 绘制草地/背景
+				ctx.fillStyle = '#7cb57c';
+				ctx.globalAlpha = 0.3;
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+				ctx.globalAlpha = 1;
+
+				// 绘制左玩家 (蓝色气球)
+				ctx.shadowColor = '#00000080';
+				ctx.shadowBlur = 10;
+				// 气球绳
+				ctx.beginPath();
+				ctx.moveTo(leftPlayer.x, leftPlayer.y + leftPlayer.r - 5);
+				ctx.lineTo(leftPlayer.x - 5, leftPlayer.y + leftPlayer.r + 15);
+				ctx.lineTo(leftPlayer.x + 5, leftPlayer.y + leftPlayer.r + 15);
+				ctx.fillStyle = '#8b5a2b';
+				ctx.fill();
+				// 气球
+				ctx.beginPath();
+				ctx.arc(leftPlayer.x, leftPlayer.y, leftPlayer.r, 0, Math.PI * 2);
+				ctx.fillStyle = '#3b82f6';
+				ctx.fill();
+				ctx.strokeStyle = '#1e3a8a';
+				ctx.lineWidth = 2;
+				ctx.stroke();
+				// 眼睛
+				ctx.fillStyle = '#fff';
+				ctx.beginPath();
+				ctx.arc(leftPlayer.x - 6, leftPlayer.y - 6, 4, 0, Math.PI*2);
+				ctx.fill();
+				ctx.beginPath();
+				ctx.arc(leftPlayer.x + 6, leftPlayer.y - 6, 4, 0, Math.PI*2);
+				ctx.fill();
+				ctx.fillStyle = '#000';
+				ctx.beginPath();
+				ctx.arc(leftPlayer.x - 7, leftPlayer.y - 7, 2, 0, Math.PI*2);
+				ctx.fill();
+				ctx.beginPath();
+				ctx.arc(leftPlayer.x + 5, leftPlayer.y - 7, 2, 0, Math.PI*2);
+				ctx.fill();
+				// 微笑
+				ctx.beginPath();
+				ctx.strokeStyle = '#000';
+				ctx.lineWidth = 2;
+				ctx.arc(leftPlayer.x, leftPlayer.y + 2, 6, 0.1, Math.PI - 0.1);
+				ctx.stroke();
+
+				// 绘制右玩家 (红色气球)
+				ctx.beginPath();
+				ctx.moveTo(rightPlayer.x, rightPlayer.y + rightPlayer.r - 5);
+				ctx.lineTo(rightPlayer.x - 5, rightPlayer.y + rightPlayer.r + 15);
+				ctx.lineTo(rightPlayer.x + 5, rightPlayer.y + rightPlayer.r + 15);
+				ctx.fillStyle = '#8b5a2b';
+				ctx.fill();
+				ctx.beginPath();
+				ctx.arc(rightPlayer.x, rightPlayer.y, rightPlayer.r, 0, Math.PI * 2);
+				ctx.fillStyle = '#dc2626';
+				ctx.fill();
+				ctx.strokeStyle = '#991b1b';
+				ctx.lineWidth = 2;
+				ctx.stroke();
+				// 眼睛
+				ctx.fillStyle = '#fff';
+				ctx.beginPath();
+				ctx.arc(rightPlayer.x - 6, rightPlayer.y - 6, 4, 0, Math.PI*2);
+				ctx.fill();
+				ctx.beginPath();
+				ctx.arc(rightPlayer.x + 6, rightPlayer.y - 6, 4, 0, Math.PI*2);
+				ctx.fill();
+				ctx.fillStyle = '#000';
+				ctx.beginPath();
+				ctx.arc(rightPlayer.x - 7, rightPlayer.y - 7, 2, 0, Math.PI*2);
+				ctx.fill();
+				ctx.beginPath();
+				ctx.arc(rightPlayer.x + 5, rightPlayer.y - 7, 2, 0, Math.PI*2);
+				ctx.fill();
+				// 生气的眉毛
+				ctx.beginPath();
+				ctx.strokeStyle = '#000';
+				ctx.lineWidth = 2;
+				ctx.moveTo(rightPlayer.x - 12, rightPlayer.y - 16);
+				ctx.lineTo(rightPlayer.x - 6, rightPlayer.y - 12);
+				ctx.moveTo(rightPlayer.x + 12, rightPlayer.y - 16);
+				ctx.lineTo(rightPlayer.x + 6, rightPlayer.y - 12);
+				ctx.stroke();
+
+				// 绘制子弹
+				for (let b of bullets) {
+					ctx.beginPath();
+					ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
+					ctx.fillStyle = b.side === 'left' ? '#3b82f6' : '#dc2626';
+					ctx.shadowBlur = 15;
+					ctx.fill();
+					// 子弹尾迹
+					ctx.beginPath();
+					ctx.arc(b.x - b.vx * 0.8, b.y - b.vy * 0.8, b.r * 0.6, 0, Math.PI*2);
+					ctx.fillStyle = '#ffffff80';
+					ctx.fill();
+				}
+				ctx.shadowBlur = 0;
+
+				// 绘制冷却指示器
+				if (leftCooldown > 0) {
+					ctx.fillStyle = '#ffffff50';
+					ctx.font = 'bold 14px sans-serif';
+					ctx.fillText('⏳', leftPlayer.x - 30, leftPlayer.y - 40);
+				}
+				if (rightCooldown > 0) {
+					ctx.fillStyle = '#ffffff50';
+					ctx.font = 'bold 14px sans-serif';
+					ctx.fillText('⏳', rightPlayer.x + 20, rightPlayer.y - 40);
+				}
+			}
+
+			// 游戏循环
+			function gameLoop() {
+				updatePlayers();
+				updateBullets();
+				draw();
+				requestAnimationFrame(gameLoop);
+			}
+			gameLoop();
+
+			// 阻止页面滚动
+			document.body.addEventListener('touchmove', (e) => {
+				if (e.target.closest('button')) {
+					e.preventDefault();
+				}
+			}, { passive: false });
+		})();
+	</script>
+</body>
+</html>
