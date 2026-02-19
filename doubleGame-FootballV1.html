@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<title>双人足球 · 同屏对战</title>
+	<style>
+		* {
+			box-sizing: border-box;
+			user-select: none;
+			-webkit-tap-highlight-color: transparent;
+		}
+		body {
+			margin: 0;
+			min-height: 100vh;
+			background: linear-gradient(145deg, #0b4620, #1a5a2a);
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			font-family: 'Segoe UI', Roboto, sans-serif;
+			padding: 10px;
+			touch-action: pan-y pinch-zoom;
+		}
+		.game-container {
+			width: 100%;
+			max-width: 500px;
+			background: #1a6e3a;
+			border-radius: 40px;
+			padding: 20px;
+			box-shadow: 0 20px 35px #00000080;
+			border: 3px solid #ffd700;
+		}
+		.header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			color: #ffffff;
+			font-size: 1.2rem;
+			font-weight: 700;
+			margin-bottom: 15px;
+			padding: 0 10px;
+		}
+		.score-board {
+			background: #0a3a1a;
+			padding: 8px 30px;
+			border-radius: 40px;
+			display: flex;
+			gap: 40px;
+			border: 2px solid #ffd700;
+		}
+		.score-left, .score-right {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			font-size: 1.3rem;
+		}
+		.score-left span, .score-right span {
+			font-size: 2rem;
+			color: #ffd700;
+			min-width: 40px;
+			text-align: center;
+		}
+		canvas {
+			display: block;
+			margin: 0 auto;
+			width: 100%;
+			aspect-ratio: 1/1;
+			border-radius: 30px;
+			background: #2a8a4a;
+			box-shadow: inset 0 0 30px #00000099, 0 10px 15px black;
+			border: 4px solid #ffffff;
+			touch-action: none;
+		}
+		.controls-row {
+			display: flex;
+			justify-content: space-between;
+			margin-top: 20px;
+			gap: 15px;
+		}
+		.player-controls {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			background: #0a3a1a;
+			border-radius: 30px;
+			padding: 15px 10px;
+			border: 2px solid #ffd700;
+		}
+		.player-label {
+			color: #ffffff;
+			font-weight: bold;
+			margin-bottom: 12px;
+			font-size: 1.1rem;
+		}
+		.player-label.left {
+			color: #3b82f6;
+		}
+		.player-label.right {
+			color: #dc2626;
+		}
+		.player-controls.left {
+			border-color: #3b82f6;
+		}
+		.player-controls.right {
+			border-color: #dc2626;
+		}
+		.paddle-control {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			width: 100%;
+			gap: 8px;
+		}
+		.control-row {
+			display: flex;
+			gap: 15px;
+			justify-content: center;
+		}
+		.ctrl-btn {
+			background: #2d4b6e;
+			border: none;
+			color: white;
+			font-size: 2rem;
+			font-weight: bold;
+			width: 70px;
+			height: 70px;
+			border-radius: 35px;
+			box-shadow: 0 5px 0 #0e2637;
+			transition: 0.05s;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			touch-action: manipulation;
+			cursor: pointer;
+			-webkit-tap-highlight-color: transparent;
+		}
+		.ctrl-btn:active {
+			transform: translateY(4px);
+			box-shadow: 0 1px 0 #0e2637;
+		}
+		.ctrl-btn.left-color {
+			background: #3b82f6;
+		}
+		.ctrl-btn.right-color {
+			background: #dc2626;
+		}
+		.kick-btn {
+			background: #ffd700;
+			color: #1e2f47;
+			font-size: 1.5rem;
+			width: 100px;
+			height: 70px;
+			border-radius: 35px;
+			margin-top: 5px;
+			box-shadow: 0 5px 0 #b8860b;
+		}
+		.kick-btn:active {
+			transform: translateY(4px);
+			box-shadow: 0 1px 0 #b8860b;
+		}
+		.footer {
+			text-align: center;
+			margin-top: 15px;
+			color: #ffffff;
+			font-size: 0.9rem;
+		}
+		.victory-message {
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			background: rgba(0,0,0,0.9);
+			color: gold;
+			font-size: 2.5rem;
+			font-weight: bold;
+			padding: 30px 50px;
+			border-radius: 60px;
+			border: 4px solid gold;
+			z-index: 1000;
+			display: none;
+			text-align: center;
+			backdrop-filter: blur(10px);
+		}
+		.restart-btn {
+			background: #ffd700;
+			border: none;
+			color: #1e2f47;
+			font-size: 1.2rem;
+			padding: 10px 30px;
+			border-radius: 40px;
+			margin-top: 15px;
+			font-weight: bold;
+			cursor: pointer;
+		}
+	</style>
+</head>
+<body>
+	<div class="victory-message" id="victoryMessage">
+		🏆 玩家获胜 🏆
+		<div><button class="restart-btn" onclick="location.reload()">再玩一局</button></div>
+	</div>
+
+	<div class="game-container">
+		<div class="header">
+			<span>⚽ 双人足球</span>
+			<div class="score-board">
+				<div class="score-left">🔵 <span id="scoreLeft">0</span></div>
+				<div class="score-right">🔴 <span id="scoreRight">0</span></div>
+			</div>
+		</div>
+
+		<canvas id="gameCanvas" width="400" height="400"></canvas>
+
+		<!-- 双人控制区域 -->
+		<div class="controls-row">
+			<!-- 左侧玩家 (蓝色) -->
+			<div class="player-controls left">
+				<div class="player-label left">👈 蓝队</div>
+				<div class="paddle-control">
+					<div class="control-row">
+						<button class="ctrl-btn left-color" id="leftUp">⬆️</button>
+						<button class="ctrl-btn left-color" id="leftDown">⬇️</button>
+						<button class="ctrl-btn left-color" id="leftLeft">⬅️</button>
+						<button class="ctrl-btn left-color" id="leftRight">➡️</button>
+					</div>
+					<button class="ctrl-btn left-color kick-btn" id="leftKick">⚽ 踢</button>
+				</div>
+			</div>
+
+			<!-- 右侧玩家 (红色) -->
+			<div class="player-controls right">
+				<div class="player-label right">👉 红队</div>
+				<div class="paddle-control">
+					<div class="control-row">
+						<button class="ctrl-btn right-color" id="rightUp">⬆️</button>
+						<button class="ctrl-btn right-color" id="rightDown">⬇️</button>
+						<button class="ctrl-btn right-color" id="rightLeft">⬅️</button>
+						<button class="ctrl-btn right-color" id="rightRight">➡️</button>
+					</div>
+					<button class="ctrl-btn right-color kick-btn" id="rightKick">⚽ 踢</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="footer">
+			移动球员 · 踢球射门 · 先得5分获胜
+		</div>
+	</div>
+
+	<script>
+		(function() {
+			const canvas = document.getElementById('gameCanvas');
+			const ctx = canvas.getContext('2d');
+			const victoryMsg = document.getElementById('victoryMessage');
+
+			// 游戏配置
+			const config = {
+				playerRadius: 15,
+				ballRadius: 6,
+				playerSpeed: 4,
+				kickPower: 8,
+				winScore: 5
+			};
+
+			// 球员位置
+			let leftPlayer = {
+				x: 100,
+				y: 200,
+				r: config.playerRadius
+			};
+			let rightPlayer = {
+				x: 300,
+				y: 200,
+				r: config.playerRadius
+			};
+
+			// 球
+			let ball = {
+				x: 200,
+				y: 200,
+				r: config.ballRadius,
+				vx: 0,
+				vy: 0
+			};
+
+			// 球门位置
+			const leftGoal = { x1: 0, y1: 140, x2: 10, y2: 260 };
+			const rightGoal = { x1: 390, y1: 140, x2: 400, y2: 260 };
+
+			// 分数
+			let leftScore = 0;
+			let rightScore = 0;
+
+			// 移动状态
+			const leftMove = { up: false, down: false, left: false, right: false };
+			const rightMove = { up: false, down: false, left: false, right: false };
+
+			// 分数显示
+			const scoreLeftEl = document.getElementById('scoreLeft');
+			const scoreRightEl = document.getElementById('scoreRight');
+
+			// 触摸绑定
+			function bindButton(btnId, playerMove, dir) {
+				const btn = document.getElementById(btnId);
+				if (!btn) return;
+				
+				btn.addEventListener('touchstart', (e) => {
+					e.preventDefault();
+					playerMove[dir] = true;
+				});
+				btn.addEventListener('touchend', (e) => {
+					e.preventDefault();
+					playerMove[dir] = false;
+				});
+				btn.addEventListener('touchcancel', (e) => {
+					e.preventDefault();
+					playerMove[dir] = false;
+				});
+				btn.addEventListener('mousedown', (e) => {
+					e.preventDefault();
+					playerMove[dir] = true;
+				});
+				btn.addEventListener('mouseup', (e) => {
+					e.preventDefault();
+					playerMove[dir] = false;
+				});
+				btn.addEventListener('mouseleave', (e) => {
+					playerMove[dir] = false;
+				});
+			}
+
+			bindButton('leftUp', leftMove, 'up');
+			bindButton('leftDown', leftMove, 'down');
+			bindButton('leftLeft', leftMove, 'left');
+			bindButton('leftRight', leftMove, 'right');
+			bindButton('rightUp', rightMove, 'up');
+			bindButton('rightDown', rightMove, 'down');
+			bindButton('rightLeft', rightMove, 'left');
+			bindButton('rightRight', rightMove, 'right');
+
+			// 踢球
+			document.getElementById('leftKick').addEventListener('touchstart', (e) => {
+				e.preventDefault();
+				kick('left');
+			});
+			document.getElementById('leftKick').addEventListener('mousedown', (e) => {
+				e.preventDefault();
+				kick('left');
+			});
+			document.getElementById('rightKick').addEventListener('touchstart', (e) => {
+				e.preventDefault();
+				kick('right');
+			});
+			document.getElementById('rightKick').addEventListener('mousedown', (e) => {
+				e.preventDefault();
+				kick('right');
+			});
+
+			function kick(side) {
+				const player = side === 'left' ? leftPlayer : rightPlayer;
+				// 计算球到球员的距离
+				const dx = ball.x - player.x;
+				const dy = ball.y - player.y;
+				const dist = Math.sqrt(dx*dx + dy*dy);
+				
+				// 如果球足够近，可以踢
+				if (dist < player.r + ball.r + 15) {
+					// 计算踢球方向（从球员指向球，但加上一点随机性）
+					const angle = Math.atan2(dy, dx);
+					const randomAngle = angle + (Math.random() - 0.5) * 0.5;
+					
+					ball.vx = Math.cos(randomAngle) * config.kickPower;
+					ball.vy = Math.sin(randomAngle) * config.kickPower;
+					
+					// 确保球离开球员
+					ball.x = player.x + Math.cos(angle) * (player.r + ball.r + 2);
+					ball.y = player.y + Math.sin(angle) * (player.r + ball.r + 2);
+				}
+			}
+
+			// 重置球
+			function resetBall() {
+				ball.x = 200;
+				ball.y = 200;
+				ball.vx = (Math.random() - 0.5) * 3;
+				ball.vy = (Math.random() - 0.5) * 3;
+			}
+
+			// 检查胜利
+			function checkWin() {
+				if (leftScore >= config.winScore) {
+					victoryMsg.style.display = 'block';
+					victoryMsg.innerHTML = '🏆 蓝队胜利 🏆<div><button class="restart-btn" onclick="location.reload()">再玩一局</button></div>';
+					return true;
+				} else if (rightScore >= config.winScore) {
+					victoryMsg.style.display = 'block';
+					victoryMsg.innerHTML = '🏆 红队胜利 🏆<div><button class="restart-btn" onclick="location.reload()">再玩一局</button></div>';
+					return true;
+				}
+				return false;
+			}
+
+			// 更新球员位置
+			function updatePlayers() {
+				// 左球员移动
+				if (leftMove.up) leftPlayer.y -= config.playerSpeed;
+				if (leftMove.down) leftPlayer.y += config.playerSpeed;
+				if (leftMove.left) leftPlayer.x -= config.playerSpeed;
+				if (leftMove.right) leftPlayer.x += config.playerSpeed;
+
+				// 右球员移动
+				if (rightMove.up) rightPlayer.y -= config.playerSpeed;
+				if (rightMove.down) rightPlayer.y += config.playerSpeed;
+				if (rightMove.left) rightPlayer.x -= config.playerSpeed;
+				if (rightMove.right) rightPlayer.x += config.playerSpeed;
+
+				// 边界限制
+				leftPlayer.x = Math.max(leftPlayer.r, Math.min(canvas.width/2 - 20, leftPlayer.x));
+				leftPlayer.y = Math.max(leftPlayer.r, Math.min(canvas.height - leftPlayer.r, leftPlayer.y));
+				
+				rightPlayer.x = Math.max(canvas.width/2 + 20, Math.min(canvas.width - rightPlayer.r, rightPlayer.x));
+				rightPlayer.y = Math.max(rightPlayer.r, Math.min(canvas.height - rightPlayer.r, rightPlayer.y));
+
+				// 球员之间不能重叠
+				const dx = rightPlayer.x - leftPlayer.x;
+				const dy = rightPlayer.y - leftPlayer.y;
+				const dist = Math.sqrt(dx*dx + dy*dy);
+				const minDist = leftPlayer.r + rightPlayer.r;
+				
+				if (dist < minDist) {
+					const angle = Math.atan2(dy, dx);
+					const overlap = minDist - dist;
+					leftPlayer.x -= Math.cos(angle) * overlap/2;
+					leftPlayer.y -= Math.sin(angle) * overlap/2;
+					rightPlayer.x += Math.cos(angle) * overlap/2;
+					rightPlayer.y += Math.sin(angle) * overlap/2;
+				}
+			}
+
+			// 更新球
+			function updateBall() {
+				if (checkWin()) return;
+
+				// 移动球
+				ball.x += ball.vx;
+				ball.y += ball.vy;
+
+				// 摩擦力
+				ball.vx *= 0.98;
+				ball.vy *= 0.98;
+
+				// 上下边界反弹
+				if (ball.y - ball.r < 0) {
+					ball.y = ball.r;
+					ball.vy = -ball.vy * 0.8;
+				} else if (ball.y + ball.r > canvas.height) {
+					ball.y = canvas.height - ball.r;
+					ball.vy = -ball.vy * 0.8;
+				}
+
+				// 检查进球 (左球门 - 红队得分)
+				if (ball.x - ball.r < leftGoal.x2 && 
+					ball.y > leftGoal.y1 && ball.y < leftGoal.y2) {
+					rightScore++;
+					scoreRightEl.innerText = rightScore;
+					resetBall();
+					return;
+				}
+
+				// 检查进球 (右球门 - 蓝队得分)
+				if (ball.x + ball.r > rightGoal.x1 && 
+					ball.y > rightGoal.y1 && ball.y < rightGoal.y2) {
+					leftScore++;
+					scoreLeftEl.innerText = leftScore;
+					resetBall();
+					return;
+				}
+
+				// 左边界反弹（非球门区）
+				if (ball.x - ball.r < 0 && (ball.y < leftGoal.y1 || ball.y > leftGoal.y2)) {
+					ball.x = ball.r;
+					ball.vx = -ball.vx * 0.6;
+				}
+
+				// 右边界反弹（非球门区）
+				if (ball.x + ball.r > canvas.width && (ball.y < rightGoal.y1 || ball.y > rightGoal.y2)) {
+					ball.x = canvas.width - ball.r;
+					ball.vx = -ball.vx * 0.6;
+				}
+
+				// 与左球员碰撞
+				const dx1 = ball.x - leftPlayer.x;
+				const dy1 = ball.y - leftPlayer.y;
+				const dist1 = Math.sqrt(dx1*dx1 + dy1*dy1);
+				if (dist1 < ball.r + leftPlayer.r) {
+					const angle = Math.atan2(dy1, dx1);
+					const speed = Math.sqrt(ball.vx*ball.vx + ball.vy*ball.vy);
+					const newSpeed = Math.max(speed, 3);
+					
+					ball.vx = Math.cos(angle) * newSpeed * 1.2;
+					ball.vy = Math.sin(angle) * newSpeed * 1.2;
+					
+					ball.x = leftPlayer.x + Math.cos(angle) * (leftPlayer.r + ball.r);
+					ball.y = leftPlayer.y + Math.sin(angle) * (leftPlayer.r + ball.r);
+				}
+
+				// 与右球员碰撞
+				const dx2 = ball.x - rightPlayer.x;
+				const dy2 = ball.y - rightPlayer.y;
+				const dist2 = Math.sqrt(dx2*dx2 + dy2*dy2);
+				if (dist2 < ball.r + rightPlayer.r) {
+					const angle = Math.atan2(dy2, dx2);
+					const speed = Math.sqrt(ball.vx*ball.vx + ball.vy*ball.vy);
+					const newSpeed = Math.max(speed, 3);
+					
+					ball.vx = Math.cos(angle) * newSpeed * 1.2;
+					ball.vy = Math.sin(angle) * newSpeed * 1.2;
+					
+					ball.x = rightPlayer.x + Math.cos(angle) * (rightPlayer.r + ball.r);
+					ball.y = rightPlayer.y + Math.sin(angle) * (rightPlayer.r + ball.r);
+				}
+			}
+
+			// 绘制
+			function draw() {
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+				// 绘制草坪
+				ctx.fillStyle = '#2a8a4a';
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+				
+				// 绘制草坪纹理
+				ctx.strokeStyle = '#1a6a3a';
+				ctx.lineWidth = 1;
+				for (let i = 0; i < canvas.width; i += 20) {
+					ctx.beginPath();
+					ctx.moveTo(i, 0);
+					ctx.lineTo(i - 20, canvas.height);
+					ctx.strokeStyle = '#1a6a3a';
+					ctx.stroke();
+				}
+
+				// 绘制中线
+				ctx.strokeStyle = '#ffffff55';
+				ctx.lineWidth = 2;
+				ctx.setLineDash([10, 10]);
+				ctx.beginPath();
+				ctx.moveTo(canvas.width/2, 0);
+				ctx.lineTo(canvas.width/2, canvas.height);
+				ctx.stroke();
+				
+				// 绘制中圈
+				ctx.setLineDash([]);
+				ctx.beginPath();
+				ctx.arc(canvas.width/2, canvas.height/2, 40, 0, Math.PI*2);
+				ctx.strokeStyle = '#ffffff55';
+				ctx.lineWidth = 2;
+				ctx.stroke();
+
+				// 绘制球门
+				ctx.fillStyle = '#ffffff33';
+				ctx.fillRect(leftGoal.x1, leftGoal.y1, leftGoal.x2, leftGoal.y2 - leftGoal.y1);
+				ctx.fillRect(rightGoal.x1, rightGoal.y1, rightGoal.x2 - rightGoal.x1, rightGoal.y2 - rightGoal.y1);
+				
+				ctx.strokeStyle = '#ffffff';
+				ctx.lineWidth = 3;
+				ctx.strokeRect(leftGoal.x1, leftGoal.y1, leftGoal.x2, leftGoal.y2 - leftGoal.y1);
+				ctx.strokeRect(rightGoal.x1, rightGoal.y1, rightGoal.x2 - rightGoal.x1, rightGoal.y2 - rightGoal.y1);
+
+				// 绘制左球员
+				ctx.shadowBlur = 15;
+				ctx.shadowColor = '#00000080';
+				
+				// 身体
+				ctx.beginPath();
+				ctx.arc(leftPlayer.x, leftPlayer.y, leftPlayer.r, 0, Math.PI*2);
+				ctx.fillStyle = '#3b82f6';
+				ctx.fill();
+				ctx.strokeStyle = '#1e3a8a';
+				ctx.lineWidth = 3;
+				ctx.stroke();
+				
+				// 球衣号码
+				ctx.fillStyle = '#ffffff';
+				ctx.font = 'bold 12px sans-serif';
+				ctx.fillText('10', leftPlayer.x - 8, leftPlayer.y + 5);
+
+				// 绘制右球员
+				ctx.beginPath();
+				ctx.arc(rightPlayer.x, rightPlayer.y, rightPlayer.r, 0, Math.PI*2);
+				ctx.fillStyle = '#dc2626';
+				ctx.fill();
+				ctx.strokeStyle = '#991b1b';
+				ctx.stroke();
+				
+				ctx.fillStyle = '#ffffff';
+				ctx.fillText('7', rightPlayer.x - 6, rightPlayer.y + 5);
+
+				// 绘制球
+				ctx.beginPath();
+				ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2);
+				
+				// 足球纹理
+				const gradient = ctx.createRadialGradient(
+					ball.x - 2, ball.y - 2, 2,
+					ball.x, ball.y, ball.r + 4
+				);
+				gradient.addColorStop(0, '#ffffff');
+				gradient.addColorStop(0.7, '#c0a86a');
+				gradient.addColorStop(1, '#8b7355');
+				
+				ctx.fillStyle = gradient;
+				ctx.fill();
+				
+				// 足球黑块
+				ctx.strokeStyle = '#000000';
+				ctx.lineWidth = 2;
+				ctx.beginPath();
+				ctx.moveTo(ball.x - 3, ball.y - 5);
+				ctx.lineTo(ball.x - 8, ball.y - 3);
+				ctx.lineTo(ball.x - 5, ball.y + 3);
+				ctx.closePath();
+				ctx.stroke();
+				ctx.fillStyle = '#00000033';
+				ctx.fill();
+
+				// 绘制分数
+				ctx.shadowBlur = 0;
+				ctx.fillStyle = '#ffffff';
+				ctx.font = 'bold 24px monospace';
+				ctx.fillText(leftScore, canvas.width/4, 50);
+				ctx.fillText(rightScore, canvas.width*3/4 - 20, 50);
+			}
+
+			// 游戏循环
+			function gameLoop() {
+				updatePlayers();
+				updateBall();
+				draw();
+				requestAnimationFrame(gameLoop);
+			}
+			gameLoop();
+
+			// 阻止滚动
+			document.body.addEventListener('touchmove', (e) => {
+				if (e.target.closest('button')) {
+					e.preventDefault();
+				}
+			}, { passive: false });
+
+			// 初始化球
+			resetBall();
+		})();
+	</script>
+</body>
+</html>
