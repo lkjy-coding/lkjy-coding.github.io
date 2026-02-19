@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<title>双人空战 · 十字操作</title>
+	<style>
+		* {
+			box-sizing: border-box;
+			user-select: none;
+			-webkit-tap-highlight-color: transparent;
+		}
+		body {
+			margin: 0;
+			min-height: 100vh;
+			background: linear-gradient(145deg, #0b1c2f, #1a2f42);
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			font-family: 'Segoe UI', Roboto, sans-serif;
+			padding: 10px;
+			touch-action: pan-y pinch-zoom;
+		}
+		.game-container {
+			width: 100%;
+			max-width: 500px;
+			background: #1e3a5f;
+			border-radius: 40px;
+			padding: 20px;
+			box-shadow: 0 20px 35px #00000080;
+			border: 2px solid #4c7aa2;
+		}
+		.header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			color: #e6f0ff;
+			font-size: 1.2rem;
+			font-weight: 700;
+			margin-bottom: 15px;
+			padding: 0 10px;
+		}
+		.score-board {
+			background: #0f2a40;
+			padding: 8px 20px;
+			border-radius: 40px;
+			display: flex;
+			gap: 30px;
+		}
+		.score-left, .score-right {
+			display: flex;
+			align-items: center;
+			gap: 5px;
+		}
+		.score-left span, .score-right span {
+			font-size: 1.5rem;
+			color: #ffb347;
+		}
+		.map-name {
+			background: #0f2a40;
+			padding: 5px 15px;
+			border-radius: 30px;
+			color: #a5d8ff;
+			font-size: 0.9rem;
+		}
+		canvas {
+			display: block;
+			margin: 0 auto;
+			width: 100%;
+			aspect-ratio: 1/1;
+			border-radius: 30px;
+			background: #87CEEB;
+			box-shadow: inset 0 0 20px #00000055, 0 10px 15px black;
+			border: 4px solid #5f8db0;
+			touch-action: none;
+		}
+		.controls-row {
+			display: flex;
+			justify-content: space-between;
+			margin-top: 20px;
+			gap: 10px;
+		}
+		.player-controls {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			background: #0f2a40;
+			border-radius: 30px;
+			padding: 15px 10px;
+			border: 2px solid #3a6792;
+		}
+		.player-label {
+			color: #d7ecff;
+			font-weight: bold;
+			margin-bottom: 12px;
+			font-size: 1.1rem;
+		}
+		.player-label.left {
+			color: #3b82f6;
+		}
+		.player-label.right {
+			color: #dc2626;
+		}
+		
+		/* 十字操作布局 */
+		.cross-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr 1fr;
+			gap: 8px;
+			width: 100%;
+			margin-bottom: 8px;
+		}
+		.cross-center {
+			grid-column: 2;
+			grid-row: 2;
+		}
+		.cross-up {
+			grid-column: 2;
+			grid-row: 1;
+		}
+		.cross-down {
+			grid-column: 2;
+			grid-row: 3;
+		}
+		.cross-left {
+			grid-column: 1;
+			grid-row: 2;
+		}
+		.cross-right {
+			grid-column: 3;
+			grid-row: 2;
+		}
+		
+		.ctrl-btn {
+			background: #2d4b6e;
+			border: none;
+			color: white;
+			font-size: 1.8rem;
+			font-weight: bold;
+			aspect-ratio: 1/1;
+			border-radius: 20px;
+			box-shadow: 0 5px 0 #0e2637;
+			transition: 0.05s;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			touch-action: manipulation;
+			cursor: pointer;
+			-webkit-tap-highlight-color: transparent;
+		}
+		.ctrl-btn:active {
+			transform: translateY(4px);
+			box-shadow: 0 1px 0 #0e2637;
+		}
+		.ctrl-btn.left-color {
+			background: #3b82f6;
+		}
+		.ctrl-btn.right-color {
+			background: #dc2626;
+		}
+		.fire-btn {
+			background: #ffb347;
+			color: #1e2f47;
+			font-size: 1.2rem;
+			padding: 12px 0;
+			width: 100%;
+			aspect-ratio: auto;
+			border-radius: 30px;
+			margin-top: 5px;
+			box-shadow: 0 5px 0 #b16400;
+		}
+		.victory-message {
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			background: rgba(0,0,0,0.9);
+			color: gold;
+			font-size: 3rem;
+			font-weight: bold;
+			padding: 30px 50px;
+			border-radius: 60px;
+			border: 4px solid gold;
+			z-index: 1000;
+			display: none;
+			text-align: center;
+			backdrop-filter: blur(10px);
+		}
+		.restart-btn {
+			background: #ffb347;
+			border: none;
+			color: #1e2f47;
+			font-size: 1.2rem;
+			padding: 10px 30px;
+			border-radius: 40px;
+			margin-top: 10px;
+			font-weight: bold;
+			cursor: pointer;
+		}
+		.footer {
+			text-align: center;
+			margin-top: 15px;
+			color: #8aa9c9;
+			font-size: 0.9rem;
+		}
+	</style>
+</head>
+<body>
+	<div class="victory-message" id="victoryMessage">
+		🏆 红方胜利 🏆
+		<div><button class="restart-btn" onclick="location.reload()">再玩一局</button></div>
+	</div>
+
+	<div class="game-container">
+		<div class="header">
+			<span>⚡ 双人空战 · 十字操作</span>
+			<div class="score-board">
+				<div class="score-left">🔵 <span id="scoreLeft">0</span></div>
+				<div class="score-right">🔴 <span id="scoreRight">0</span></div>
+			</div>
+		</div>
+		<div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+			<div class="map-name" id="mapName">🏝️ 初始战场</div>
+			<div class="map-name">🎯 先得5分获胜</div>
+		</div>
+
+		<canvas id="gameCanvas" width="400" height="400"></canvas>
+
+		<!-- 双人控制区域 - 十字布局 -->
+		<div class="controls-row">
+			<!-- 左侧玩家 (蓝色) - 十字操作 -->
+			<div class="player-controls">
+				<div class="player-label left">👈 蓝方</div>
+				<div class="cross-grid">
+					<div class="cross-up">
+						<button class="ctrl-btn left-color" id="leftUp">⬆️</button>
+					</div>
+					<div class="cross-left">
+						<button class="ctrl-btn left-color" id="leftLeft">⬅️</button>
+					</div>
+					<div class="cross-center">
+						<button class="ctrl-btn left-color fire-btn" id="leftFire">🔥</button>
+					</div>
+					<div class="cross-right">
+						<button class="ctrl-btn left-color" id="leftRight">➡️</button>
+					</div>
+					<div class="cross-down">
+						<button class="ctrl-btn left-color" id="leftDown">⬇️</button>
+					</div>
+				</div>
+				<div style="margin-top: 5px; color: #a5d8ff; font-size: 0.8rem;">中央开火</div>
+			</div>
+
+			<!-- 右侧玩家 (红色) - 十字操作 -->
+			<div class="player-controls">
+				<div class="player-label right">👉 红方</div>
+				<div class="cross-grid">
+					<div class="cross-up">
+						<button class="ctrl-btn right-color" id="rightUp">⬆️</button>
+					</div>
+					<div class="cross-left">
+						<button class="ctrl-btn right-color" id="rightLeft">⬅️</button>
+					</div>
+					<div class="cross-center">
+						<button class="ctrl-btn right-color fire-btn" id="rightFire">🔥</button>
+					</div>
+					<div class="cross-right">
+						<button class="ctrl-btn right-color" id="rightRight">➡️</button>
+					</div>
+					<div class="cross-down">
+						<button class="ctrl-btn right-color" id="rightDown">⬇️</button>
+					</div>
+				</div>
+				<div style="margin-top: 5px; color: #ffa5a5; font-size: 0.8rem;">中央开火</div>
+			</div>
+		</div>
+		<div class="footer">
+			击中对方切换战场！先得5分获胜
+		</div>
+	</div>
+
+	<script>
+		(function() {
+			const canvas = document.getElementById('gameCanvas');
+			const ctx = canvas.getContext('2d');
+			const victoryMsg = document.getElementById('victoryMessage');
+			const mapNameEl = document.getElementById('mapName');
+
+			// 游戏配置
+			const config = {
+				playerRadius: 16,
+				bulletRadius: 5,
+				playerSpeed: 3.5,
+				bulletSpeed: 5,
+				fireCooldown: 15,
+				winScore: 5
+			};
+
+			// 玩家初始位置
+			let leftPlayer = { x: 80, y: 200, r: config.playerRadius };
+			let rightPlayer = { x: 320, y: 200, r: config.playerRadius };
+
+			// 子弹数组
+			let bullets = [];
+
+			// 分数 - 修正逻辑：蓝方击中红方蓝方得分，红方击中蓝方红方得分
+			let leftScore = 0;  // 蓝方得分
+			let rightScore = 0; // 红方得分
+
+			// 冷却
+			let leftCooldown = 0;
+			let rightCooldown = 0;
+
+			// 移动状态
+			const leftMove = { up: false, down: false, left: false, right: false };
+			const rightMove = { up: false, down: false, left: false, right: false };
+
+			// 当前地图索引和障碍物
+			let currentMapIndex = 0;
+			let obstacles = [];
+
+			// 地图名称列表
+			const mapNames = [
+				'🏝️ 热带岛屿', '🏜️ 沙漠遗迹', '❄️ 冰封雪原', '🌋 火山峡谷', 
+				'🏙️ 城市废墟', '🌲 神秘森林', '🪐 外星基地', '⛩️ 古代神庙',
+				'🚢 废弃船坞', '🏯 忍者要塞'
+			];
+
+			// 生成随机地图
+			function generateRandomMap() {
+				currentMapIndex = Math.floor(Math.random() * mapNames.length);
+				mapNameEl.innerText = mapNames[currentMapIndex];
+				
+				obstacles = [];
+				const numObstacles = 3 + Math.floor(Math.random() * 4); // 3-6个障碍物
+				
+				for (let i = 0; i < numObstacles; i++) {
+					let type = Math.floor(Math.random() * 3); // 0: 圆形, 1: 矩形, 2: 十字
+					let x = 100 + Math.random() * 200;
+					let y = 100 + Math.random() * 200;
+					
+					// 确保不遮挡出生点
+					if (Math.hypot(x - 80, y - 200) < 50 || Math.hypot(x - 320, y - 200) < 50) {
+						continue;
+					}
+					
+					obstacles.push({
+						type: type,
+						x: x,
+						y: y,
+						radius: type === 0 ? 20 + Math.random() * 15 : 0,
+						width: type === 1 ? 30 + Math.random() * 30 : 0,
+						height: type === 1 ? 30 + Math.random() * 30 : 0,
+						rotation: Math.random() * Math.PI
+					});
+				}
+			}
+
+			// 初始化地图
+			generateRandomMap();
+
+			// 分数显示
+			const scoreLeftEl = document.getElementById('scoreLeft');
+			const scoreRightEl = document.getElementById('scoreRight');
+
+			// 触摸绑定
+			function bindButton(btnId, playerMove, dir) {
+				const btn = document.getElementById(btnId);
+				if (!btn) return;
+				
+				btn.addEventListener('touchstart', (e) => {
+					e.preventDefault();
+					playerMove[dir] = true;
+				});
+				btn.addEventListener('touchend', (e) => {
+					e.preventDefault();
+					playerMove[dir] = false;
+				});
+				btn.addEventListener('touchcancel', (e) => {
+					e.preventDefault();
+					playerMove[dir] = false;
+				});
+				btn.addEventListener('mousedown', (e) => {
+					e.preventDefault();
+					playerMove[dir] = true;
+				});
+				btn.addEventListener('mouseup', (e) => {
+					e.preventDefault();
+					playerMove[dir] = false;
+				});
+				btn.addEventListener('mouseleave', (e) => {
+					playerMove[dir] = false;
+				});
+			}
+
+			bindButton('leftUp', leftMove, 'up');
+			bindButton('leftDown', leftMove, 'down');
+			bindButton('leftLeft', leftMove, 'left');
+			bindButton('leftRight', leftMove, 'right');
+			bindButton('rightUp', rightMove, 'up');
+			bindButton('rightDown', rightMove, 'down');
+			bindButton('rightLeft', rightMove, 'left');
+			bindButton('rightRight', rightMove, 'right');
+
+			// 开火
+			document.getElementById('leftFire').addEventListener('touchstart', (e) => {
+				e.preventDefault();
+				if (leftCooldown <= 0) fireBullet('left');
+			});
+			document.getElementById('leftFire').addEventListener('mousedown', (e) => {
+				e.preventDefault();
+				if (leftCooldown <= 0) fireBullet('left');
+			});
+			document.getElementById('rightFire').addEventListener('touchstart', (e) => {
+				e.preventDefault();
+				if (rightCooldown <= 0) fireBullet('right');
+			});
+			document.getElementById('rightFire').addEventListener('mousedown', (e) => {
+				e.preventDefault();
+				if (rightCooldown <= 0) fireBullet('right');
+			});
+
+			function fireBullet(side) {
+				if (side === 'left') {
+					bullets.push({
+						x: leftPlayer.x + 15,
+						y: leftPlayer.y,
+						vx: config.bulletSpeed,
+						vy: 0,
+						side: 'left',
+						r: config.bulletRadius
+					});
+					leftCooldown = config.fireCooldown;
+				} else {
+					bullets.push({
+						x: rightPlayer.x - 15,
+						y: rightPlayer.y,
+						vx: -config.bulletSpeed,
+						vy: 0,
+						side: 'right',
+						r: config.bulletRadius
+					});
+					rightCooldown = config.fireCooldown;
+				}
+			}
+
+			// 检查碰撞（玩家 vs 障碍物）
+			function checkPlayerObstacleCollision(player) {
+				for (let obs of obstacles) {
+					if (obs.type === 0) { // 圆形障碍
+						let dx = player.x - obs.x;
+						let dy = player.y - obs.y;
+						let dist = Math.sqrt(dx*dx + dy*dy);
+						if (dist < player.r + obs.radius) {
+							return true;
+						}
+					} else if (obs.type === 1) { // 矩形障碍
+						// 简单矩形碰撞检测
+						let halfW = obs.width/2;
+						let halfH = obs.height/2;
+						let closestX = Math.max(obs.x - halfW, Math.min(player.x, obs.x + halfW));
+						let closestY = Math.max(obs.y - halfH, Math.min(player.y, obs.y + halfH));
+						let dx = player.x - closestX;
+						let dy = player.y - closestY;
+						let dist = Math.sqrt(dx*dx + dy*dy);
+						if (dist < player.r) {
+							return true;
+						}
+					}
+				}
+				return false;
+			}
+
+			// 更新玩家位置（带障碍物碰撞）
+			function updatePlayers() {
+				let oldLeftX = leftPlayer.x, oldLeftY = leftPlayer.y;
+				let oldRightX = rightPlayer.x, oldRightY = rightPlayer.y;
+
+				// 左玩家移动
+				if (leftMove.up) leftPlayer.y -= config.playerSpeed;
+				if (leftMove.down) leftPlayer.y += config.playerSpeed;
+				if (leftMove.left) leftPlayer.x -= config.playerSpeed;
+				if (leftMove.right) leftPlayer.x += config.playerSpeed;
+
+				// 边界限制
+				leftPlayer.x = Math.max(leftPlayer.r, Math.min(canvas.width/2 - 10, leftPlayer.x));
+				leftPlayer.y = Math.max(leftPlayer.r, Math.min(canvas.height - leftPlayer.r, leftPlayer.y));
+
+				// 障碍物碰撞回退
+				if (checkPlayerObstacleCollision(leftPlayer)) {
+					leftPlayer.x = oldLeftX;
+					leftPlayer.y = oldLeftY;
+				}
+
+				// 右玩家移动
+				if (rightMove.up) rightPlayer.y -= config.playerSpeed;
+				if (rightMove.down) rightPlayer.y += config.playerSpeed;
+				if (rightMove.left) rightPlayer.x -= config.playerSpeed;
+				if (rightMove.right) rightPlayer.x += config.playerSpeed;
+
+				rightPlayer.x = Math.max(canvas.width/2 + 10, Math.min(canvas.width - rightPlayer.r, rightPlayer.x));
+				rightPlayer.y = Math.max(rightPlayer.r, Math.min(canvas.height - rightPlayer.r, rightPlayer.y));
+
+				if (checkPlayerObstacleCollision(rightPlayer)) {
+					rightPlayer.x = oldRightX;
+					rightPlayer.y = oldRightY;
+				}
+			}
+
+			// 更新子弹（带障碍物碰撞）
+			function updateBullets() {
+				for (let i = bullets.length - 1; i >= 0; i--) {
+					const b = bullets[i];
+					let newX = b.x + b.vx;
+					let newY = b.y + b.vy;
+
+					// 障碍物碰撞检测
+					let bulletCollided = false;
+					for (let obs of obstacles) {
+						if (obs.type === 0) { // 圆形
+							let dx = newX - obs.x;
+							let dy = newY - obs.y;
+							let dist = Math.sqrt(dx*dx + dy*dy);
+							if (dist < b.r + obs.radius) {
+								bulletCollided = true;
+								break;
+							}
+						} else if (obs.type === 1) { // 矩形
+							let halfW = obs.width/2;
+							let halfH = obs.height/2;
+							let closestX = Math.max(obs.x - halfW, Math.min(newX, obs.x + halfW));
+							let closestY = Math.max(obs.y - halfH, Math.min(newY, obs.y + halfH));
+							let dx = newX - closestX;
+							let dy = newY - closestY;
+							let dist = Math.sqrt(dx*dx + dy*dy);
+							if (dist < b.r) {
+								bulletCollided = true;
+								break;
+							}
+						}
+					}
+
+					if (bulletCollided) {
+						bullets.splice(i, 1);
+						continue;
+					}
+
+					b.x = newX;
+					b.y = newY;
+
+					// 边界移除
+					if (b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height) {
+						bullets.splice(i, 1);
+						continue;
+					}
+
+					// 修正分数逻辑：蓝方子弹击中红方 → 蓝方得分
+					if (b.side === 'left') {
+						let dx = b.x - rightPlayer.x;
+						let dy = b.y - rightPlayer.y;
+						let dist = Math.sqrt(dx*dx + dy*dy);
+						if (dist < b.r + rightPlayer.r) {
+							// 蓝方击中红方，蓝方得分
+							leftScore++;
+							scoreLeftEl.innerText = leftScore;
+							bullets.splice(i, 1);
+							
+							// 检查胜利
+							if (leftScore >= config.winScore) {
+								victoryMsg.style.display = 'block';
+								victoryMsg.innerHTML = '🏆 蓝方胜利 🏆<div><button class="restart-btn" onclick="location.reload()">再玩一局</button></div>';
+								gameActive = false;
+								return;
+							}
+							
+							// 重置位置并切换地图
+							leftPlayer = { x: 80, y: 200, r: config.playerRadius };
+							rightPlayer = { x: 320, y: 200, r: config.playerRadius };
+							generateRandomMap();
+							bullets = [];
+							break;
+						}
+					} else { // 红方子弹
+						let dx = b.x - leftPlayer.x;
+						let dy = b.y - leftPlayer.y;
+						let dist = Math.sqrt(dx*dx + dy*dy);
+						if (dist < b.r + leftPlayer.r) {
+							// 红方击中蓝方，红方得分
+							rightScore++;
+							scoreRightEl.innerText = rightScore;
+							bullets.splice(i, 1);
+							
+							if (rightScore >= config.winScore) {
+								victoryMsg.style.display = 'block';
+								victoryMsg.innerHTML = '🏆 红方胜利 🏆<div><button class="restart-btn" onclick="location.reload()">再玩一局</button></div>';
+								gameActive = false;
+								return;
+							}
+							
+							leftPlayer = { x: 80, y: 200, r: config.playerRadius };
+							rightPlayer = { x: 320, y: 200, r: config.playerRadius };
+							generateRandomMap();
+							bullets = [];
+							break;
+						}
+					}
+				}
+
+				// 冷却更新
+				if (leftCooldown > 0) leftCooldown--;
+				if (rightCooldown > 0) rightCooldown--;
+			}
+
+			// 绘制障碍物
+			function drawObstacles() {
+				for (let obs of obstacles) {
+					ctx.shadowBlur = 15;
+					ctx.shadowColor = '#00000080';
+					
+					if (obs.type === 0) { // 圆形障碍
+						ctx.beginPath();
+						ctx.arc(obs.x, obs.y, obs.radius, 0, Math.PI*2);
+						ctx.fillStyle = '#8b5a2b';
+						ctx.fill();
+						ctx.strokeStyle = '#5a3a1a';
+						ctx.lineWidth = 3;
+						ctx.stroke();
+						
+						// 纹理
+						ctx.fillStyle = '#a8753a';
+						for (let i = 0; i < 3; i++) {
+							let angle = (i / 3) * Math.PI * 2;
+							let x1 = obs.x + Math.cos(angle) * obs.radius * 0.5;
+							let y1 = obs.y + Math.sin(angle) * obs.radius * 0.5;
+							ctx.beginPath();
+							ctx.arc(x1, y1, 4, 0, Math.PI*2);
+							ctx.fill();
+						}
+					} else if (obs.type === 1) { // 矩形障碍
+						ctx.save();
+						ctx.translate(obs.x, obs.y);
+						ctx.rotate(obs.rotation);
+						ctx.fillStyle = '#5d6d7e';
+						ctx.fillRect(-obs.width/2, -obs.height/2, obs.width, obs.height);
+						ctx.strokeStyle = '#2c3e50';
+						ctx.lineWidth = 3;
+						ctx.strokeRect(-obs.width/2, -obs.height/2, obs.width, obs.height);
+						
+						// 纹理
+						ctx.fillStyle = '#778899';
+						for (let i = -1; i <= 1; i++) {
+							ctx.fillRect(-obs.width/2 + 5, i * 10 - 5, obs.width - 10, 2);
+						}
+						ctx.restore();
+					} else if (obs.type === 2) { // 十字障碍
+						ctx.save();
+						ctx.translate(obs.x, obs.y);
+						ctx.fillStyle = '#b87333';
+						ctx.shadowBlur = 15;
+						// 水平条
+						ctx.fillRect(-25, -8, 50, 16);
+						// 垂直条
+						ctx.fillRect(-8, -25, 16, 50);
+						ctx.strokeStyle = '#8b4513';
+						ctx.lineWidth = 3;
+						ctx.strokeRect(-25, -8, 50, 16);
+						ctx.strokeRect(-8, -25, 16, 50);
+						ctx.restore();
+					}
+				}
+				ctx.shadowBlur = 0;
+			}
+
+			let gameActive = true;
+
+			// 绘制
+			function draw() {
+				if (!gameActive) return;
+				
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+				// 背景渐变
+				const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+				gradient.addColorStop(0, '#87CEEB');
+				gradient.addColorStop(1, '#B0E0F0');
+				ctx.fillStyle = gradient;
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+				// 绘制障碍物
+				drawObstacles();
+
+				// 中线
+				ctx.strokeStyle = '#ffffff55';
+				ctx.lineWidth = 2;
+				ctx.setLineDash([10, 10]);
+				ctx.beginPath();
+				ctx.moveTo(canvas.width/2, 0);
+				ctx.lineTo(canvas.width/2, canvas.height);
+				ctx.stroke();
+				ctx.setLineDash([]);
+
+				// 绘制左玩家
+				ctx.shadowBlur = 15;
+				ctx.shadowColor = '#00000080';
+				
+				// 飞机身体
+				ctx.beginPath();
+				ctx.moveTo(leftPlayer.x, leftPlayer.y - 15);
+				ctx.lineTo(leftPlayer.x + 12, leftPlayer.y + 8);
+				ctx.lineTo(leftPlayer.x + 4, leftPlayer.y + 8);
+				ctx.lineTo(leftPlayer.x, leftPlayer.y + 15);
+				ctx.lineTo(leftPlayer.x - 4, leftPlayer.y + 8);
+				ctx.lineTo(leftPlayer.x - 12, leftPlayer.y + 8);
+				ctx.closePath();
+				ctx.fillStyle = '#3b82f6';
+				ctx.fill();
+				ctx.strokeStyle = '#1e3a8a';
+				ctx.lineWidth = 2;
+				ctx.stroke();
+				
+				// 驾驶舱
+				ctx.beginPath();
+				ctx.arc(leftPlayer.x, leftPlayer.y - 6, 5, 0, Math.PI, true);
+				ctx.fillStyle = '#a5d8ff';
+				ctx.fill();
+
+				// 绘制右玩家
+				ctx.beginPath();
+				ctx.moveTo(rightPlayer.x, rightPlayer.y - 15);
+				ctx.lineTo(rightPlayer.x + 12, rightPlayer.y + 8);
+				ctx.lineTo(rightPlayer.x + 4, rightPlayer.y + 8);
+				ctx.lineTo(rightPlayer.x, rightPlayer.y + 15);
+				ctx.lineTo(rightPlayer.x - 4, rightPlayer.y + 8);
+				ctx.lineTo(rightPlayer.x - 12, rightPlayer.y + 8);
+				ctx.closePath();
+				ctx.fillStyle = '#dc2626';
+				ctx.fill();
+				ctx.strokeStyle = '#991b1b';
+				ctx.stroke();
+				
+				ctx.beginPath();
+				ctx.arc(rightPlayer.x, rightPlayer.y - 6, 5, 0, Math.PI, true);
+				ctx.fillStyle = '#ffa5a5';
+				ctx.fill();
+
+				// 子弹
+				for (let b of bullets) {
+					ctx.beginPath();
+					ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
+					ctx.fillStyle = b.side === 'left' ? '#3b82f6' : '#dc2626';
+					ctx.shadowBlur = 15;
+					ctx.fill();
+					
+					// 尾焰
+					ctx.beginPath();
+					ctx.arc(b.x - b.vx * 0.8, b.y - b.vy * 0.8, b.r * 0.6, 0, Math.PI*2);
+					ctx.fillStyle = '#ffff00';
+					ctx.fill();
+				}
+
+				// 冷却指示
+				ctx.shadowBlur = 0;
+				if (leftCooldown > 0) {
+					ctx.fillStyle = '#ffffff';
+					ctx.font = 'bold 14px sans-serif';
+					ctx.fillText('⏳', leftPlayer.x - 30, leftPlayer.y - 30);
+				}
+				if (rightCooldown > 0) {
+					ctx.fillStyle = '#ffffff';
+					ctx.font = 'bold 14px sans-serif';
+					ctx.fillText('⏳', rightPlayer.x + 20, rightPlayer.y - 30);
+				}
+			}
+
+			// 游戏循环
+			function gameLoop() {
+				if (gameActive) {
+					updatePlayers();
+					updateBullets();
+					draw();
+				}
+				requestAnimationFrame(gameLoop);
+			}
+			gameLoop();
+
+			// 阻止滚动
+			document.body.addEventListener('touchmove', (e) => {
+				if (e.target.closest('button')) {
+					e.preventDefault();
+				}
+			}, { passive: false });
+		})();
+	</script>
+</body>
+</html>
