@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<title>双人篮球 · 1分钟竞速投篮</title>
+	<style>
+		* {
+			box-sizing: border-box;
+			user-select: none;
+			-webkit-tap-highlight-color: transparent;
+		}
+		body {
+			margin: 0;
+			min-height: 100vh;
+			background: linear-gradient(145deg, #b95e1a, #8b4513);
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			font-family: 'Segoe UI', Roboto, sans-serif;
+			padding: 10px;
+			touch-action: pan-y pinch-zoom;
+		}
+		.game-container {
+			width: 100%;
+			max-width: 500px;
+			background: #d2691e;
+			border-radius: 40px;
+			padding: 20px;
+			box-shadow: 0 20px 35px #00000080;
+			border: 3px solid #ffd700;
+		}
+		.header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			color: #ffffff;
+			font-size: 1.2rem;
+			font-weight: 700;
+			margin-bottom: 15px;
+			padding: 0 10px;
+		}
+		.score-board {
+			background: #8b4513;
+			padding: 8px 30px;
+			border-radius: 40px;
+			display: flex;
+			gap: 40px;
+			border: 2px solid #ffd700;
+		}
+		.score-left, .score-right {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			font-size: 1.3rem;
+			color: white;
+		}
+		.score-left span, .score-right span {
+			font-size: 2rem;
+			color: #ffd700;
+			min-width: 40px;
+			text-align: center;
+		}
+		.timer-box {
+			background: #0a0a0a;
+			color: #ffd700;
+			padding: 5px 20px;
+			border-radius: 40px;
+			font-size: 1.5rem;
+			font-weight: bold;
+			border: 2px solid #ffd700;
+		}
+		.phase-box {
+			background: #4a2a0a;
+			color: #ffd700;
+			padding: 5px 15px;
+			border-radius: 30px;
+			font-size: 1rem;
+			border: 1px solid #ffd700;
+		}
+		canvas {
+			display: block;
+			margin: 0 auto;
+			width: 100%;
+			aspect-ratio: 1/1;
+			border-radius: 30px;
+			background: #f4a460;
+			box-shadow: inset 0 0 30px #00000099, 0 10px 15px black;
+			border: 4px solid #8b4513;
+			touch-action: none;
+		}
+		.controls-row {
+			display: flex;
+			justify-content: space-between;
+			margin-top: 20px;
+			gap: 15px;
+		}
+		.player-controls {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			background: #8b4513;
+			border-radius: 30px;
+			padding: 15px 10px;
+			border: 2px solid #ffd700;
+		}
+		.player-label {
+			color: #ffffff;
+			font-weight: bold;
+			margin-bottom: 12px;
+			font-size: 1.1rem;
+		}
+		.player-label.left {
+			color: #3b82f6;
+		}
+		.player-label.right {
+			color: #dc2626;
+		}
+		.player-controls.left {
+			border-color: #3b82f6;
+		}
+		.player-controls.right {
+			border-color: #dc2626;
+		}
+		
+		/* 三键布局 */
+		.three-keys {
+			display: grid;
+			grid-template-columns: 1fr 1fr 1fr;
+			gap: 8px;
+			width: 100%;
+		}
+		.key-left {
+			grid-column: 1;
+			grid-row: 1;
+		}
+		.key-shoot {
+			grid-column: 2;
+			grid-row: 1;
+		}
+		.key-right {
+			grid-column: 3;
+			grid-row: 1;
+		}
+		
+		.ctrl-btn {
+			background: #2d4b6e;
+			border: none;
+			color: white;
+			font-size: 1.8rem;
+			font-weight: bold;
+			aspect-ratio: 1/1;
+			width: 100%;
+			border-radius: 20px;
+			box-shadow: 0 5px 0 #0e2637;
+			transition: 0.05s;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			touch-action: manipulation;
+			cursor: pointer;
+			-webkit-tap-highlight-color: transparent;
+		}
+		.ctrl-btn:active {
+			transform: translateY(4px);
+			box-shadow: 0 1px 0 #0e2637;
+		}
+		.ctrl-btn.left-color {
+			background: #3b82f6;
+		}
+		.ctrl-btn.right-color {
+			background: #dc2626;
+		}
+		.shoot-btn {
+			background: #ffd700;
+			color: #1e2f47;
+			font-size: 1.5rem;
+		}
+		.footer {
+			text-align: center;
+			margin-top: 15px;
+			color: #ffffff;
+			font-size: 0.9rem;
+		}
+		.victory-message {
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			background: rgba(0,0,0,0.9);
+			color: gold;
+			font-size: 2rem;
+			font-weight: bold;
+			padding: 30px 50px;
+			border-radius: 60px;
+			border: 4px solid gold;
+			z-index: 1000;
+			display: none;
+			text-align: center;
+			backdrop-filter: blur(10px);
+		}
+		.restart-btn {
+			background: #ffd700;
+			border: none;
+			color: #1e2f47;
+			font-size: 1.2rem;
+			padding: 10px 30px;
+			border-radius: 40px;
+			margin-top: 15px;
+			font-weight: bold;
+			cursor: pointer;
+		}
+	</style>
+</head>
+<body>
+	<div class="victory-message" id="victoryMessage">
+		🏆 获胜 🏆
+		<div><button class="restart-btn" onclick="location.reload()">再玩一局</button></div>
+	</div>
+
+	<div class="game-container">
+		<div class="header">
+			<span>🏀 双人篮球 · 1分钟竞速</span>
+			<div class="timer-box" id="timer">01:00</div>
+		</div>
+		<div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+			<div class="phase-box" id="phaseDisplay">⚡ 篮筐静止</div>
+			<div class="score-board">
+				<div class="score-left">🔵 <span id="scoreLeft">0</span></div>
+				<div class="score-right">🔴 <span id="scoreRight">0</span></div>
+			</div>
+		</div>
+
+		<canvas id="gameCanvas" width="400" height="400"></canvas>
+
+		<!-- 双人控制区域 - 三键布局 -->
+		<div class="controls-row">
+			<!-- 左侧玩家 (蓝色) - 左右+投篮 -->
+			<div class="player-controls left">
+				<div class="player-label left">👈 蓝队</div>
+				<div class="three-keys">
+					<div class="key-left">
+						<button class="ctrl-btn left-color" id="leftLeft">⬅️</button>
+					</div>
+					<div class="key-shoot">
+						<button class="ctrl-btn left-color shoot-btn" id="leftShoot">🏀</button>
+					</div>
+					<div class="key-right">
+						<button class="ctrl-btn left-color" id="leftRight">➡️</button>
+					</div>
+				</div>
+				<div style="margin-top: 5px; color: #a5d8ff; font-size: 0.8rem;">左右瞄准 · 中央投篮</div>
+			</div>
+
+			<!-- 右侧玩家 (红色) - 左右+投篮 -->
+			<div class="player-controls right">
+				<div class="player-label right">👉 红队</div>
+				<div class="three-keys">
+					<div class="key-left">
+						<button class="ctrl-btn right-color" id="rightLeft">⬅️</button>
+					</div>
+					<div class="key-shoot">
+						<button class="ctrl-btn right-color shoot-btn" id="rightShoot">🏀</button>
+					</div>
+					<div class="key-right">
+						<button class="ctrl-btn right-color" id="rightRight">➡️</button>
+					</div>
+				</div>
+				<div style="margin-top: 5px; color: #ffa5a5; font-size: 0.8rem;">左右瞄准 · 中央投篮</div>
+			</div>
+		</div>
+
+		<div class="footer">
+			前30秒篮筐静止，后30秒移动 · 看谁投得多！
+		</div>
+	</div>
+
+	<script>
+		(function() {
+			const canvas = document.getElementById('gameCanvas');
+			const ctx = canvas.getContext('2d');
+			const victoryMsg = document.getElementById('victoryMessage');
+			const timerEl = document.getElementById('timer');
+			const phaseEl = document.getElementById('phaseDisplay');
+
+			// 游戏配置
+			const config = {
+				ballRadius: 6,
+				hoopRadius: 15,
+				hoopSpeed: 2,
+				totalTime: 60, // 1分钟
+				moveStartTime: 30 // 30秒后开始移动
+			};
+
+			// 篮筐位置 - 初始在中央偏上
+			let hoop = {
+				x: 200,
+				y: 100,
+				r: config.hoopRadius,
+				vx: 1,
+				vy: 0.5,
+				phase: 'static' // static 或 moving
+			};
+
+			// 篮球
+			let balls = [];
+
+			// 投篮方向（每个玩家一个）
+			let leftDirection = 0; // -1 左, 0 中, 1 右
+			let rightDirection = 0;
+
+			// 分数
+			let leftScore = 0;
+			let rightScore = 0;
+
+			// 计时
+			let timeLeft = config.totalTime;
+			let gameActive = true;
+			let gameStarted = false;
+			let gameInterval = null;
+
+			// 分数显示
+			const scoreLeftEl = document.getElementById('scoreLeft');
+			const scoreRightEl = document.getElementById('scoreRight');
+
+			// 移动状态
+			const leftKeys = { left: false, right: false };
+			const rightKeys = { left: false, right: false };
+
+			// 触摸绑定
+			function bindButton(btnId, playerKeys, dir) {
+				const btn = document.getElementById(btnId);
+				if (!btn) return;
+				
+				const setState = (value) => {
+					playerKeys[dir] = value;
+					
+					// 更新方向显示
+					if (btnId.includes('left')) {
+						if (playerKeys.left && !playerKeys.right) leftDirection = -1;
+						else if (!playerKeys.left && playerKeys.right) leftDirection = 1;
+						else leftDirection = 0;
+					} else {
+						if (playerKeys.left && !playerKeys.right) rightDirection = -1;
+						else if (!playerKeys.left && playerKeys.right) rightDirection = 1;
+						else rightDirection = 0;
+					}
+				};
+				
+				btn.addEventListener('touchstart', (e) => {
+					e.preventDefault();
+					setState(true);
+				});
+				btn.addEventListener('touchend', (e) => {
+					e.preventDefault();
+					setState(false);
+				});
+				btn.addEventListener('touchcancel', (e) => {
+					e.preventDefault();
+					setState(false);
+				});
+				btn.addEventListener('mousedown', (e) => {
+					e.preventDefault();
+					setState(true);
+				});
+				btn.addEventListener('mouseup', (e) => {
+					e.preventDefault();
+					setState(false);
+				});
+				btn.addEventListener('mouseleave', (e) => {
+					setState(false);
+				});
+			}
+
+			bindButton('leftLeft', leftKeys, 'left');
+			bindButton('leftRight', leftKeys, 'right');
+			bindButton('rightLeft', rightKeys, 'left');
+			bindButton('rightRight', rightKeys, 'right');
+
+			// 投篮
+			document.getElementById('leftShoot').addEventListener('touchstart', (e) => {
+				e.preventDefault();
+				shoot('left');
+			});
+			document.getElementById('leftShoot').addEventListener('mousedown', (e) => {
+				e.preventDefault();
+				shoot('left');
+			});
+			document.getElementById('rightShoot').addEventListener('touchstart', (e) => {
+				e.preventDefault();
+				shoot('right');
+			});
+			document.getElementById('rightShoot').addEventListener('mousedown', (e) => {
+				e.preventDefault();
+				shoot('right');
+			});
+
+			function shoot(side) {
+				if (!gameActive || !gameStarted) return;
+				
+				const direction = side === 'left' ? leftDirection : rightDirection;
+				const startX = side === 'left' ? 100 : 300;
+				const startY = 350;
+				
+				// 根据方向计算初速度
+				let vx = 0;
+				if (direction === -1) vx = -4;
+				else if (direction === 1) vx = 4;
+				else vx = 0;
+				
+				balls.push({
+					x: startX,
+					y: startY,
+					r: config.ballRadius,
+					vx: vx,
+					vy: -10, // 向上抛
+					side: side,
+					active: true
+				});
+			}
+
+			// 重置游戏
+			function resetGame() {
+				leftScore = 0;
+				rightScore = 0;
+				timeLeft = config.totalTime;
+				gameActive = true;
+				gameStarted = true;
+				balls = [];
+				hoop.phase = 'static';
+				hoop.x = 200;
+				hoop.y = 100;
+				phaseEl.innerText = '⚡ 篮筐静止';
+				
+				scoreLeftEl.innerText = leftScore;
+				scoreRightEl.innerText = rightScore;
+				
+				if (gameInterval) clearInterval(gameInterval);
+				gameInterval = setInterval(updateTimer, 1000);
+			}
+
+			// 更新计时器
+			function updateTimer() {
+				if (!gameActive || !gameStarted) return;
+				
+				timeLeft--;
+				const mins = Math.floor(timeLeft / 60);
+				const secs = timeLeft % 60;
+				timerEl.innerText = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+				
+				// 30秒后篮筐开始移动
+				if (timeLeft === config.moveStartTime) {
+					hoop.phase = 'moving';
+					phaseEl.innerText = '🌀 篮筐移动';
+				}
+				
+				if (timeLeft <= 0) {
+					gameActive = false;
+					clearInterval(gameInterval);
+					
+					// 显示胜利信息
+					let winner = '';
+					if (leftScore > rightScore) winner = '🏆 蓝队胜利 🏆';
+					else if (rightScore > leftScore) winner = '🏆 红队胜利 🏆';
+					else winner = '🤝 平局';
+					
+					victoryMsg.style.display = 'block';
+					victoryMsg.innerHTML = `${winner}<div><button class="restart-btn" onclick="location.reload()">再玩一局</button></div>`;
+				}
+			}
+
+			// 更新篮筐位置
+			function updateHoop() {
+				if (hoop.phase === 'moving') {
+					hoop.x += hoop.vx * config.hoopSpeed;
+					hoop.y += hoop.vy * config.hoopSpeed;
+					
+					// 边界反弹
+					if (hoop.x - hoop.r < 0) {
+						hoop.x = hoop.r;
+						hoop.vx = -hoop.vx;
+					} else if (hoop.x + hoop.r > canvas.width) {
+						hoop.x = canvas.width - hoop.r;
+						hoop.vx = -hoop.vx;
+					}
+					
+					if (hoop.y - hoop.r < 0) {
+						hoop.y = hoop.r;
+						hoop.vy = -hoop.vy;
+					} else if (hoop.y + hoop.r > canvas.height) {
+						hoop.y = canvas.height - hoop.r;
+						hoop.vy = -hoop.vy;
+					}
+				}
+			}
+
+			// 更新篮球
+			function updateBalls() {
+				for (let i = balls.length - 1; i >= 0; i--) {
+					const b = balls[i];
+					
+					// 重力
+					b.vy += 0.3;
+					
+					// 移动
+					b.x += b.vx;
+					b.y += b.vy;
+					
+					// 边界反弹（除了篮筐区域）
+					if (b.x - b.r < 0) {
+						b.x = b.r;
+						b.vx = -b.vx * 0.5;
+					} else if (b.x + b.r > canvas.width) {
+						b.x = canvas.width - b.r;
+						b.vx = -b.vx * 0.5;
+					}
+					
+					if (b.y - b.r < 0) {
+						b.y = b.r;
+						b.vy = -b.vy * 0.5;
+					} else if (b.y + b.r > canvas.height) {
+						// 落地消失
+						balls.splice(i, 1);
+						continue;
+					}
+					
+					// 检查是否进篮筐
+					const dx = b.x - hoop.x;
+					const dy = b.y - hoop.y;
+					const dist = Math.sqrt(dx*dx + dy*dy);
+					
+					// 如果球穿过篮筐区域且速度向下（正在下落）
+					if (dist < hoop.r + b.r && b.vy > 0) {
+						if (b.side === 'left') {
+							leftScore++;
+							scoreLeftEl.innerText = leftScore;
+						} else {
+							rightScore++;
+							scoreRightEl.innerText = rightScore;
+						}
+						balls.splice(i, 1);
+						
+						// 篮筐闪一下
+						hoop.r = config.hoopRadius + 5;
+						setTimeout(() => hoop.r = config.hoopRadius, 100);
+					}
+				}
+			}
+
+			// 绘制方向指示器
+			function drawDirection(side, direction) {
+				let x, y;
+				if (side === 'left') {
+					x = 100;
+					y = 380;
+				} else {
+					x = 300;
+					y = 380;
+				}
+				
+				ctx.fillStyle = side === 'left' ? '#3b82f6' : '#dc2626';
+				ctx.beginPath();
+				ctx.arc(x, y, 12, 0, Math.PI*2);
+				ctx.fill();
+				
+				// 方向箭头
+				ctx.fillStyle = 'white';
+				ctx.font = 'bold 14px sans-serif';
+				if (direction === -1) {
+					ctx.fillText('←', x - 18, y + 5);
+				} else if (direction === 1) {
+					ctx.fillText('→', x + 12, y + 5);
+				} else {
+					ctx.fillText('●', x - 4, y + 5);
+				}
+			}
+
+			// 绘制
+			function draw() {
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+				// 绘制球场
+				ctx.fillStyle = '#f4a460';
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+				
+				// 绘制三分线
+				ctx.strokeStyle = '#ffffff55';
+				ctx.lineWidth = 2;
+				ctx.beginPath();
+				ctx.arc(200, 200, 120, 0, Math.PI*2);
+				ctx.stroke();
+				
+				// 绘制罚球线
+				ctx.beginPath();
+				ctx.moveTo(100, 150);
+				ctx.lineTo(300, 150);
+				ctx.stroke();
+
+				// 绘制篮筐
+				ctx.shadowBlur = 20;
+				ctx.shadowColor = '#00000080';
+				
+				// 篮筐外圈
+				ctx.beginPath();
+				ctx.arc(hoop.x, hoop.y, hoop.r, 0, Math.PI*2);
+				ctx.fillStyle = '#ffd700';
+				ctx.fill();
+				ctx.strokeStyle = '#b8860b';
+				ctx.lineWidth = 4;
+				ctx.stroke();
+				
+				// 篮网
+				ctx.beginPath();
+				ctx.moveTo(hoop.x - 10, hoop.y + 5);
+				ctx.lineTo(hoop.x, hoop.y + 20);
+				ctx.lineTo(hoop.x + 10, hoop.y + 5);
+				ctx.strokeStyle = '#ffffff';
+				ctx.lineWidth = 2;
+				ctx.stroke();
+				
+				// 篮筐中心点
+				ctx.beginPath();
+				ctx.arc(hoop.x, hoop.y, 4, 0, Math.PI*2);
+				ctx.fillStyle = '#b8860b';
+				ctx.fill();
+
+				// 绘制篮球
+				for (let b of balls) {
+					ctx.beginPath();
+					ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
+					
+					// 篮球纹理
+					const gradient = ctx.createRadialGradient(
+						b.x - 2, b.y - 2, 2,
+						b.x, b.y, b.r + 4
+					);
+					gradient.addColorStop(0, '#ff8c00');
+					gradient.addColorStop(0.7, '#d2691e');
+					gradient.addColorStop(1, '#8b4513');
+					
+					ctx.fillStyle = gradient;
+					ctx.fill();
+					
+					// 篮球黑线
+					ctx.strokeStyle = '#000000';
+					ctx.lineWidth = 1;
+					ctx.beginPath();
+					ctx.moveTo(b.x - 4, b.y - 4);
+					ctx.lineTo(b.x + 4, b.y + 4);
+					ctx.moveTo(b.x + 4, b.y - 4);
+					ctx.lineTo(b.x - 4, b.y + 4);
+					ctx.stroke();
+				}
+
+				// 绘制方向指示器
+				drawDirection('left', leftDirection);
+				drawDirection('right', rightDirection);
+
+				// 绘制出手点
+				ctx.fillStyle = '#3b82f6';
+				ctx.beginPath();
+				ctx.arc(100, 350, 10, 0, Math.PI*2);
+				ctx.fill();
+				
+				ctx.fillStyle = '#dc2626';
+				ctx.beginPath();
+				ctx.arc(300, 350, 10, 0, Math.PI*2);
+				ctx.fill();
+
+				// 绘制分数背景
+				ctx.shadowBlur = 0;
+				ctx.fillStyle = '#00000080';
+				ctx.font = 'bold 36px monospace';
+				ctx.fillText(leftScore, 50, 80);
+				ctx.fillText(rightScore, canvas.width - 90, 80);
+			}
+
+			// 游戏循环
+			function gameLoop() {
+				if (gameActive && gameStarted) {
+					updateHoop();
+					updateBalls();
+				}
+				draw();
+				requestAnimationFrame(gameLoop);
+			}
+
+			// 自动开始
+			resetGame();
+			gameLoop();
+
+			// 阻止滚动
+			document.body.addEventListener('touchmove', (e) => {
+				if (e.target.closest('button')) {
+					e.preventDefault();
+				}
+			}, { passive: false });
+		})();
+	</script>
+</body>
+</html>
