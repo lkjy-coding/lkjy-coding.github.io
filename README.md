@@ -55,3 +55,39 @@ Also try <https://chenzheaya.github.io/OnlineJudgeMaintainerSimulator/>!
 ### V1
 
 <https://lkjy-coding.github.io/tools_v1.html>
+
+
+---
+
+# 双人游戏
+
+## 文件目录
+
+- `doubleGame`
+  - V1
+  - V2
+  - V3
+- `doubleGame-Football`
+  - V1
+  - V2
+- `doubleGame-Pingpong`
+  - V1
+- `doubleGame-Basketball`
+  - V1
+  - V2
+
+## 体验地址
+
+格式：https://lkjy-coding.github.io/(对应的文件名)
+
+---
+
+# JCode
+
+## 文件目录
+
+- `JCode.html`
+
+## 体验地址
+
+格式见上文。
