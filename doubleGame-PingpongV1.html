@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<title>双人乒乓球 · 同屏对战</title>
+	<style>
+		* {
+			box-sizing: border-box;
+			user-select: none;
+			-webkit-tap-highlight-color: transparent;
+		}
+		body {
+			margin: 0;
+			min-height: 100vh;
+			background: linear-gradient(145deg, #0b1c2f, #1a2f42);
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			font-family: 'Segoe UI', Roboto, sans-serif;
+			padding: 10px;
+			touch-action: pan-y pinch-zoom;
+		}
+		.game-container {
+			width: 100%;
+			max-width: 500px;
+			background: #1e3a5f;
+			border-radius: 40px;
+			padding: 20px;
+			box-shadow: 0 20px 35px #00000080;
+			border: 2px solid #4c7aa2;
+		}
+		.header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			color: #e6f0ff;
+			font-size: 1.2rem;
+			font-weight: 700;
+			margin-bottom: 15px;
+			padding: 0 10px;
+		}
+		.score-board {
+			background: #0f2a40;
+			padding: 8px 30px;
+			border-radius: 40px;
+			display: flex;
+			gap: 40px;
+		}
+		.score-left, .score-right {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			font-size: 1.3rem;
+		}
+		.score-left span, .score-right span {
+			font-size: 2rem;
+			color: #ffb347;
+			min-width: 40px;
+			text-align: center;
+		}
+		canvas {
+			display: block;
+			margin: 0 auto;
+			width: 100%;
+			aspect-ratio: 1/1;
+			border-radius: 30px;
+			background: #1a472a;
+			box-shadow: inset 0 0 30px #00000099, 0 10px 15px black;
+			border: 4px solid #c0a86a;
+			touch-action: none;
+		}
+		.controls-row {
+			display: flex;
+			justify-content: space-between;
+			margin-top: 20px;
+			gap: 15px;
+		}
+		.player-controls {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			background: #0f2a40;
+			border-radius: 30px;
+			padding: 15px 10px;
+			border: 2px solid #3a6792;
+		}
+		.player-label {
+			color: #d7ecff;
+			font-weight: bold;
+			margin-bottom: 12px;
+			font-size: 1.1rem;
+		}
+		.player-label.left {
+			color: #3b82f6;
+		}
+		.player-label.right {
+			color: #dc2626;
+		}
+		.paddle-control {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			width: 100%;
+			gap: 10px;
+		}
+		.ctrl-btn {
+			background: #2d4b6e;
+			border: none;
+			color: white;
+			font-size: 2rem;
+			font-weight: bold;
+			width: 80px;
+			height: 80px;
+			border-radius: 50px;
+			box-shadow: 0 5px 0 #0e2637;
+			transition: 0.05s;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			touch-action: manipulation;
+			cursor: pointer;
+			-webkit-tap-highlight-color: transparent;
+		}
+		.ctrl-btn:active {
+			transform: translateY(4px);
+			box-shadow: 0 1px 0 #0e2637;
+		}
+		.ctrl-btn.left-color {
+			background: #3b82f6;
+		}
+		.ctrl-btn.right-color {
+			background: #dc2626;
+		}
+		.speed-control {
+			display: flex;
+			gap: 10px;
+			margin-top: 10px;
+			justify-content: center;
+		}
+		.speed-btn {
+			background: #4a6a8a;
+			border: none;
+			color: white;
+			font-size: 1rem;
+			padding: 8px 16px;
+			border-radius: 30px;
+			box-shadow: 0 3px 0 #1e3a5f;
+			cursor: pointer;
+			touch-action: manipulation;
+		}
+		.speed-btn.active {
+			background: #ffb347;
+			color: #1e2f47;
+			font-weight: bold;
+		}
+		.footer {
+			text-align: center;
+			margin-top: 15px;
+			color: #8aa9c9;
+			font-size: 0.9rem;
+		}
+		.victory-message {
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			background: rgba(0,0,0,0.9);
+			color: gold;
+			font-size: 2.5rem;
+			font-weight: bold;
+			padding: 30px 50px;
+			border-radius: 60px;
+			border: 4px solid gold;
+			z-index: 1000;
+			display: none;
+			text-align: center;
+			backdrop-filter: blur(10px);
+		}
+		.restart-btn {
+			background: #ffb347;
+			border: none;
+			color: #1e2f47;
+			font-size: 1.2rem;
+			padding: 10px 30px;
+			border-radius: 40px;
+			margin-top: 15px;
+			font-weight: bold;
+			cursor: pointer;
+		}
+	</style>
+</head>
+<body>
+	<div class="victory-message" id="victoryMessage">
+		🏆 玩家获胜 🏆
+		<div><button class="restart-btn" onclick="location.reload()">再玩一局</button></div>
+	</div>
+
+	<div class="game-container">
+		<div class="header">
+			<span>🏓 双人乒乓球</span>
+			<div class="score-board">
+				<div class="score-left">🔵 <span id="scoreLeft">0</span></div>
+				<div class="score-right">🔴 <span id="scoreRight">0</span></div>
+			</div>
+		</div>
+
+		<canvas id="gameCanvas" width="400" height="400"></canvas>
+
+		<!-- 双人控制区域 -->
+		<div class="controls-row">
+			<!-- 左侧玩家 (蓝色) -->
+			<div class="player-controls">
+				<div class="player-label left">👈 蓝方</div>
+				<div class="paddle-control">
+					<button class="ctrl-btn left-color" id="leftUp">⬆️</button>
+					<button class="ctrl-btn left-color" id="leftDown">⬇️</button>
+				</div>
+			</div>
+
+			<!-- 右侧玩家 (红色) -->
+			<div class="player-controls">
+				<div class="player-label right">👉 红方</div>
+				<div class="paddle-control">
+					<button class="ctrl-btn right-color" id="rightUp">⬆️</button>
+					<button class="ctrl-btn right-color" id="rightDown">⬇️</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- 速度控制 -->
+		<div class="speed-control">
+			<button class="speed-btn" id="speedSlow">🐢 慢速</button>
+			<button class="speed-btn active" id="speedMedium">⚡ 中速</button>
+			<button class="speed-btn" id="speedFast">🚀 快速</button>
+		</div>
+
+		<div class="footer">
+			上下移动球拍 · 先得7分获胜
+		</div>
+	</div>
+
+	<script>
+		(function() {
+			const canvas = document.getElementById('gameCanvas');
+			const ctx = canvas.getContext('2d');
+			const victoryMsg = document.getElementById('victoryMessage');
+
+			// 游戏配置
+			const config = {
+				paddleWidth: 12,
+				paddleHeight: 70,
+				paddleSpeed: 6,
+				ballRadius: 6,
+				winScore: 7
+			};
+
+			// 球拍位置
+			let leftPaddle = {
+				x: 30,
+				y: canvas.height / 2 - config.paddleHeight / 2,
+				w: config.paddleWidth,
+				h: config.paddleHeight
+			};
+			let rightPaddle = {
+				x: canvas.width - 30 - config.paddleWidth,
+				y: canvas.height / 2 - config.paddleHeight / 2,
+				w: config.paddleWidth,
+				h: config.paddleHeight
+			};
+
+			// 球
+			let ball = {
+				x: canvas.width / 2,
+				y: canvas.height / 2,
+				r: config.ballRadius,
+				vx: 4,
+				vy: 3
+			};
+
+			// 分数
+			let leftScore = 0;
+			let rightScore = 0;
+
+			// 移动状态
+			const leftMove = { up: false, down: false };
+			const rightMove = { up: false, down: false };
+
+			// 速度等级
+			let speedLevel = 'medium'; // slow, medium, fast
+			const speedMap = {
+				slow: { ball: 3, paddle: 4 },
+				medium: { ball: 5, paddle: 6 },
+				fast: { ball: 7, paddle: 8 }
+			};
+
+			// 分数显示
+			const scoreLeftEl = document.getElementById('scoreLeft');
+			const scoreRightEl = document.getElementById('scoreRight');
+
+			// 速度按钮
+			document.getElementById('speedSlow').addEventListener('click', () => {
+				speedLevel = 'slow';
+				updateSpeedButtons();
+				updateSpeed();
+			});
+			document.getElementById('speedMedium').addEventListener('click', () => {
+				speedLevel = 'medium';
+				updateSpeedButtons();
+				updateSpeed();
+			});
+			document.getElementById('speedFast').addEventListener('click', () => {
+				speedLevel = 'fast';
+				updateSpeedButtons();
+				updateSpeed();
+			});
+
+			function updateSpeedButtons() {
+				document.querySelectorAll('.speed-btn').forEach(btn => btn.classList.remove('active'));
+				if (speedLevel === 'slow') document.getElementById('speedSlow').classList.add('active');
+				if (speedLevel === 'medium') document.getElementById('speedMedium').classList.add('active');
+				if (speedLevel === 'fast') document.getElementById('speedFast').classList.add('active');
+			}
+
+			function updateSpeed() {
+				const speed = speedMap[speedLevel];
+				// 保持当前方向，只改变速度大小
+				const ballSpeed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+				if (ballSpeed > 0) {
+					const ratio = speed.ball / ballSpeed;
+					ball.vx = ball.vx * ratio;
+					ball.vy = ball.vy * ratio;
+				}
+				// 球拍速度不需要立即改变，会在移动时使用
+			}
+
+			// 触摸绑定
+			function bindButton(btnId, playerMove, dir) {
+				const btn = document.getElementById(btnId);
+				if (!btn) return;
+				
+				btn.addEventListener('touchstart', (e) => {
+					e.preventDefault();
+					playerMove[dir] = true;
+				});
+				btn.addEventListener('touchend', (e) => {
+					e.preventDefault();
+					playerMove[dir] = false;
+				});
+				btn.addEventListener('touchcancel', (e) => {
+					e.preventDefault();
+					playerMove[dir] = false;
+				});
+				btn.addEventListener('mousedown', (e) => {
+					e.preventDefault();
+					playerMove[dir] = true;
+				});
+				btn.addEventListener('mouseup', (e) => {
+					e.preventDefault();
+					playerMove[dir] = false;
+				});
+				btn.addEventListener('mouseleave', (e) => {
+					playerMove[dir] = false;
+				});
+			}
+
+			bindButton('leftUp', leftMove, 'up');
+			bindButton('leftDown', leftMove, 'down');
+			bindButton('rightUp', rightMove, 'up');
+			bindButton('rightDown', rightMove, 'down');
+
+			// 重置球
+			function resetBall(scorer) {
+				ball.x = canvas.width / 2;
+				ball.y = canvas.height / 2;
+				
+				// 随机方向，但偏向失分方
+				let baseAngle;
+				if (scorer === 'left') {
+					// 蓝方得分，球发向红方
+					baseAngle = Math.random() * 0.8 - 0.4; // -0.4 到 0.4 弧度
+				} else {
+					// 红方得分，球发向蓝方
+					baseAngle = Math.PI + (Math.random() * 0.8 - 0.4);
+				}
+				
+				const speed = speedMap[speedLevel].ball;
+				ball.vx = Math.cos(baseAngle) * speed;
+				ball.vy = Math.sin(baseAngle) * speed * 0.8; // 垂直速度稍小
+				
+				// 确保球不会太平
+				if (Math.abs(ball.vy) < 1.5) {
+					ball.vy = ball.vy > 0 ? 2 : -2;
+				}
+			}
+
+			// 检查胜利
+			function checkWin() {
+				if (leftScore >= config.winScore) {
+					victoryMsg.style.display = 'block';
+					victoryMsg.innerHTML = '🏆 蓝方胜利 🏆<div><button class="restart-btn" onclick="location.reload()">再玩一局</button></div>';
+					return true;
+				} else if (rightScore >= config.winScore) {
+					victoryMsg.style.display = 'block';
+					victoryMsg.innerHTML = '🏆 红方胜利 🏆<div><button class="restart-btn" onclick="location.reload()">再玩一局</button></div>';
+					return true;
+				}
+				return false;
+			}
+
+			// 更新球拍位置
+			function updatePaddles() {
+				const paddleSpeed = speedMap[speedLevel].paddle;
+				
+				if (leftMove.up) leftPaddle.y -= paddleSpeed;
+				if (leftMove.down) leftPaddle.y += paddleSpeed;
+				if (rightMove.up) rightPaddle.y -= paddleSpeed;
+				if (rightMove.down) rightPaddle.y += paddleSpeed;
+
+				// 边界限制
+				leftPaddle.y = Math.max(0, Math.min(canvas.height - leftPaddle.h, leftPaddle.y));
+				rightPaddle.y = Math.max(0, Math.min(canvas.height - rightPaddle.h, rightPaddle.y));
+			}
+
+			// 更新球
+			function updateBall() {
+				if (checkWin()) return;
+
+				ball.x += ball.vx;
+				ball.y += ball.vy;
+
+				// 上下边界反弹
+				if (ball.y - ball.r < 0) {
+					ball.y = ball.r;
+					ball.vy = -ball.vy;
+				} else if (ball.y + ball.r > canvas.height) {
+					ball.y = canvas.height - ball.r;
+					ball.vy = -ball.vy;
+				}
+
+				// 左右边界（得分）
+				if (ball.x - ball.r < 0) {
+					// 红方得分
+					rightScore++;
+					scoreRightEl.innerText = rightScore;
+					resetBall('right');
+					return;
+				} else if (ball.x + ball.r > canvas.width) {
+					// 蓝方得分
+					leftScore++;
+					scoreLeftEl.innerText = leftScore;
+					resetBall('left');
+					return;
+				}
+
+				// 左球拍碰撞
+				if (ball.x - ball.r < leftPaddle.x + leftPaddle.w && 
+					ball.x + ball.r > leftPaddle.x &&
+					ball.y > leftPaddle.y && 
+					ball.y < leftPaddle.y + leftPaddle.h) {
+					
+					// 计算反弹角度（基于击球位置）
+					let relativeY = (ball.y - (leftPaddle.y + leftPaddle.h/2)) / (leftPaddle.h/2);
+					let angle = relativeY * 0.8; // -0.8 到 0.8 弧度
+					
+					// 确保球向右飞
+					let speed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+					ball.vx = Math.abs(Math.cos(angle) * speed);
+					ball.vy = Math.sin(angle) * speed;
+					
+					// 稍微增加速度
+					ball.vx *= 1.05;
+					ball.vy *= 1.05;
+					
+					// 防止球卡在拍子里
+					ball.x = leftPaddle.x + leftPaddle.w + ball.r;
+				}
+
+				// 右球拍碰撞
+				if (ball.x + ball.r > rightPaddle.x && 
+					ball.x - ball.r < rightPaddle.x + rightPaddle.w &&
+					ball.y > rightPaddle.y && 
+					ball.y < rightPaddle.y + rightPaddle.h) {
+					
+					let relativeY = (ball.y - (rightPaddle.y + rightPaddle.h/2)) / (rightPaddle.h/2);
+					let angle = Math.PI - relativeY * 0.8; // 向左反弹
+					
+					let speed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+					ball.vx = -Math.abs(Math.cos(angle) * speed);
+					ball.vy = Math.sin(angle) * speed;
+					
+					ball.vx *= 1.05;
+					ball.vy *= 1.05;
+					
+					ball.x = rightPaddle.x - ball.r;
+				}
+			}
+
+			// 绘制
+			function draw() {
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+				// 绘制桌面
+				ctx.fillStyle = '#2d5a2d';
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+				
+				// 绘制中线
+				ctx.strokeStyle = '#ffffff55';
+				ctx.lineWidth = 2;
+				ctx.setLineDash([10, 10]);
+				ctx.beginPath();
+				ctx.moveTo(canvas.width/2, 0);
+				ctx.lineTo(canvas.width/2, canvas.height);
+				ctx.stroke();
+				
+				// 绘制中心圆
+				ctx.setLineDash([]);
+				ctx.beginPath();
+				ctx.arc(canvas.width/2, canvas.height/2, 40, 0, Math.PI*2);
+				ctx.strokeStyle = '#ffffff55';
+				ctx.lineWidth = 2;
+				ctx.stroke();
+
+				// 绘制左球拍
+				ctx.shadowBlur = 15;
+				ctx.shadowColor = '#00000080';
+				ctx.fillStyle = '#3b82f6';
+				ctx.fillRect(leftPaddle.x, leftPaddle.y, leftPaddle.w, leftPaddle.h);
+				
+				// 球拍边框
+				ctx.strokeStyle = '#1e3a8a';
+				ctx.lineWidth = 2;
+				ctx.strokeRect(leftPaddle.x, leftPaddle.y, leftPaddle.w, leftPaddle.h);
+
+				// 绘制右球拍
+				ctx.fillStyle = '#dc2626';
+				ctx.fillRect(rightPaddle.x, rightPaddle.y, rightPaddle.w, rightPaddle.h);
+				ctx.strokeStyle = '#991b1b';
+				ctx.strokeRect(rightPaddle.x, rightPaddle.y, rightPaddle.w, rightPaddle.h);
+
+				// 绘制球
+				ctx.beginPath();
+				ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2);
+				
+				// 球体渐变
+				const gradient = ctx.createRadialGradient(
+					ball.x - 2, ball.y - 2, 2,
+					ball.x, ball.y, ball.r + 4
+				);
+				gradient.addColorStop(0, '#ffffff');
+				gradient.addColorStop(0.5, '#f5f5dc');
+				gradient.addColorStop(1, '#c0a86a');
+				
+				ctx.fillStyle = gradient;
+				ctx.fill();
+				ctx.strokeStyle = '#8b7355';
+				ctx.lineWidth = 1;
+				ctx.stroke();
+				
+				// 球的高光
+				ctx.beginPath();
+				ctx.arc(ball.x - 2, ball.y - 2, 2, 0, Math.PI*2);
+				ctx.fillStyle = '#ffffff80';
+				ctx.fill();
+
+				// 绘制分数背景
+				ctx.shadowBlur = 0;
+				ctx.fillStyle = '#00000080';
+				ctx.font = 'bold 48px monospace';
+				ctx.fillText(leftScore, canvas.width/4, 70);
+				ctx.fillStyle = '#ffffff';
+				ctx.font = 'bold 48px monospace';
+				ctx.fillText(leftScore, canvas.width/4 - 2, 68);
+				
+				ctx.fillStyle = '#00000080';
+				ctx.fillText(rightScore, canvas.width*3/4 - 40, 70);
+				ctx.fillStyle = '#ffffff';
+				ctx.fillText(rightScore, canvas.width*3/4 - 42, 68);
+			}
+
+			// 游戏循环
+			function gameLoop() {
+				updatePaddles();
+				updateBall();
+				draw();
+				requestAnimationFrame(gameLoop);
+			}
+			gameLoop();
+
+			// 阻止滚动
+			document.body.addEventListener('touchmove', (e) => {
+				if (e.target.closest('button')) {
+					e.preventDefault();
+				}
+			}, { passive: false });
+		})();
+	</script>
+</body>
+</html>
