@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+	<title>硬件规格检查器 V5 | 全功能版 · 输入法联动 · 后台增删改</title>
+	<style>
+		* { box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+		body { background: #f0f2f5; margin: 0; padding: 24px 20px; color: #1e293b; }
+		.container { max-width: 1450px; margin: 0 auto; }
+		.card { background: white; border-radius: 28px; box-shadow: 0 12px 30px rgba(0,0,0,0.08); padding: 24px 28px; margin-bottom: 28px; }
+		h1 { font-size: 1.8rem; font-weight: 600; margin: 0 0 6px; background: linear-gradient(135deg, #2563eb, #7c3aed); -webkit-background-clip: text; background-clip: text; color: transparent; }
+		.sub { color: #475569; border-left: 4px solid #3b82f6; padding-left: 14px; margin: 8px 0 20px; font-size: 0.9rem; }
+		.grid-2col { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+		.form-group { margin-bottom: 20px; }
+		label { font-weight: 600; display: block; margin-bottom: 8px; font-size: 0.9rem; color: #0f172a; }
+		select, input[type="text"], input[type="number"] { width: 100%; padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 18px; font-size: 0.9rem; background: #fefefe; transition: 0.2s; }
+		select:focus, input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+		.checkbox-group, .radio-group { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 8px; }
+		.checkbox-group label, .radio-group label { font-weight: normal; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+		.inline-hint { font-size: 0.7rem; color: #6c757d; margin-top: 4px; }
+		button { background: #1e293b; color: white; border: none; padding: 12px 24px; border-radius: 40px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.2s; }
+		button.primary { background: #2563eb; }
+		button.primary:hover { background: #1d4ed8; transform: scale(1.01); }
+		.result-area { background: #f8fafc; border-radius: 24px; padding: 20px; margin-top: 16px; border-left: 6px solid #3b82f6; }
+		.warning { color: #b91c1c; background: #fee2e2; padding: 12px; border-radius: 20px; margin-top: 8px; }
+		.footer-buttons { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; gap: 12px; flex-wrap: wrap; }
+		.admin-login-btn { background: #334155; }
+		.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; }
+		.modal-content { background: white; max-width: 900px; width: 90%; border-radius: 32px; padding: 24px; max-height: 85vh; overflow-y: auto; }
+		.sys-group { margin-bottom: 20px; border: 1px solid #e2e8f0; border-radius: 20px; padding: 12px; }
+		.sys-header { font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; background: #f1f5f9; padding: 8px 12px; border-radius: 40px; margin-bottom: 10px; }
+		.subsys-list { margin-left: 16px; display: grid; gap: 8px; }
+		.subsys-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e1; padding: 6px 0; }
+		.status-select { font-size: 0.8rem; padding: 4px 8px; border-radius: 30px; background: white; border: 1px solid #cbd5e1; }
+		.btn-icon { background: #ef4444; padding: 4px 12px; border-radius: 30px; font-size: 0.7rem; margin-left: 8px; }
+		.btn-edit { background: #3b82f6; }
+		.speed-test { background: #e6f0ff; padding: 8px 12px; border-radius: 20px; margin-top: 8px; font-size: 0.8rem; }
+		hr { margin: 16px 0; }
+		.foreign-toggle { margin: 12px 0 0 24px; background: #eef2ff; padding: 8px 12px; border-radius: 24px; display: inline-flex; align-items: center; gap: 10px; }
+		.creator-panel { background: #f8fafc; border-radius: 24px; padding: 16px; margin-top: 20px; }
+		.sub-branch { margin-left: 28px; margin-top: 6px; padding: 6px 12px; background: #f9f9ff; border-radius: 16px; }
+		@media (max-width: 800px) { .grid-2col { grid-template-columns: 1fr; } }
+	</style>
+</head>
+<body>
+<div class="container">
+	<div class="card">
+		<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+			<div><h1>⚙️ 硬件规格检查器 V5 · 全功能版</h1><div class="sub">输入法联动 · 后台完整管理 · 投影智能单选</div></div>
+			<button id="adminBtn" class="admin-login-btn">🔐 后台管理</button>
+		</div>
+		<div id="networkAlert" style="display: none;" class="warning"></div>
+		<div class="grid-2col">
+			<div>
+				<div class="form-group"><label>🎮 游戏名称 / 下载链接</label><input type="text" id="gameInput" placeholder="例如: 赛博朋克2077" value="原神"></div>
+				<div class="form-group"><label>📥 下载来源 (可多选，部分外国来源需特别查询)</label><div id="sourceCheckboxes" class="checkbox-group"></div>
+					<div id="otherSourceRow" style="margin-top: 8px; display: none;"><input type="text" id="otherSourceLink" placeholder="主站链接 (输入None则按仅评估执行)" style="width: 100%;"></div>
+					<div id="onlineGameSub" class="sub-branch" style="display: none;"><label>在线小游戏分支：</label><select id="onlineSubSelect"><option value="4399">4399</option><option value="4366">4366</option><option value="7k7k">7k7k</option><option value="Poki">Poki</option><option value="17173">17173</option><option value="其他">其他小游戏站</option></select><input type="text" id="onlineOtherInput" placeholder="其他站点名" style="margin-top: 5px; display: none;"></div>
+					<div id="foreignBypassRow" class="foreign-toggle"><label><input type="checkbox" id="foreignBypassCheck"> 🌐 特别查询</label></div>
+				</div>
+				<div class="form-group"><label>💻 操作系统</label><select id="osMajorSelect"></select><select id="osSubSelect" style="margin-top: 8px;"></select><div id="osVersionNote" class="inline-hint"></div></div>
+				<div class="form-group"><label>📱 设备类型 (投影模式智能单选)</label><div class="checkbox-group" id="deviceGroup">
+					<label><input type="checkbox" class="deviceType" value="电脑"> 电脑</label>
+					<label><input type="checkbox" class="deviceType" value="手机"> 手机</label>
+					<label><input type="checkbox" class="deviceType" value="Pad"> Pad</label>
+					<label><input type="checkbox" class="deviceType" value="智能手表"> 智能手表</label>
+					<label><input type="checkbox" class="deviceType" value="手柄"> 手柄</label>
+					<label><input type="checkbox" class="deviceType" value="游戏主机"> 游戏主机(如PlayStation)</label>
+					<label><input type="checkbox" class="deviceType" value="平板电脑"> 平板电脑(二合一)</label>
+				</div>
+				<label style="margin-top: 8px;"><input type="checkbox" id="projectorCheck"> 转接投影 (智能保留最后选择的两个设备，超出则自动淘汰旧选项)</label>
+				<label style="margin-top: 8px;"><input type="checkbox" id="initPhaseCheck"> 系统是否在初始化阶段（是否刚安装完成）</label>
+			</div>
+			<div>
+				<div class="form-group"><label>📊 硬件规格</label><input type="text" id="gpuMem" placeholder="显卡内存(GB)" value="6"><input type="text" id="storageMem" placeholder="硬盘总容量(GB)" value="512" style="margin-top: 8px;"><input type="text" id="freeSpace" placeholder="硬盘剩余空间(GB)" value="200" style="margin-top: 8px;"><input type="text" id="ramMem" placeholder="运行内存(GB)" value="16" style="margin-top: 8px;"><input type="text" id="cpuCores" placeholder="CPU核数" value="8" style="margin-top: 8px;"></div>
+				<div class="form-group"><label>⌨️ 输入法支持 (可多选，与设备联动)</label><div id="imeGroup" class="checkbox-group" style="max-height: 180px; overflow-y: auto; border:1px solid #e2e8f0; border-radius: 20px; padding: 8px;"></div><div id="imeWarning" class="inline-hint" style="color:#d97706;"></div></div>
+				<div class="form-group"><label>⚡ 技术特性</label><div id="featuresCheck" class="checkbox-group"><label><input type="checkbox" value="HTML5"> HTML5</label><label><input type="checkbox" value="TCP2.0"> TCP 2.0+</label><label><input type="checkbox" value="Sound"> 声音播放</label><label><input type="checkbox" value="256Color"> 256色显示</label><label><input type="checkbox" value="Regedit"> 注册表修改</label></div></div>
+				<div class="form-group"><button id="speedTestBtn" class="btn-sm" style="background:#475569;">📡 网络测速 (延迟检测)</button><span id="speedResult" class="inline-hint" style="margin-left: 12px;"></span></div>
+			</div>
+		</div>
+		<div class="footer-buttons"><button id="checkBtn" class="primary">✅ 开始评估</button><button id="resetBtn">⟳ 重置</button></div>
+		<div id="resultPanel" class="result-area" style="display: none;"></div>
+	</div>
+</div>
+
+<!-- 后台模态框 -->
+<div id="adminModal" class="modal"><div class="modal-content"><h2>🛠️ 后台管理 (增删改查)</h2><div id="sysStatusTree"></div><div class="creator-panel"><h4>➕ 新增版本 (大类/小类/版本)</h4><div style="display:flex;flex-wrap:wrap;gap:8px;"><input type="text" id="newMajorName" placeholder="新大类名" style="width:140px"><select id="parentMajorSelect"><option value="__NEW__">(新建大类)</option></select><input type="text" id="newSubName" placeholder="小类名"><input type="text" id="newVersionName" placeholder="具体版本"><button id="createVersionBtn" class="btn-sm">创建</button></div><div class="inline-hint">支持预定义* **标记</div></div><button id="saveSysStatus">💾 保存全部</button><span id="saveToast"></span><hr><button id="closeModalBtn">关闭</button></div></div>
+
+<script>
+	// 完整操作系统树 (含新增: Windows PE, 朝鲜手机系统)
+	const FULL_OS_TREE = {
+		"Windows": { sub: { "Windows正式版": ["Windows 1.0*","Windows 2.0*","Windows 3.0*","Windows 3.1*","Windows for Workgroups 3.11*","Windows NT 3.1","Windows 3.2","Windows NT 3.5","Windows NT 3.51","Windows 95","Windows NT 4.0","Windows 98","Windows 98 SE","Windows 2000","Windows ME","Windows XP","Windows Vista","Windows 7","Windows Thin PC","Windows 8","Windows 8.1","Windows 10","Windows 11","Windows 12**","Windows PE*"], "Windows Server": ["Windows 2000 Server","Windows Server 2003","Windows Server 2003 R2","Windows Server 2008","Windows Server 2008 R2","Windows Server 2012","Windows Server 2012 R2","Windows Server 2016","Windows Server 2019","Windows Server 2022","Windows Server 2025"], "Windows CE": ["Windows CE 1.0","Windows CE 2.0","Windows CE 3.0","Windows CE 4.0","Windows CE 4.1","Windows CE 4.2","Windows CE 5.0","Windows CE 6.0","Windows CE 7.0"], "Windows Mobile": ["Pocket PC2000","Pocket PC2002","Windows Mobile 2003","Windows Mobile 5.0","Windows Mobile 6.0","Windows Mobile 6.5"], "Windows Phone": ["Windows Phone 7.0","Windows Phone 7.1","Windows Phone 7.5","Windows Phone 8.0","Window Phone 8.1"], "Windows预览版": ["Windows预览版*"] } },
+		"macOS": { sub: { "macOS及以后": ["macOS 10.12 Sierra","macOS 13 Ventura","macOS 14 Sonoma","macOS 15 Sequoia","macOS 26 RC"] } },
+		"iOS": { sub: { "iOS": ["iOS 15","iOS 16","iOS 17","iOS 18"] } }, "tvOS": { sub: { "tvOS": ["tvOS 15*","tvOS 16**"] } },
+		"澎湃OS": { sub: { "澎湃OS": ["2.0","2.1","3.0","3.1"] } },
+		"鸿蒙": { sub: { "HarmonyOS（PC）": ["5.0.5","5.1.0","5.1.1","6.0.0"], "HarmonyOS（Mobile）": ["2.0","3.0","3.1","4.0","4.1","4.2","4.3","4.4","5.0","5.0.1","5.0.5","5.1.0","5.1.1","6.0.0"] } },
+		"Android": { sub: { "Android on PC": ["11","12","13","14","15","16"], "Android on Mobile": ["2.3","4.0","4.1","4.2","4.3","4.4","5.0","5.1","6.0","7.0","7.1","8.0","8.1","9","10","11","12","13","14","15","16"] } },
+		"阿里云OS": { sub: { "阿里云OS": ["2.1903","3.2104","3.2201","4.2402"] } }, "Unix": { sub: { "Unix": ["System V","BSD"] } },
+		"Ubuntu": { sub: { "Ubuntu Normal": ["4.10","5.04","6.06 LTS","8.04 LTS","10.04 LTS","12.04 LTS","14.04 LTS","16.04 LTS","18.04 LTS","20.04 LTS","22.04 LTS","24.04 LTS"], "Ubuntu Kylin": ["14.04 LTS","16.04 LTS","18.04 LTS","20.04 LTS","22.04 LTS","24.04 LTS"], "lubuntu": ["lubuntu 18.04*"], "xubuntu": ["xubuntu 20.04*"] } },
+		"MS-DOS": { sub: { "MS-DOS": ["1.24","2.0","2.11","3.0","3.1","3.2","3.21","3.3","3.31","4.0","5.0","6.0","6.2","6.21","6.22","7.0","7.1"] } },
+		"CentOS": { sub: { "CentOS": ["5.11","6.10","7.9","8.0","8.1","8.2","8.3","8.4","8.5","9","9-stream"] } },
+		"LOONGNIX": { sub: { "LOONGNIX": ["20.7","23.1","23.2","25.1"] } },
+		"Red Star OS": { sub: { "Red Star OS": ["1.0*","2.0*","3.0","4.0"] } },
+		"朝鲜手机系统": { sub: { "朝鲜手机系统": ["Red Star Mobile 1.0**","Red Star Mobile 2.0**"] } },
+		"其他": { sub: { "其他系统": ["请附百科词条链接"] } }
+	};
+	let osMajorList = Object.keys(FULL_OS_TREE);
+	let systemDetailedStatus = {};
+	function getStatusKey(major, subCat, version) { return `${major}||${subCat}||${version}`; }
+	function getDefaultStatus(ver) { if(ver.includes('**')) return 'unreleased'; if(ver.includes('*')) return 'unavailable'; return 'enabled'; }
+	function initStatus() { for(let major of osMajorList) for(let subCat of Object.keys(FULL_OS_TREE[major].sub||{})) for(let ver of (FULL_OS_TREE[major].sub[subCat]||[])) { let key=getStatusKey(major,subCat,ver); if(!systemDetailedStatus[key]) systemDetailedStatus[key]=getDefaultStatus(ver); } }
+	function loadStorage() { let s=localStorage.getItem('sysDetailedStatus'); if(s) try{systemDetailedStatus=JSON.parse(s);}catch(e){} let t=localStorage.getItem('FULL_OS_TREE'); if(t) try{Object.assign(FULL_OS_TREE,JSON.parse(t)); osMajorList=Object.keys(FULL_OS_TREE);}catch(e){} initStatus(); }
+	loadStorage();
+	
+	// 输入法树
+	const IME_TREE = { "中文输入法": ["中文：拼音","中文：五笔","中文：郑码","中文：注音（港澳台）","中文：手写","中文：笔画","九键","二十六键","其他"], "英文":["英文"], "法语":["法语"], "德语":["德语"], "朝鲜文":["全谚文（朝鲜文）","全汉字（朝鲜文）","汉谚混写（朝鲜文）"], "韩国文":["全谚文（韩国文）","全汉字（韩国文）","汉谚混写（韩国文）"], "藏文":["藏文"], "蒙古文":["蒙古文"], "维吾尔文":["维吾尔文"], "其他":["其他输入法"] };
+	let allImeList = [];
+	for(let cat in IME_TREE) IME_TREE[cat].forEach(ime => allImeList.push(ime));
+	
+	// DOM 元素
+	const sourceDiv = document.getElementById('sourceCheckboxes'), otherRow = document.getElementById('otherSourceRow'), otherLinkInput = document.getElementById('otherSourceLink');
+	const foreignBypassCheck = document.getElementById('foreignBypassCheck'), projectorCheck = document.getElementById('projectorCheck');
+	const osMajorSelect = document.getElementById('osMajorSelect'), osSubSelect = document.getElementById('osSubSelect'), versionNoteDiv = document.getElementById('osVersionNote');
+	const checkBtn = document.getElementById('checkBtn'), resetBtn = document.getElementById('resetBtn'), resultPanel = document.getElementById('resultPanel');
+	const adminBtn = document.getElementById('adminBtn'), adminModal = document.getElementById('adminModal'), sysStatusTreeDiv = document.getElementById('sysStatusTree');
+	const saveSysStatusBtn = document.getElementById('saveSysStatus'), closeModalBtn = document.getElementById('closeModalBtn');
+	const imeGroup = document.getElementById('imeGroup'), imeWarning = document.getElementById('imeWarning');
+	const speedTestBtn = document.getElementById('speedTestBtn'), speedResult = document.getElementById('speedResult');
+	const freeSpaceInput = document.getElementById('freeSpace'), initPhaseCheck = document.getElementById('initPhaseCheck');
+	
+	// 渲染来源 (新增品牌应用商店、应用下载网站、仅评估)
+	const sourcesList = ["AppStore","GooglePlay","Tiktok","YouTube","Twitter（X）","华为应用市场","小米应用商店","应用宝","OPPO应用商店","Steam","在线小游戏","品牌应用商店","应用下载网站","仅评估","其他（需附链接）"];
+	function renderSources() {
+		sourceDiv.innerHTML = '';
+		sourcesList.forEach(src => { let label=document.createElement('label'); let cb=document.createElement('input'); cb.type='checkbox'; cb.value=src; cb.classList.add('source-cb'); label.appendChild(cb); label.appendChild(document.createTextNode(src)); sourceDiv.appendChild(label); });
+		let otherCb = document.querySelector('.source-cb[value="其他（需附链接）"]'); if(otherCb) otherCb.addEventListener('change',(e)=>{ otherRow.style.display=e.target.checked?'block':'none'; });
+		let onlineCb = document.querySelector('.source-cb[value="在线小游戏"]'); if(onlineCb) onlineCb.addEventListener('change',(e)=>{ document.getElementById('onlineGameSub').style.display=e.target.checked?'block':'none'; });
+		document.getElementById('onlineSubSelect')?.addEventListener('change',function(){ document.getElementById('onlineOtherInput').style.display=this.value==='其他'?'inline-block':'none'; });
+		applySourceRestriction();
+	}
+	let isDomesticIP=false, foreignBypass=false;
+	function applySourceRestriction() { document.querySelectorAll('.source-cb').forEach(cb=>{ if(['GooglePlay','Tiktok','YouTube','Twitter（X）'].includes(cb.value)){ let blocked=isDomesticIP&&!foreignBypass; cb.disabled=blocked; if(blocked&&cb.checked) cb.checked=false; } }); }
+	foreignBypassCheck.addEventListener('change',e=>{ foreignBypass=e.target.checked; applySourceRestriction(); });
+	async function detectIP(){ try{ let res=await fetch('https://ipapi.co/json/',{signal:AbortSignal.timeout?AbortSignal.timeout(3000):undefined}); let data=await res.json(); isDomesticIP=(data.country_code==='CN'); }catch(e){} applySourceRestriction(); } detectIP();
+	
+	// 智能投影模式: 记录选中顺序，最多保留2个
+	let deviceSelectionOrder = [];
+	function updateProjectorLogic() {
+		let cbs = document.querySelectorAll('.deviceType');
+		if(projectorCheck.checked) {
+			cbs.forEach(cb=>{ cb.removeEventListener('change', projectorHandler); cb.addEventListener('change', projectorHandler); });
+			let checked = Array.from(cbs).filter(cb=>cb.checked);
+			if(checked.length > 2) { let toUncheck = checked.slice(2); toUncheck.forEach(cb=>cb.checked=false); }
+			deviceSelectionOrder = Array.from(cbs).filter(cb=>cb.checked).map(cb=>cb.value);
+		} else { cbs.forEach(cb=>cb.removeEventListener('change', projectorHandler)); }
+	}
+	function projectorHandler(e) {
+		if(!projectorCheck.checked) return;
+		let cbs = document.querySelectorAll('.deviceType');
+		let checkedNow = Array.from(cbs).filter(cb=>cb.checked);
+		if(checkedNow.length > 2) { e.target.checked = false; alert("投影模式下最多选择两种设备类型"); }
+	}
+	projectorCheck.addEventListener('change', updateProjectorLogic);
+	
+	// 输入法联动校验
+	function validateImeWithDevice() {
+		let devices = Array.from(document.querySelectorAll('.deviceType:checked')).map(cb=>cb.value);
+		let selectedIme = Array.from(document.querySelectorAll('.ime-cb:checked')).map(cb=>cb.value);
+		let invalid = selectedIme.filter(ime => (ime.includes("手写")||ime.includes("笔画")) && !(devices.includes("手机")||devices.includes("Pad")||devices.includes("平板电脑")));
+		if(invalid.length) { imeWarning.innerText = `⚠️ 输入法“${invalid.join(',')}”仅适用于手机/Pad/平板电脑，当前设备不匹配。`; return false; }
+		imeWarning.innerText = ''; return true;
+	}
+	function renderIme() { imeGroup.innerHTML=''; allImeList.forEach(ime=>{ let l=document.createElement('label'); let cb=document.createElement('input'); cb.type='checkbox'; cb.classList.add('ime-cb'); cb.value=ime; l.appendChild(cb); l.appendChild(document.createTextNode(ime)); imeGroup.appendChild(l); }); document.querySelectorAll('.ime-cb').forEach(cb=>cb.addEventListener('change',()=>validateImeWithDevice())); }
+	renderIme();
+	
+	// 系统下拉
+	let currentVersionSelect=null;
+	function rebuildOSSelectors() { osMajorSelect.innerHTML=''; osMajorList.forEach(m=>{let op=document.createElement('option'); op.value=m; op.text=m; osMajorSelect.appendChild(op);}); osMajorSelect.onchange=()=>rebuildSubSelect(osMajorSelect.value); if(osMajorList.length) rebuildSubSelect(osMajorList[0]); }
+	function rebuildSubSelect(major) { let subs=FULL_OS_TREE[major]?.sub||{}; osSubSelect.innerHTML=''; Object.keys(subs).forEach(sub=>{let op=document.createElement('option'); op.value=sub; op.text=sub; osSubSelect.appendChild(op);}); if(osSubSelect.options.length) updateVersionDropdown(major,osSubSelect.value); osSubSelect.onchange=()=>updateVersionDropdown(major,osSubSelect.value); }
+	function updateVersionDropdown(major,subCat) { let versions=FULL_OS_TREE[major]?.sub[subCat]||[]; if(currentVersionSelect&&currentVersionSelect.parentNode) currentVersionSelect.parentNode.removeChild(currentVersionSelect); let wrapper=document.createElement('div'); wrapper.id='versionSelectWrapper'; let html=`<select id="versionSelect" style="width:100%; margin-top:6px;">`; versions.forEach(v=>html+=`<option value="${v}">${v}</option>`); html+=`</select>`; wrapper.innerHTML=html; osSubSelect.parentNode.insertBefore(wrapper,osSubSelect.nextSibling); currentVersionSelect=document.getElementById('versionSelect'); currentVersionSelect.addEventListener('change',()=>showVersionNote(currentVersionSelect.value)); showVersionNote(currentVersionSelect.value); }
+	function showVersionNote(ver) { let major=osMajorSelect.value,sub=osSubSelect.value; let key=getStatusKey(major,sub,ver); let st=systemDetailedStatus[key]||'enabled'; let text=`状态: ${st}`; if((major==='Red Star OS'||major==='朝鲜手机系统') && (ver.includes('*')||ver.includes('**'))) text+=" ⚠️ 版本被严格保密，无从得知。"; if(ver.includes('**')) text='📛 未发布。'+text; else if(ver.includes('*')) text='⚠️ 技术受限。'+text; versionNoteDiv.innerHTML=text; }
+	
+	// 网络测速
+	async function speedTest() { speedResult.innerText='测速中...'; let start=Date.now(); try{ await fetch('https://httpbin.org/get',{mode:'cors',cache:'no-store'}); let latency=Date.now()-start; speedResult.innerText=`✅ 延迟: ${latency}ms`; }catch(e){ speedResult.innerText='⚠️ 测速失败'; } }
+	speedTestBtn.onclick=speedTest;
+	
+	// 核心评估
+	async function checkCompatibility() {
+		if(!navigator.onLine){ resultPanel.style.display='block'; resultPanel.innerHTML='<div class="warning">无网络连接</div>'; return; }
+		let sources = Array.from(document.querySelectorAll('.source-cb:checked')).map(cb=>cb.value);
+		let onlyEval = sources.includes('仅评估');
+		let otherLinkVal = otherLinkInput.value.trim();
+		if(otherLinkVal.toLowerCase()==='none') onlyEval=true;
+		if(!onlyEval && sources.filter(s=>s!=='仅评估').length===0) { resultPanel.style.display='block'; resultPanel.innerHTML='<div class="warning">❌ 未选中任何下载来源，且未开启“仅评估”，请至少选择一个来源或勾选仅评估。</div>'; return; }
+		let game=gameInput.value.trim()||"未知游戏";
+		let devices=Array.from(document.querySelectorAll('.deviceType:checked')).map(cb=>cb.value);
+		let major=osMajorSelect.value, subCat=osSubSelect.value, versionRaw=currentVersionSelect?.value||'';
+		let imeSelected=Array.from(document.querySelectorAll('.ime-cb:checked')).map(cb=>cb.value);
+		if(!validateImeWithDevice()) { resultPanel.style.display='block'; resultPanel.innerHTML='<div class="warning">输入法与设备冲突，请重新选择。</div>'; return; }
+		let gpu=parseFloat(document.getElementById('gpuMem').value)||0, storage=parseFloat(document.getElementById('storageMem').value)||0, freeSpace=parseFloat(freeSpaceInput.value)||0, ram=parseFloat(document.getElementById('ramMem').value)||0, cpu=parseFloat(document.getElementById('cpuCores').value)||0;
+		let initPhase=initPhaseCheck.checked;
+		let features=Array.from(document.querySelectorAll('#featuresCheck input:checked')).map(cb=>cb.value);
+		let stateKey=getStatusKey(major,subCat,versionRaw); let verState=systemDetailedStatus[stateKey]||'enabled';
+		if(verState!=='enabled'){ resultPanel.innerHTML=`<div class="warning">系统版本状态异常(${verState})，无法分析。</div>`; resultPanel.style.display='block'; return; }
+		let pass=true, reasons=[];
+		if(ram<8) { pass=false; reasons.push("运行内存<8GB"); } if(storage<100) reasons.push("硬盘容量较小"); if(freeSpace<50) reasons.push("剩余空间不足50GB"); if(cpu<4) reasons.push("CPU核数少"); if(initPhase) reasons.push("系统处于初始化阶段，性能可能不稳定");
+		let finalMsg=pass?"✅ 满足运行需求":"⚠️ 可能不满足需求";
+		let detail=`<strong>游戏:</strong> ${game}<br><strong>来源:</strong> ${sources.join(", ")} ${otherLinkVal?`链接:${otherLinkVal}`:''}<br><strong>系统:</strong> ${major}/${subCat}/${versionRaw}<br><strong>设备:</strong> ${devices.join(", ")} ${projectorCheck.checked?"(投影)":""}<br><strong>硬件:</strong> 显卡${gpu}GB/硬盘${storage}GB(剩余${freeSpace}GB)/内存${ram}GB/CPU${cpu}核<br><strong>输入法:</strong> ${imeSelected.join(", ")}<br><strong>特性:</strong> ${features.join(", ")}<br><strong>初始化阶段:</strong> ${initPhase?"是":"否"}<hr><strong>结论:</strong> ${finalMsg}`;
+		if(reasons.length) detail+=`<div class="warning">⚠️ ${reasons.join("; ")}</div>`;
+		resultPanel.style.display='block'; resultPanel.innerHTML=detail;
+	}
+	
+	// 后台完整管理 (增删改)
+	function renderAdminTree() {
+		sysStatusTreeDiv.innerHTML='';
+		for(let major of Object.keys(FULL_OS_TREE)) {
+			let majorDiv=document.createElement('div'); majorDiv.className='sys-group';
+			majorDiv.innerHTML=`<div class="sys-header"><span>📁 ${major}</span><span><button class="btn-icon btn-edit" data-major="${major}" data-action="editMajor">✏️编辑</button> <button class="btn-icon" data-major="${major}" data-action="delMajor">🗑️删除大类</button></span></div>`;
+			let subContainer=document.createElement('div'); subContainer.className='subsys-list';
+			let subs=FULL_OS_TREE[major].sub;
+			for(let subCat of Object.keys(subs)) {
+				let subDiv=document.createElement('div'); subDiv.style.marginBottom='12px';
+				subDiv.innerHTML=`<div style="font-weight:bold; background:#eef2ff; padding:6px 10px; border-radius:20px;">📂 ${subCat} <button class="btn-icon btn-edit" data-major="${major}" data-sub="${subCat}" data-action="editSub">✏️</button> <button class="btn-icon" data-major="${major}" data-sub="${subCat}" data-action="delSub">🗑️删小类</button></div>`;
+				let verContainer=document.createElement('div'); verContainer.style.marginLeft='20px';
+				let versions=subs[subCat];
+				for(let ver of versions){
+					let key=getStatusKey(major,subCat,ver); let cur=systemDetailedStatus[key]||'enabled';
+					let item=document.createElement('div'); item.className='subsys-item';
+					item.innerHTML=`<span>${ver}</span><span><select class="status-select" data-key="${key}"><option ${cur==='enabled'?'selected':''}>✅启用</option><option ${cur==='disabled'?'selected':''}>🚫禁用</option><option ${cur==='unavailable'?'selected':''}>❓无法查询</option><option ${cur==='unreleased'?'selected':''}>📛未发布</option></select> <button class="btn-icon" data-major="${major}" data-sub="${subCat}" data-ver="${ver}" data-action="delVer">🗑️</button></span>`;
+					verContainer.appendChild(item);
+				}
+				subDiv.appendChild(verContainer);
+				subContainer.appendChild(subDiv);
+			}
+			majorDiv.appendChild(subContainer);
+			sysStatusTreeDiv.appendChild(majorDiv);
+		}
+		attachAdminEvents(); let parentSelect=document.getElementById('parentMajorSelect'); if(parentSelect) parentSelect.innerHTML='<option value="__NEW__">(新建大类)</option>'+Object.keys(FULL_OS_TREE).map(m=>`<option value="${m}">${m}</option>`).join('');
+	}
+	function attachAdminEvents() {
+		document.querySelectorAll('[data-action="editMajor"]').forEach(btn=>btn.onclick=()=>{ let newName=prompt("新大类名",btn.dataset.major); if(newName&&newName!==btn.dataset.major){ FULL_OS_TREE[newName]=FULL_OS_TREE[btn.dataset.major]; delete FULL_OS_TREE[btn.dataset.major]; osMajorList=Object.keys(FULL_OS_TREE); saveFullTree(); renderAdminTree(); rebuildOSSelectors(); } });
+		document.querySelectorAll('[data-action="delMajor"]').forEach(btn=>btn.onclick=()=>{ if(confirm(`删除大类${btn.dataset.major}及其全部内容？`)){ delete FULL_OS_TREE[btn.dataset.major]; osMajorList=Object.keys(FULL_OS_TREE); saveFullTree(); renderAdminTree(); rebuildOSSelectors(); } });
+		document.querySelectorAll('[data-action="editSub"]').forEach(btn=>btn.onclick=()=>{ let newSub=prompt("新小类名",btn.dataset.sub); if(newSub){ let major=btn.dataset.major; let oldSub=btn.dataset.sub; FULL_OS_TREE[major].sub[newSub]=FULL_OS_TREE[major].sub[oldSub]; delete FULL_OS_TREE[major].sub[oldSub]; saveFullTree(); renderAdminTree(); rebuildOSSelectors(); } });
+		document.querySelectorAll('[data-action="delSub"]').forEach(btn=>btn.onclick=()=>{ if(confirm(`删除小类${btn.dataset.sub}`)){ delete FULL_OS_TREE[btn.dataset.major].sub[btn.dataset.sub]; saveFullTree(); renderAdminTree(); rebuildOSSelectors(); } });
+		document.querySelectorAll('[data-action="delVer"]').forEach(btn=>btn.onclick=()=>{ let major=btn.dataset.major, sub=btn.dataset.sub, ver=btn.dataset.ver; let idx=FULL_OS_TREE[major].sub[sub].indexOf(ver); if(idx!==-1) FULL_OS_TREE[major].sub[sub].splice(idx,1); saveFullTree(); renderAdminTree(); rebuildOSSelectors(); });
+		document.querySelectorAll('.status-select').forEach(sel=>sel.addEventListener('change',()=>{ let key=sel.dataset.key; systemDetailedStatus[key]=sel.value; }));
+	}
+	function createVersion() { let newMajor=document.getElementById('newMajorName').value.trim(); let selectedParent=document.getElementById('parentMajorSelect').value; let newSub=document.getElementById('newSubName').value.trim(); let newVer=document.getElementById('newVersionName').value.trim(); if(!newVer) return alert("填写版本"); let targetMajor=selectedParent==='__NEW__'?newMajor:selectedParent; if(!targetMajor) return alert("填写大类"); if(!FULL_OS_TREE[targetMajor]) FULL_OS_TREE[targetMajor]={sub:{}}; let subKey=newSub||"默认分类"; if(!FULL_OS_TREE[targetMajor].sub[subKey]) FULL_OS_TREE[targetMajor].sub[subKey]=[]; if(!FULL_OS_TREE[targetMajor].sub[subKey].includes(newVer)) FULL_OS_TREE[targetMajor].sub[subKey].push(newVer); let key=getStatusKey(targetMajor,subKey,newVer); if(!systemDetailedStatus[key]) systemDetailedStatus[key]=getDefaultStatus(newVer); osMajorList=Object.keys(FULL_OS_TREE); saveFullTree(); renderAdminTree(); rebuildOSSelectors(); alert("已添加"); }
+	function saveFullTree(){ localStorage.setItem('FULL_OS_TREE',JSON.stringify(FULL_OS_TREE)); localStorage.setItem('sysDetailedStatus',JSON.stringify(systemDetailedStatus)); document.getElementById('saveToast').innerText='✅已保存'; setTimeout(()=>document.getElementById('saveToast').innerText='',1500); }
+	function adminLogin(){ let u=prompt("用户名:"),p=prompt("密码:"); if(u==="admin-smry" && p==="ipalzlabcdsmrygittthubiridicjcadmiiin"){ renderAdminTree(); adminModal.style.display='flex'; } else alert("错误"); }
+	adminBtn.onclick=adminLogin; saveSysStatusBtn.onclick=saveFullTree; closeModalBtn.onclick=()=>adminModal.style.display='none';
+	document.getElementById('createVersionBtn')?.addEventListener('click',createVersion);
+	checkBtn.onclick=checkCompatibility; resetBtn.onclick=()=>location.reload();
+	renderSources(); rebuildOSSelectors(); updateProjectorLogic();
+	window.onclick=e=>{if(e.target===adminModal)adminModal.style.display='none';};
+	setInterval(()=>validateImeWithDevice(),500);
+</script>
+</body>
+</html>
