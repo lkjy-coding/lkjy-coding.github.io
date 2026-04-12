@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+	<title>硬件规格检查器 V4 | 完整系统库 · 修复投影逻辑</title>
+	<style>
+		* { box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+		body { background: #f0f2f5; margin: 0; padding: 24px 20px; color: #1e293b; }
+		.container { max-width: 1400px; margin: 0 auto; }
+		.card { background: white; border-radius: 28px; box-shadow: 0 12px 30px rgba(0,0,0,0.08); padding: 24px 28px; margin-bottom: 28px; }
+		h1 { font-size: 1.8rem; font-weight: 600; margin: 0 0 6px; background: linear-gradient(135deg, #2563eb, #7c3aed); -webkit-background-clip: text; background-clip: text; color: transparent; }
+		.sub { color: #475569; border-left: 4px solid #3b82f6; padding-left: 14px; margin: 8px 0 20px; font-size: 0.9rem; }
+		.grid-2col { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+		.form-group { margin-bottom: 20px; }
+		label { font-weight: 600; display: block; margin-bottom: 8px; font-size: 0.9rem; color: #0f172a; }
+		select, input[type="text"], input[type="number"] { width: 100%; padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 18px; font-size: 0.9rem; background: #fefefe; transition: 0.2s; }
+		select:focus, input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+		.checkbox-group, .radio-group { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 8px; }
+		.checkbox-group label, .radio-group label { font-weight: normal; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+		.inline-hint { font-size: 0.7rem; color: #6c757d; margin-top: 4px; }
+		button { background: #1e293b; color: white; border: none; padding: 12px 24px; border-radius: 40px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+		button.primary { background: #2563eb; }
+		button.primary:hover { background: #1d4ed8; transform: scale(1.01); }
+		.result-area { background: #f8fafc; border-radius: 24px; padding: 20px; margin-top: 16px; border-left: 6px solid #3b82f6; }
+		.warning { color: #b91c1c; background: #fee2e2; padding: 12px; border-radius: 20px; margin-top: 8px; }
+		.footer-buttons { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; }
+		.admin-login-btn { background: #334155; }
+		.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; }
+		.modal-content { background: white; max-width: 850px; width: 90%; border-radius: 32px; padding: 24px; max-height: 85vh; overflow-y: auto; }
+		.sys-group { margin-bottom: 20px; border: 1px solid #e2e8f0; border-radius: 20px; padding: 12px; }
+		.sys-header { font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; background: #f1f5f9; padding: 8px 12px; border-radius: 40px; margin-bottom: 10px; }
+		.subsys-list { margin-left: 16px; display: grid; gap: 8px; }
+		.subsys-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e1; padding: 6px 0; }
+		.status-select { font-size: 0.8rem; padding: 4px 8px; border-radius: 30px; background: white; border: 1px solid #cbd5e1; }
+		.save-msg { font-size: 0.8rem; margin-top: 12px; color: #2563eb; }
+		hr { margin: 16px 0; }
+		.foreign-toggle { margin: 12px 0 0 24px; background: #eef2ff; padding: 8px 12px; border-radius: 24px; display: inline-flex; align-items: center; gap: 10px; }
+		.creator-panel { background: #f8fafc; border-radius: 24px; padding: 16px; margin-top: 20px; }
+		.creator-panel input, .creator-panel select { width: auto; min-width: 180px; margin-right: 10px; }
+		.btn-sm { padding: 6px 16px; font-size: 0.8rem; background: #475569; }
+		@media (max-width: 800px) { .grid-2col { grid-template-columns: 1fr; } .card { padding: 18px; } }
+		.compat-warning { background: #fff3e0; border-left: 4px solid #f97316; }
+	</style>
+</head>
+<body>
+<div class="container">
+	<div class="card">
+		<div style="display: flex; justify-content: space-between; align-items: center;">
+			<div><h1>⚙️ 硬件规格检查器 V4 · 完整系统库</h1><div class="sub">修复投影单选逻辑 · 全系统版本呈现 · 动态后台管理</div></div>
+			<button id="adminBtn" class="admin-login-btn">🔐 后台管理</button>
+		</div>
+		<div id="networkAlert" style="display: none;" class="warning"></div>
+
+		<div class="grid-2col">
+			<div>
+				<div class="form-group"><label>🎮 游戏名称 / 下载链接</label><input type="text" id="gameInput" placeholder="例如: 赛博朋克2077" value="赛博朋克2077"></div>
+				<div class="form-group"><label>📥 下载来源 (可多选)</label><div id="sourceCheckboxes" class="checkbox-group"></div>
+					<div id="otherSourceRow" style="margin-top: 8px; display: none;"><input type="text" id="otherSourceLink" placeholder="请输入主站链接 (https://...)" style="width: 100%;"></div>
+					<div id="foreignBypassRow" class="foreign-toggle"><label><input type="checkbox" id="foreignBypassCheck"> 🌐 特别查询 (临时解除部分来源限制)</label></div>
+				</div>
+				<div class="form-group"><label>💻 操作系统 (完整版本树)</label><select id="osMajorSelect"></select><select id="osSubSelect" style="margin-top: 8px;"></select><div id="osVersionNote" class="inline-hint"></div></div>
+				<div class="form-group"><label>📱 设备类型 (可多选，投影模式强制单选)</label><div class="checkbox-group" id="deviceGroup">
+					<label><input type="checkbox" class="deviceType" value="电脑"> 电脑</label>
+					<label><input type="checkbox" class="deviceType" value="手机"> 手机</label>
+					<label><input type="checkbox" class="deviceType" value="Pad"> Pad</label>
+					<label><input type="checkbox" class="deviceType" value="智能手表"> 智能手表</label>
+				</div>
+				<label style="margin-top: 8px;"><input type="checkbox" id="projectorCheck"> 转接投影 (勾选后仅能选择一种设备类型)</label></div>
+			</div>
+			<div>
+				<div class="form-group"><label>📊 硬件规格</label><input type="text" id="gpuMem" placeholder="显卡内存 (GB)" value="8"><input type="text" id="storageMem" placeholder="硬盘内存 (GB)" value="512" style="margin-top: 8px;"><input type="text" id="ramMem" placeholder="运行内存 (GB)" value="16" style="margin-top: 8px;"><input type="text" id="cpuCores" placeholder="CPU核数" value="8" style="margin-top: 8px;"></div>
+				<div class="form-group"><label>⚡ 技术特性支持</label><div id="featuresCheck" class="checkbox-group"><label><input type="checkbox" value="HTML5"> 支持HTML5</label><label><input type="checkbox" value="TCP2.0"> 支持TCP 2.0+</label><label><input type="checkbox" value="Sound"> 支持声音播放</label><label><input type="checkbox" value="256Color"> 支持256色显示</label><label><input type="checkbox" value="Regedit"> 支持注册表修改</label></div></div>
+			</div>
+		</div>
+		<div class="footer-buttons"><button id="checkBtn" class="primary">✅ 开始检查兼容性</button><button id="resetBtn">⟳ 重置表单</button></div>
+		<div id="resultPanel" class="result-area" style="display: none;"></div>
+	</div>
+</div>
+
+<!-- 后台模态框 (包含创建功能) -->
+<div id="adminModal" class="modal"><div class="modal-content">
+	<h2>🛠️ 系统状态后台 + 动态版本管理</h2>
+	<div id="sysStatusTree"></div>
+	<div class="creator-panel">
+		<h4>➕ 一键创建版本 (大类/小类/具体版本)</h4>
+		<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end;">
+			<div><label>选择/新建大类</label><input type="text" id="newMajorName" placeholder="新大类名" style="width:140px"></div>
+			<div><label>所属大类</label><select id="parentMajorSelect"><option value="__NEW__">(新建大类)</option></select></div>
+			<div><label>小类名</label><input type="text" id="newSubName" placeholder="新小类名"></div>
+			<div><label>具体版本</label><input type="text" id="newVersionName" placeholder="例: Windows 15"></div>
+			<button id="createVersionBtn" class="btn-sm">✨ 创建/添加</button>
+		</div>
+		<div class="inline-hint">* 若选择已有大类并填写小类/版本，将在该大类下新增；若选择“新建大类”则创建全新大类+小类+版本。</div>
+	</div>
+	<button id="saveSysStatus">💾 保存全部状态</button><span id="saveToast" class="save-msg"></span><hr><button id="closeModalBtn">关闭</button>
+</div></div>
+
+<script>
+	// ======================= 完整操作系统树 (V4 恢复全部系统) =======================
+	const FULL_OS_TREE = {
+		"Windows": { sub: {
+			"Windows正式版": ["Windows 1.0*","Windows 2.0*","Windows 3.0*","Windows 3.1*","Windows for Workgroups 3.11*","Windows NT 3.1","Windows 3.2","Windows NT 3.5","Windows NT 3.51","Windows 95","Windows NT 4.0","Windows 98","Windows 98 SE","Windows 2000","Windows ME","Windows XP","Windows Vista","Windows 7","Windows Thin PC","Windows 8","Windows 8.1","Windows 10","Windows 11","Windows 12**"],
+			"Windows Server": ["Windows 2000 Server","Windows Server 2003","Windows Server 2003 R2","Windows Server 2008","Windows Server 2008 R2","Windows Server 2012","Windows Server 2012 R2","Windows Server 2016","Windows Server 2019","Windows Server 2022","Windows Server 2025"],
+			"Windows CE": ["Windows CE 1.0","Windows CE 2.0","Windows CE 3.0","Windows CE 4.0","Windows CE 4.1","Windows CE 4.2","Windows CE 5.0","Windows CE 6.0","Windows CE 7.0"],
+			"Windows Mobile": ["Pocket PC2000(Only for PC)","Pocket PC2002(Only for Mobile)","Windows Mobile 2003","Windows Mobile 5.0","Windows Mobile 6.0","Windows Mobile 6.5"],
+			"Windows Phone": ["Windows Phone 7.0","Windows Phone 7.1(NoDo)","Windows Phone 7.5(Mango)","Windows Phone 7.5(Tango)","Windows Phone 7.8","Windows Phone 8.0(Apollo)","Window Phone 8.1","Windows Phone 8.1 Update 2（GDR2）"],
+			"Windows预览版": ["Windows预览版*"]
+		} },
+		"macOS": { sub: { "macOS及以后": ["macOS 10.12 Sierra","macOS 13 Ventura","macOS 14 Sonoma","macOS 15 Sequoia","macOS 26 RC","macOS 26开发者预览版 Beta 3*","macOS 26.0.1"] } },
+		"iOS": { sub: { "iOS": ["iOS 15","iOS 16","iOS 17","iOS 18","iOS 19**"] } },
+		"tvOS": { sub: { "tvOS": ["tvOS 15*","tvOS 16**"] } },
+		"澎湃OS": { sub: { "澎湃OS": ["2.0","2.1","3.0","3.1"] } },
+		"鸿蒙": { sub: { "HarmonyOS（PC）": ["5.0.5","5.1.0","5.1.1","6.0.0","6.0.1","6.0.2"], "HarmonyOS（Mobile）": ["2.0","3.0","3.1","4.0","4.1","4.2","4.3","4.4","5.0","5.0.1","5.0.5","5.1.0","5.1.1","6.0.0"] } },
+		"Android": { sub: { "Android on PC": ["11","12","13","14","15","16"], "Android on Mobile": ["2.3","4.0","4.1","4.2","4.3","4.4","5.0","5.1","6.0","7.0","7.1","8.0","8.1","9","10","11","12","13","14","15","16"] } },
+		"阿里云OS": { sub: { "阿里云OS": ["2.1903","3.2104","3.2201","4.2402"] } },
+		"Unix": { sub: { "Unix": ["System V","BSD"] } },
+		"Ubuntu": { sub: { "Ubuntu Normal": ["4.10","5.04","6.06 LTS","8.04 LTS","10.04 LTS","12.04 LTS","14.04 LTS","16.04 LTS","18.04 LTS","20.04 LTS","22.04 LTS","24.04 LTS"], "Ubuntu Kylin": ["14.04 LTS","16.04 LTS","18.04 LTS","20.04 LTS","22.04 LTS","24.04 LTS"], "lubuntu": ["lubuntu 18.04*"], "xubuntu": ["xubuntu 20.04*"] } },
+		"MS-DOS": { sub: { "MS-DOS": ["1.24","2.0","2.11","3.0","3.1","3.2","3.21","3.3","3.31","4.0","5.0","6.0","6.2","6.21","6.22","7.0","7.1"] } },
+		"CentOS": { sub: { "CentOS": ["5.11","6.10","7.9","8.0","8.1","8.2","8.3","8.4","8.5","9","9-stream"] } },
+		"LOONGNIX": { sub: { "LOONGNIX": ["20.7","23.1","23.2","25.1"] } },
+		"Red Star OS": { sub: { "Red Star OS": ["1.0*","2.0*","3.0","4.0"] } },
+		"其他": { sub: { "其他系统": ["请附百科词条链接"] } }
+	};
+	
+	let osMajorList = Object.keys(FULL_OS_TREE);
+	// 状态存储
+	let systemDetailedStatus = {};
+	function getStatusKey(major, subCat, version) { return `${major}||${subCat}||${version}`; }
+	function getDefaultStatus(versionRaw) {
+		if(versionRaw.includes('**')) return 'unreleased';
+		if(versionRaw.includes('*')) return 'unavailable';
+		return 'enabled';
+	}
+	function initDetailedStatus() {
+		for(let major of osMajorList) {
+			const subs = FULL_OS_TREE[major]?.sub || {};
+			for(let subCat of Object.keys(subs)) {
+				const versions = subs[subCat] || [];
+				for(let ver of versions) {
+					const key = getStatusKey(major, subCat, ver);
+					if(!systemDetailedStatus[key]) systemDetailedStatus[key] = getDefaultStatus(ver);
+				}
+			}
+		}
+	}
+	function loadStatusFromStorage() {
+		const stored = localStorage.getItem('sysDetailedStatus');
+		if(stored) { try { systemDetailedStatus = JSON.parse(stored); } catch(e){} }
+		const treeStored = localStorage.getItem('FULL_OS_TREE');
+		if(treeStored) {
+			try { 
+				const parsed = JSON.parse(treeStored);
+				Object.assign(FULL_OS_TREE, parsed);
+				osMajorList = Object.keys(FULL_OS_TREE);
+			} catch(e){}
+		}
+		initDetailedStatus();
+	}
+	function saveFullTreeToStorage() { localStorage.setItem('FULL_OS_TREE', JSON.stringify(FULL_OS_TREE)); }
+	loadStatusFromStorage();
+
+	// DOM 元素
+	const gameInput = document.getElementById('gameInput');
+	const sourceDiv = document.getElementById('sourceCheckboxes');
+	const otherRow = document.getElementById('otherSourceRow');
+	const otherLinkInput = document.getElementById('otherSourceLink');
+	const foreignBypassCheck = document.getElementById('foreignBypassCheck');
+	const osMajorSelect = document.getElementById('osMajorSelect');
+	const osSubSelect = document.getElementById('osSubSelect');
+	const versionNoteDiv = document.getElementById('osVersionNote');
+	const checkBtn = document.getElementById('checkBtn');
+	const resetBtn = document.getElementById('resetBtn');
+	const resultPanel = document.getElementById('resultPanel');
+	const adminBtn = document.getElementById('adminBtn');
+	const adminModal = document.getElementById('adminModal');
+	const sysStatusTreeDiv = document.getElementById('sysStatusTree');
+	const saveSysStatusBtn = document.getElementById('saveSysStatus');
+	const closeModalBtn = document.getElementById('closeModalBtn');
+	const projectorCheck = document.getElementById('projectorCheck');
+	const deviceGroup = document.getElementById('deviceGroup');
+	const networkAlertDiv = document.getElementById('networkAlert');
+	
+	// 获取设备复选框
+	function getDeviceCheckboxes() { return document.querySelectorAll('.deviceType'); }
+	
+	// ========== 修复转接投影逻辑：强制单选，且动态控制 ==========
+	function applyProjectorSingleSelect() {
+		const cbs = getDeviceCheckboxes();
+		if(projectorCheck.checked) {
+			// 投影模式：只能选一个，如果当前选中数量>1，清空所有并提示
+			const checkedArr = Array.from(cbs).filter(cb => cb.checked);
+			if(checkedArr.length > 1) {
+				cbs.forEach(cb => cb.checked = false);
+				alert("转接投影模式下只能选择一种设备类型，已清空多选。");
+			}
+			// 添加change监听，确保单选
+			cbs.forEach(cb => {
+				cb.removeEventListener('change', projectorChangeHandler);
+				cb.addEventListener('change', projectorChangeHandler);
+			});
+		} else {
+			// 普通模式，移除强制限制
+			cbs.forEach(cb => {
+				cb.removeEventListener('change', projectorChangeHandler);
+			});
+		}
+	}
+	function projectorChangeHandler(e) {
+		if(projectorCheck.checked) {
+			const cbs = getDeviceCheckboxes();
+			if(e.target.checked) {
+				cbs.forEach(cb => { if(cb !== e.target && cb.checked) cb.checked = false; });
+			}
+		}
+	}
+	projectorCheck.addEventListener('change', () => { applyProjectorSingleSelect(); });
+	
+	// 来源列表 & 国际限制
+	const sourcesList = ["AppStore","GooglePlay","Tiktok","YouTube","Twitter（X）","华为应用市场","小米应用商店","应用宝","OPPO应用商店","Steam","在线小游戏","其他（需附链接）"];
+	let isDomesticIP = false, foreignBypass = false;
+	function isAppleSystem(major) { return major === 'macOS' || major === 'iOS' || major === 'tvOS'; }
+	function validateSourceSystem(major, selectedSources) {
+		if(selectedSources.includes('AppStore') && !isAppleSystem(major)) {
+			return { ok: false, msg: "AppStore 仅支持 macOS / iOS / tvOS 系统，当前系统不兼容！请取消选择。" };
+		}
+		return { ok: true };
+	}
+	async function detectIP() {
+		try {
+			const controller = new AbortController(); setTimeout(()=>controller.abort(),3000);
+			const res = await fetch('https://ipapi.co/json/', { signal: controller.signal });
+			const data = await res.json();
+			isDomesticIP = (data.country_code === 'CN');
+		} catch(e) { isDomesticIP = false; }
+		applySourceRestriction();
+	}
+	function applySourceRestriction() {
+		const allCb = document.querySelectorAll('.source-cb');
+		allCb.forEach(cb => {
+			const val = cb.value;
+			if(['GooglePlay','Tiktok','YouTube','Twitter（X）'].includes(val)) {
+				const blocked = (isDomesticIP && !foreignBypass);
+				cb.disabled = blocked;
+				if(blocked && cb.checked) cb.checked = false;
+				let warnSpan = cb.parentElement.querySelector('.ip-warning');
+				if(blocked && !warnSpan) { warnSpan = document.createElement('span'); warnSpan.className='ip-warning'; warnSpan.style.color='red'; warnSpan.style.fontSize='0.7rem'; warnSpan.innerText=' 🚫需开启特别查询'; cb.parentElement.appendChild(warnSpan);}
+				else if(!blocked && warnSpan) warnSpan.remove();
+			}
+		});
+		if(isDomesticIP && !foreignBypass) networkAlertDiv.style.display='block', networkAlertDiv.innerHTML='⚠️ 当前IP位于国内，需勾选“特别查询”才可选国际来源。';
+		else networkAlertDiv.style.display='none';
+	}
+	foreignBypassCheck.addEventListener('change', (e) => { foreignBypass = e.target.checked; applySourceRestriction(); });
+	
+	function renderSources() {
+		sourceDiv.innerHTML = '';
+		sourcesList.forEach(src => {
+			const label = document.createElement('label');
+			const cb = document.createElement('input'); cb.type='checkbox'; cb.value=src; cb.classList.add('source-cb');
+			label.appendChild(cb); label.appendChild(document.createTextNode(src));
+			sourceDiv.appendChild(label);
+		});
+		const otherCb = document.querySelector('.source-cb[value="其他（需附链接）"]');
+		if(otherCb) otherCb.addEventListener('change', (e) => { otherRow.style.display = e.target.checked ? 'block' : 'none'; });
+		else otherRow.style.display = 'none';
+		applySourceRestriction();
+	}
+	
+	// 系统下拉刷新 (全量)
+	let currentVersionSelect = null;
+	function rebuildOSSelectors() {
+		osMajorSelect.innerHTML = '';
+		osMajorList.forEach(m => { let op=document.createElement('option'); op.value=m; op.text=m; osMajorSelect.appendChild(op); });
+		osMajorSelect.onchange = () => { rebuildSubSelect(osMajorSelect.value); };
+		if(osMajorList.length) rebuildSubSelect(osMajorList[0]);
+	}
+	function rebuildSubSelect(major) {
+		const subs = FULL_OS_TREE[major]?.sub || {};
+		osSubSelect.innerHTML = '';
+		Object.keys(subs).forEach(sub => { let op=document.createElement('option'); op.value=sub; op.text=sub; osSubSelect.appendChild(op); });
+		if(osSubSelect.options.length) updateVersionDropdown(major, osSubSelect.value);
+		osSubSelect.onchange = () => updateVersionDropdown(major, osSubSelect.value);
+	}
+	function updateVersionDropdown(major, subCat) {
+		const versions = FULL_OS_TREE[major]?.sub[subCat] || [];
+		if(currentVersionSelect && currentVersionSelect.parentNode) currentVersionSelect.parentNode.removeChild(currentVersionSelect);
+		const wrapper = document.createElement('div'); wrapper.id='versionSelectWrapper';
+		let html = `<select id="versionSelect" style="width:100%; margin-top:6px;">`;
+		versions.forEach(v => html += `<option value="${v}">${v}</option>`);
+		html += `</select>`;
+		wrapper.innerHTML = html;
+		osSubSelect.parentNode.insertBefore(wrapper, osSubSelect.nextSibling);
+		currentVersionSelect = document.getElementById('versionSelect');
+		currentVersionSelect.addEventListener('change', () => showVersionNote(currentVersionSelect.value));
+		showVersionNote(currentVersionSelect.value);
+	}
+	function showVersionNote(ver) {
+		const major = osMajorSelect.value, sub = osSubSelect.value;
+		const key = getStatusKey(major, sub, ver);
+		const st = systemDetailedStatus[key] || 'enabled';
+		let text = `状态: ${st==='enabled'?'✅启用':st==='disabled'?'🚫禁用':st==='unavailable'?'❓无法查询':'📛未发布'}`;
+		if(ver.includes('**')) text = '📛 未发布版本。' + text;
+		else if(ver.includes('*')) text = '⚠️ 技术受限版本。' + text;
+		versionNoteDiv.innerHTML = text;
+	}
+	
+	// 模拟连接错误
+	async function simulateSourceConnection() { return new Promise(resolve => { setTimeout(()=>{ let r=Math.random(); if(r<0.15) resolve({ok:false,error:'TIMED_OUT'}); else if(r<0.25) resolve({ok:false,error:'CONNECTION_RESET'}); else if(r<0.35) resolve({ok:false,error:'CONNECTION_ABORTED'}); else if(r<0.45) resolve({ok:false,error:'CONNECTION_REFUSED'}); else resolve({ok:true}); }, 300); }); }
+	function getErrMsg(code){ if(code==='TIMED_OUT') return "连接失败，连接超时。"; if(code==='CONNECTION_RESET') return "连接失败，连接被意外重置。"; if(code==='CONNECTION_ABORTED') return "连接失败，连接意外中断。"; if(code==='CONNECTION_REFUSED') return "连接失败，连接被拒绝。"; return "连接失败，暂时不支持分析。";}
+	
+	async function checkCompatibility() {
+		if(!navigator.onLine) { resultPanel.style.display='block'; resultPanel.innerHTML='<div class="warning">❌ 无网络连接</div>'; return; }
+		let selectedSources = Array.from(document.querySelectorAll('.source-cb:checked')).map(cb=>cb.value);
+		const otherLink = (selectedSources.includes('其他（需附链接）') && otherLinkInput.value) ? otherLinkInput.value : '';
+		const game = gameInput.value.trim() || "未知游戏";
+		let selectedDevices = Array.from(getDeviceCheckboxes()).filter(cb=>cb.checked).map(cb=>cb.value);
+		if(projectorCheck.checked && selectedDevices.length > 1) { alert("转接投影模式下只能选择一种设备类型"); return; }
+		const majorOS = osMajorSelect.value, subCat = osSubSelect.value, versionRaw = currentVersionSelect?.value || '';
+		const compatCheck = validateSourceSystem(majorOS, selectedSources);
+		if(!compatCheck.ok) { 
+			resultPanel.style.display='block'; resultPanel.innerHTML=`<div class="warning">❌ ${compatCheck.msg}</div>`;
+			const appCb = Array.from(document.querySelectorAll('.source-cb')).find(cb=>cb.value==='AppStore');
+			if(appCb && appCb.checked) appCb.checked = false;
+			return;
+		}
+		const versionState = systemDetailedStatus[getStatusKey(majorOS, subCat, versionRaw)] || 'enabled';
+		if(versionState !== 'enabled') { resultPanel.style.display='block'; resultPanel.innerHTML=`<div class="warning">⛔ 系统版本状态为【${versionState}】，无法分析。</div>`; return; }
+		if(foreignBypass && selectedSources.some(s=>['GooglePlay','Tiktok','YouTube','Twitter（X）'].includes(s))) {
+			const sim = await simulateSourceConnection();
+			if(!sim.ok) { resultPanel.style.display='block'; resultPanel.innerHTML=`<div class="warning">🌐 ${getErrMsg(sim.error)}</div>`; return; }
+		}
+		const gpu=parseFloat(document.getElementById('gpuMem').value)||0, storage=parseFloat(document.getElementById('storageMem').value)||0, ram=parseFloat(document.getElementById('ramMem').value)||0, cpu=parseFloat(document.getElementById('cpuCores').value)||0;
+		const features = Array.from(document.querySelectorAll('#featuresCheck input:checked')).map(cb=>cb.value);
+		let pass=true, reasons=[];
+		if(ram < 8) { pass=false; reasons.push("运行内存低于8GB"); }
+		if(storage < 100) { pass=false; reasons.push("硬盘容量低于100GB"); }
+		if(cpu < 4) { pass=false; reasons.push("CPU核数少于4核"); }
+		if(gpu < 4) reasons.push("显卡内存可能不足");
+		if(!features.includes("TCP2.0")) reasons.push("未勾选TCP 2.0+");
+		const finalMsg = pass ? "✅ 设备性能达标，可尝试运行" : "⚠️ 设备性能不足或存在瓶颈";
+		let detail = `<strong>🎮 游戏:</strong> ${game}<br><strong>📥 来源:</strong> ${selectedSources.join(", ")} ${otherLink?`链接:${otherLink}`:''}<br>
+		<strong>💻 系统:</strong> ${majorOS} / ${subCat} / ${versionRaw}<br><strong>📱 设备:</strong> ${selectedDevices.join(", ")} ${projectorCheck.checked?"(投影模式)":""}<br>
+		<strong>🔧 硬件:</strong> 显卡${gpu}GB / 硬盘${storage}GB / 内存${ram}GB / CPU${cpu}核<br>
+		<strong>✨ 特性:</strong> ${features.join(", ")}<hr><strong>结论:</strong> ${finalMsg}`;
+		if(reasons.length) detail += `<div class="warning">⚠️ 风险点: ${reasons.join("; ")}</div>`;
+		resultPanel.style.display='block'; resultPanel.innerHTML = detail;
+	}
+	
+	// 后台渲染 (完整树)
+	function renderAdminTree() {
+		sysStatusTreeDiv.innerHTML = '';
+		for(let major of Object.keys(FULL_OS_TREE)) {
+			const majorDiv = document.createElement('div'); majorDiv.className='sys-group';
+			majorDiv.innerHTML = `<div class="sys-header"><span>📁 ${major}</span><span>🔽</span></div>`;
+			const subContainer = document.createElement('div'); subContainer.className='subsys-list';
+			const subs = FULL_OS_TREE[major].sub;
+			for(let subCat of Object.keys(subs)) {
+				const subTitle = document.createElement('div'); subTitle.style.fontWeight='bold'; subTitle.style.marginTop='8px'; subTitle.innerText = `📂 ${subCat}`;
+				subContainer.appendChild(subTitle);
+				const versions = subs[subCat];
+				for(let ver of versions) {
+					const key = getStatusKey(major, subCat, ver);
+					const cur = systemDetailedStatus[key] || 'enabled';
+					const item = document.createElement('div'); item.className='subsys-item';
+					item.innerHTML = `<span style="font-size:0.85rem;">${ver}</span>
+					<select class="status-select" data-key="${key}"><option value="enabled" ${cur==='enabled'?'selected':''}>✅启用</option><option value="disabled" ${cur==='disabled'?'selected':''}>🚫禁用</option><option value="unavailable" ${cur==='unavailable'?'selected':''}>❓无法查询</option><option value="unreleased" ${cur==='unreleased'?'selected':''}>📛未发布</option></select>`;
+					subContainer.appendChild(item);
+				}
+			}
+			majorDiv.appendChild(subContainer);
+			sysStatusTreeDiv.appendChild(majorDiv);
+		}
+		document.querySelectorAll('.status-select').forEach(sel=>{ sel.addEventListener('change',(e)=>{ const key=sel.getAttribute('data-key'); systemDetailedStatus[key]=sel.value; }); });
+		const parentSelect = document.getElementById('parentMajorSelect');
+		if(parentSelect) { parentSelect.innerHTML = '<option value="__NEW__">(新建大类)</option>' + Object.keys(FULL_OS_TREE).map(m=>`<option value="${m}">${m}</option>`).join(''); }
+	}
+	function createVersion() {
+		let newMajor = document.getElementById('newMajorName').value.trim();
+		const selectedParent = document.getElementById('parentMajorSelect').value;
+		const newSub = document.getElementById('newSubName').value.trim();
+		const newVer = document.getElementById('newVersionName').value.trim();
+		if(!newVer) { alert("请填写具体版本名称"); return; }
+		let targetMajor = selectedParent;
+		if(selectedParent === '__NEW__') { if(!newMajor) { alert("新建大类需要填写大类名称"); return; } targetMajor = newMajor; }
+		if(!FULL_OS_TREE[targetMajor]) FULL_OS_TREE[targetMajor] = { sub: {} };
+		const subKey = newSub || "默认分类";
+		if(!FULL_OS_TREE[targetMajor].sub[subKey]) FULL_OS_TREE[targetMajor].sub[subKey] = [];
+		if(!FULL_OS_TREE[targetMajor].sub[subKey].includes(newVer)) FULL_OS_TREE[targetMajor].sub[subKey].push(newVer);
+		const newKey = getStatusKey(targetMajor, subKey, newVer);
+		if(!systemDetailedStatus[newKey]) systemDetailedStatus[newKey] = getDefaultStatus(newVer);
+		osMajorList = Object.keys(FULL_OS_TREE);
+		saveFullTreeToStorage();
+		renderAdminTree();
+		rebuildOSSelectors();
+		alert(`已添加: ${targetMajor} / ${subKey} / ${newVer}`);
+	}
+	function saveDetailedStatus() { localStorage.setItem('sysDetailedStatus', JSON.stringify(systemDetailedStatus)); saveFullTreeToStorage(); document.getElementById('saveToast').innerText='✅状态及系统树已保存'; setTimeout(()=>document.getElementById('saveToast').innerText='',1500); rebuildOSSelectors(); }
+	function adminLogin() { let u=prompt("用户名:"), p=prompt("密码:"); if(u==="admin-smry" && p==="ipalzlabcdsmrygittthubiridicjcadmiiin") { renderAdminTree(); adminModal.style.display='flex'; } else alert("错误"); }
+	adminBtn.onclick = adminLogin;
+	saveSysStatusBtn.onclick = saveDetailedStatus;
+	closeModalBtn.onclick = () => adminModal.style.display='none';
+	document.getElementById('createVersionBtn').addEventListener('click', createVersion);
+	window.onclick = (e) => { if(e.target===adminModal) adminModal.style.display='none'; };
+	checkBtn.onclick = checkCompatibility;
+	resetBtn.onclick = () => location.reload();
+	renderSources();
+	rebuildOSSelectors();
+	detectIP();
+	applyProjectorSingleSelect();
+</script>
+</body>
+</html>
