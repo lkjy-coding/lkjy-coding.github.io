@@ -123,10 +123,10 @@ Also try <https://chenzheaya.github.io/OnlineJudgeMaintainerSimulator/>!
 - **后台**：可以**禁用/启用某个大类中的小类，直到单个系统**。且调整类型分为：无法查询、未发布、禁用、启用。
 - **安装来源**：可以**让国内IP用户勾选“国外下载网站查询”然后暂时放开对GooglePlay、Tiktok、YouTube、Twitter（X）的限制**，但是如果查询超时（适用于所有网站，返回为`TIMED_OUT`及相关即可触发）就返回：“连接失败，连接超时。”
 - **更多错误提示**：
- - `CONNECTION_RESET`及相关→“连接失败，连接被意外重置。”
- - `CONNECTION_ABORTED`及相关→“连接失败，连接意外中断。”
- - `CONNECTION_REFUSED`及相关→“连接失败，连接被拒绝。”
- - 其他→“连接失败，暂时不支持分析的原因。”
+  - `CONNECTION_RESET`及相关→“连接失败，连接被意外重置。”
+  - `CONNECTION_ABORTED`及相关→“连接失败，连接意外中断。”
+  - `CONNECTION_REFUSED`及相关→“连接失败，连接被拒绝。”
+  - 其他→“连接失败，暂时不支持分析的原因。”
 
 ### V3 `GameCheck3.0.html`
 
