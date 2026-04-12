@@ -101,6 +101,8 @@ Also try <https://chenzheaya.github.io/OnlineJudgeMaintainerSimulator/>!
 - `index(2).html`
 - `GameCheck2.0.html`
 - `GameCheck3.0.html`
+- `GameCheck4.0.html`
+- `GameCheck5.0.html`
 
 ## 体验地址
 
