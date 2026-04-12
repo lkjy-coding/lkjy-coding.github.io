@@ -107,7 +107,9 @@ Also try <https://chenzheaya.github.io/OnlineJudgeMaintainerSimulator/>!
 格式见上文。
 
 > 另外，为了测试方便，特此贴出：
+> 
 > <https://lkjy-coding.github.io/GameCheck2.0.html>
+> 
 > <https://lkjy-coding.github.io/GameCheck3.0.html>
 
 ## 更新日志
