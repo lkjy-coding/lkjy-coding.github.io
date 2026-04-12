@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+	<title>硬件规格检查工具 | 游戏兼容性检测</title>
+	<style>
+		* {
+			box-sizing: border-box;
+			font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+		}
+		body {
+			background: #f0f2f5;
+			margin: 0;
+			padding: 24px 20px;
+			color: #1e293b;
+		}
+		.container {
+			max-width: 1300px;
+			margin: 0 auto;
+		}
+		/* 主面板卡片 */
+		.card {
+			background: white;
+			border-radius: 28px;
+			box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+			padding: 24px 28px;
+			margin-bottom: 28px;
+			transition: all 0.2s;
+		}
+		h1 {
+			font-size: 1.8rem;
+			font-weight: 600;
+			margin: 0 0 6px 0;
+			background: linear-gradient(135deg, #2563eb, #7c3aed);
+			-webkit-background-clip: text;
+			background-clip: text;
+			color: transparent;
+		}
+		.sub {
+			color: #475569;
+			border-left: 4px solid #3b82f6;
+			padding-left: 14px;
+			margin: 8px 0 20px 0;
+			font-size: 0.9rem;
+		}
+		.grid-2col {
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+			gap: 24px;
+		}
+		.form-group {
+			margin-bottom: 20px;
+		}
+		label {
+			font-weight: 600;
+			display: block;
+			margin-bottom: 8px;
+			font-size: 0.9rem;
+			color: #0f172a;
+		}
+		.label-icon {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+		}
+		select, input[type="text"], input[type="number"] {
+			width: 100%;
+			padding: 10px 14px;
+			border: 1.5px solid #e2e8f0;
+			border-radius: 18px;
+			font-size: 0.9rem;
+			background: #fefefe;
+			transition: 0.2s;
+		}
+		select:focus, input:focus {
+			outline: none;
+			border-color: #3b82f6;
+			box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+		}
+		.checkbox-group, .radio-group {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 16px;
+			margin-top: 8px;
+		}
+		.checkbox-group label, .radio-group label {
+			font-weight: normal;
+			display: inline-flex;
+			align-items: center;
+			gap: 6px;
+			cursor: pointer;
+		}
+		.inline-hint {
+			font-size: 0.7rem;
+			color: #6c757d;
+			margin-top: 4px;
+		}
+		button {
+			background: #1e293b;
+			color: white;
+			border: none;
+			padding: 12px 24px;
+			border-radius: 40px;
+			font-weight: 600;
+			font-size: 1rem;
+			cursor: pointer;
+			transition: 0.2s;
+			box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+		}
+		button.primary {
+			background: #2563eb;
+		}
+		button.primary:hover {
+			background: #1d4ed8;
+			transform: scale(1.01);
+		}
+		.result-area {
+			background: #f8fafc;
+			border-radius: 24px;
+			padding: 20px;
+			margin-top: 16px;
+			border-left: 6px solid #3b82f6;
+		}
+		.badge {
+			background: #e2e8f0;
+			padding: 4px 12px;
+			border-radius: 50px;
+			font-size: 0.75rem;
+		}
+		.warning {
+			color: #b91c1c;
+			background: #fee2e2;
+			padding: 12px;
+			border-radius: 20px;
+		}
+		.footer-buttons {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-top: 16px;
+		}
+		.admin-login-btn {
+			background: #334155;
+		}
+		/* 后台模态框 */
+		.modal {
+			display: none;
+			position: fixed;
+			top: 0; left: 0;
+			width: 100%; height: 100%;
+			background: rgba(0,0,0,0.6);
+			justify-content: center;
+			align-items: center;
+			z-index: 1000;
+		}
+		.modal-content {
+			background: white;
+			max-width: 700px;
+			width: 90%;
+			border-radius: 32px;
+			padding: 24px;
+			max-height: 80vh;
+			overflow-y: auto;
+		}
+		.sys-item {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			border-bottom: 1px solid #e2e8f0;
+			padding: 12px 0;
+		}
+		.toggle-status {
+			cursor: pointer;
+			font-weight: bold;
+			padding: 4px 12px;
+			border-radius: 40px;
+			background: #e2e8f0;
+		}
+		.status-enabled { color: #15803d; background: #dcfce7; }
+		.status-disabled { color: #b91c1c; background: #ffe4e4; }
+		.save-msg { font-size: 0.8rem; margin-top: 12px; color: #2563eb; }
+		hr { margin: 16px 0; }
+		@media (max-width: 800px) {
+			.grid-2col { grid-template-columns: 1fr; }
+			.card { padding: 18px; }
+		}
+	</style>
+</head>
+<body>
+<div class="container">
+	<div class="card">
+		<div style="display: flex; justify-content: space-between; align-items: center;">
+			<div>
+				<h1>⚙️ 硬件规格检查器</h1>
+				<div class="sub">检查设备能否运行指定游戏 · 智能匹配系统需求</div>
+			</div>
+			<button id="adminBtn" class="admin-login-btn">🔐 后台</button>
+		</div>
+
+		<!-- 网络提示占位 -->
+		<div id="networkAlert" style="display: none;" class="warning"></div>
+
+		<!-- 主表单 -->
+		<div class="grid-2col">
+			<!-- 左列 -->
+			<div>
+				<div class="form-group">
+					<label>🎮 游戏名称 / 下载链接</label>
+					<input type="text" id="gameInput" placeholder="例如: 原神 / 崩坏：星穹铁道 或 Steam 链接" value="PUBG Mobile">
+				</div>
+				<div class="form-group">
+					<label>📥 下载来源 (可多选)</label>
+					<div id="sourceCheckboxes" class="checkbox-group"></div>
+					<div id="otherSourceRow" style="margin-top: 8px; display: none;">
+						<input type="text" id="otherSourceLink" placeholder="请输入主站链接 (https://...)" style="width: 100%;">
+					</div>
+				</div>
+				<div class="form-group">
+					<label>💻 操作系统 (详细版本树)</label>
+					<select id="osMajorSelect"></select>
+					<select id="osSubSelect" style="margin-top: 8px;"></select>
+					<div id="osVersionNote" class="inline-hint" style="color:#d97706;"></div>
+				</div>
+				<div class="form-group">
+					<label>📱 设备类型</label>
+					<div class="checkbox-group">
+						<label><input type="checkbox" class="deviceType" value="电脑"> 电脑</label>
+						<label><input type="checkbox" class="deviceType" value="手机"> 手机</label>
+						<label><input type="checkbox" class="deviceType" value="Pad"> Pad</label>
+						<label><input type="checkbox" class="deviceType" value="智能手表"> 智能手表</label>
+					</div>
+					<label style="margin-top: 8px;"><input type="checkbox" id="projectorCheck"> 转接投影 (勾选后设备类型变为双选模式)</label>
+				</div>
+			</div>
+			<!-- 右列 -->
+			<div>
+				<div class="form-group">
+					<label>📊 硬件规格</label>
+					<input type="text" id="gpuMem" placeholder="显卡内存 (GB) 例: 4" value="6">
+					<input type="text" id="storageMem" placeholder="硬盘内存 (GB) 例: 256" value="128" style="margin-top: 8px;">
+					<input type="text" id="ramMem" placeholder="运行内存 (GB) 例: 8" value="8" style="margin-top: 8px;">
+					<input type="text" id="cpuCores" placeholder="CPU核数 例: 4" value="4" style="margin-top: 8px;">
+				</div>
+				<div class="form-group">
+					<label>⚡ 技术特性支持</label>
+					<div id="featuresCheck" class="checkbox-group">
+						<label><input type="checkbox" value="HTML5"> 支持HTML5</label>
+						<label><input type="checkbox" value="TCP2.0"> 支持TCP 2.0及更高版本</label>
+						<label><input type="checkbox" value="Sound"> 支持声音播放</label>
+						<label><input type="checkbox" value="256Color"> 支持256色显示</label>
+						<label><input type="checkbox" value="Regedit"> 支持注册表修改</label>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="footer-buttons">
+			<button id="checkBtn" class="primary">✅ 开始检查兼容性</button>
+			<button id="resetBtn">⟳ 重置表单</button>
+		</div>
+		<div id="resultPanel" class="result-area" style="display: none;"></div>
+	</div>
+</div>
+
+<!-- 后台模态框 -->
+<div id="adminModal" class="modal">
+	<div class="modal-content">
+		<h2>🛠️ 系统状态后台</h2>
+		<p>在线调整支持状态 (启用/禁用某个OS大类)</p>
+		<div id="sysStatusList"></div>
+		<button id="saveSysStatus">💾 保存状态</button>
+		<span id="saveToast" class="save-msg"></span>
+		<hr>
+		<button id="closeModalBtn">关闭</button>
+	</div>
+</div>
+
+<script>
+	// ---------- 1. 庞大的操作系统树 (根据需求精简但完整包含指定分支, 带*/**逻辑) ----------
+	const OS_TREE = {
+		"Windows": {
+			sub: {
+				"Windows正式版": ["Windows 1.0*","Windows 2.0*","Windows 3.0*","Windows 3.1*","Windows for Workgroups 3.11*","Windows NT 3.1","Windows 3.2","Windows NT 3.5","Windows NT 3.51","Windows 95","Windows NT 4.0","Windows 98","Windows 98 SE","Windows 2000","Windows ME","Windows XP","Windows Vista","Windows 7","Windows Thin PC","Windows 8","Windows 8.1","Windows 10","Windows 11","Windows 12**"],
+				"Windows Server": ["Windows 2000 Server","Windows Server 2003","Windows Server 2003 R2","Windows Server 2008","Windows Server 2008 R2","Windows Server 2012","Windows Server 2012 R2","Windows Server 2016","Windows Server 2019","Windows Server 2022","Windows Server 2025"],
+				"Windows CE": ["Windows CE 1.0","Windows CE 2.0","Windows CE 3.0","Windows CE 4.0","Windows CE 4.1","Windows CE 4.2","Windows CE 5.0","Windows CE 6.0","Windows CE 7.0"],
+				"Windows Mobile": ["Pocket PC2000(Only for PC)","Pocket PC2002(Only for Mobile)","Windows Mobile 2003","Windows Mobile 5.0","Windows Mobile 6.0","Windows Mobile 6.5"],
+				"Windows Phone": ["Windows Phone 7.0","Windows Phone 7.1(NoDo)","Windows Phone 7.5(Mango)","Windows Phone 7.5(Tango)","Windows Phone 7.8","Windows Phone 8.0(Apollo)","Window Phone 8.1","Windows Phone 8.1 Update 2（GDR2）"],
+				"Windows预览版": ["Windows预览版*"]
+			}
+		},
+		"Linux": { sub: { "Linux Normal": ["内核通用"], "Linux Mint": ["Mint 20","Mint 21"] } },
+		"iOS": { sub: { "iOS": ["iOS 15","iOS 16","iOS 17","iOS 18"] } },
+		"macOS": { sub: { "macOS及以后": ["macOS 10.12 Sierra","macOS 13 Ventura","macOS 14 Sonoma","macOS 15 Sequoia","macOS 26 RC"] } },
+		"tvOS": { sub: { "tvOS": ["tvOS 15*","tvOS 16**"] } },
+		"澎湃OS": { sub: { "澎湃OS": ["2.0","2.1","3.0","3.1"] } },
+		"鸿蒙": { sub: { "HarmonyOS（PC）": ["5.0.5","5.1.0","5.1.1","6.0.0","6.0.1","6.0.2"], "HarmonyOS（Mobile）": ["2.0","3.0","3.1","4.0","4.1","4.2","4.3","4.4","5.0","5.0.1","5.0.5","5.1.0","5.1.1","6.0.0"] } },
+		"Android": { sub: { "Android on PC": ["11","12","13","14","15","16"], "Android on Mobile": ["2.3","4.0","4.1","4.2","4.3","4.4","5.0","5.1","6.0","7.0","7.1","8.0","8.1","9","10","11","12","13","14","15","16"] } },
+		"阿里云OS": { sub: { "阿里云OS": ["2.1903","3.2104","3.2201","4.2402"] } },
+		"Unix": { sub: { "Unix": ["System V","BSD"] } },
+		"Ubuntu": { sub: { "Ubuntu Normal": ["4.10","5.04","5.10","6.06 LTS","8.04 LTS","10.04 LTS","12.04 LTS","14.04 LTS","16.04 LTS","18.04 LTS","20.04 LTS","22.04 LTS","24.04 LTS"], "Ubuntu Kylin": ["14.04 LTS","16.04 LTS","18.04 LTS","20.04 LTS","22.04 LTS","24.04 LTS"], "lubuntu": ["lubuntu 18.04*"], "xubuntu": ["xubuntu 20.04*"] } },
+		"MS-DOS": { sub: { "MS-DOS": ["1.24","2.0","2.11","3.0","3.1","3.2","3.21","3.3","3.31","4.0","5.0","6.0","6.2","6.21","6.22","7.0","7.1"] } },
+		"CentOS": { sub: { "CentOS": ["5.11","6.10","7.9","8.0","8.1","8.2","8.3","8.4","8.5","9","9-stream"] } },
+		"LOONGNIX": { sub: { "LOONGNIX": ["20.7","23.1","23.2","25.1"] } },
+		"Red Star OS": { sub: { "Red Star OS": ["1.0*","2.0*","3.0","4.0"] } },
+		"其他": { sub: { "其他系统": ["请附百科词条链接"] } }
+	};
+	// 为简化显示，将大条目生成下拉
+	const osMajorList = Object.keys(OS_TREE);
+
+	// 下载来源列表 (带国际限制)
+	const sourcesList = ["AppStore","GooglePlay","Tiktok","YouTube","Twitter（X）","华为应用市场","小米应用商店","应用宝","OPPO应用商店","Steam","在线小游戏","其他（需附链接）"];
+	// IP 国内限制标记
+	let isDomesticIP = false;  // 默认国际（无法获取或流量默认国际）
+	
+	// 系统支持状态存储 (后台可调)
+	let systemSupportStatus = {};
+	// 初始化所有主系统启用
+	function initSupportStatus() {
+		for(let major of osMajorList) {
+			if(!systemSupportStatus.hasOwnProperty(major)) systemSupportStatus[major] = true;
+		}
+	}
+	initSupportStatus();
+
+	// DOM 元素
+	const gameInput = document.getElementById('gameInput');
+	const sourceDiv = document.getElementById('sourceCheckboxes');
+	const otherRow = document.getElementById('otherSourceRow');
+	const otherLinkInput = document.getElementById('otherSourceLink');
+	const osMajorSelect = document.getElementById('osMajorSelect');
+	const osSubSelect = document.getElementById('osSubSelect');
+	const versionNoteDiv = document.getElementById('osVersionNote');
+	const checkBtn = document.getElementById('checkBtn');
+	const resetBtn = document.getElementById('resetBtn');
+	const resultPanel = document.getElementById('resultPanel');
+	const adminBtn = document.getElementById('adminBtn');
+	const adminModal = document.getElementById('adminModal');
+	const sysStatusListDiv = document.getElementById('sysStatusList');
+	const saveSysStatusBtn = document.getElementById('saveSysStatus');
+	const closeModalBtn = document.getElementById('closeModalBtn');
+	const projectorCheck = document.getElementById('projectorCheck');
+	const deviceCheckboxes = document.querySelectorAll('.deviceType');
+	const networkAlertDiv = document.getElementById('networkAlert');
+
+	// 渲染下载来源复选框
+	function renderSources() {
+		sourceDiv.innerHTML = '';
+		sourcesList.forEach(src => {
+			const label = document.createElement('label');
+			const cb = document.createElement('input');
+			cb.type = 'checkbox';
+			cb.value = src;
+			cb.classList.add('source-cb');
+			label.appendChild(cb);
+			label.appendChild(document.createTextNode(src));
+			sourceDiv.appendChild(label);
+		});
+		const otherCb = document.querySelector('.source-cb[value="其他（需附链接）"]');
+		if(otherCb) otherCb.addEventListener('change', (e) => { otherRow.style.display = e.target.checked ? 'block' : 'none'; });
+		else otherRow.style.display = 'none';
+	}
+	renderSources();
+
+	// 根据主系统刷新子系统列表
+	function rebuildSubSelect(major) {
+		const majorData = OS_TREE[major];
+		if(!majorData) return;
+		const subOptions = Object.keys(majorData.sub);
+		osSubSelect.innerHTML = '';
+		subOptions.forEach(opt => {
+			const option = document.createElement('option');
+			option.value = opt;
+			option.textContent = opt;
+			osSubSelect.appendChild(option);
+		});
+		// 更新版本列表细节 (展示具体版本)
+		updateVersionDetail(major, osSubSelect.value);
+		osSubSelect.onchange = () => updateVersionDetail(major, osSubSelect.value);
+	}
+
+	function updateVersionDetail(major, subCat) {
+		const versions = OS_TREE[major]?.sub[subCat] || [];
+		if(versions.length === 0) { versionNoteDiv.innerHTML = ''; return; }
+		// 展示具体版本选择下拉(三级)
+		let selectHtml = `<select id="versionSelect" style="width:100%; margin-top:6px;">`;
+		versions.forEach(v => { selectHtml += `<option value="${v}">${v}</option>`; });
+		selectHtml += `</select>`;
+		if(document.getElementById('versionSelect')) document.getElementById('versionSelect').remove();
+		const div = document.createElement('div');
+		div.id = 'versionSelectWrapper';
+		div.innerHTML = selectHtml;
+		const oldDiv = document.getElementById('versionSelectWrapper');
+		if(oldDiv) oldDiv.remove();
+		osSubSelect.parentNode.insertBefore(div, osSubSelect.nextSibling);
+		const versionSelect = document.getElementById('versionSelect');
+		versionSelect.addEventListener('change', () => {
+			let ver = versionSelect.value;
+			if(ver.includes('*') && !ver.includes('**')) {
+				versionNoteDiv.innerHTML = `⚠️ 因为技术受限，暂时不支持分析此版本。(版本: ${ver.replace(/\*/g,'')})`;
+			} else if(ver.includes('**')) {
+				versionNoteDiv.innerHTML = `⚠️ 因为当前版本暂未发布，暂时不支持分析此版本。如果发布可通知开发者。(${ver.replace(/\*\*/g,'')})`;
+			} else {
+				versionNoteDiv.innerHTML = '';
+			}
+		});
+		versionSelect.dispatchEvent(new Event('change'));
+	}
+
+	// 初始化操作系统下拉
+	function initOSSelector() {
+		osMajorSelect.innerHTML = '';
+		osMajorList.forEach(m => {
+			const opt = document.createElement('option');
+			opt.value = m;
+			opt.textContent = m;
+			osMajorSelect.appendChild(opt);
+		});
+		osMajorSelect.onchange = () => {
+			rebuildSubSelect(osMajorSelect.value);
+		};
+		rebuildSubSelect(osMajorSelect.value);
+	}
+	initOSSelector();
+
+	// IP检测 (调用ipapi简单判断)
+	async function detectIP() {
+		try {
+			const controller = new AbortController();
+			const timeout = setTimeout(() => controller.abort(), 4000);
+			const res = await fetch('https://ipapi.co/json/', { signal: controller.signal });
+			clearTimeout(timeout);
+			const data = await res.json();
+			if(data.country_code === 'CN') isDomesticIP = true;
+			else isDomesticIP = false;
+		} catch(e) {
+			console.log("IP检测失败，默认为国际IP");
+			isDomesticIP = false;
+		}
+		applySourceRestriction();
+	}
+	function applySourceRestriction() {
+		const allSourceCb = document.querySelectorAll('.source-cb');
+		allSourceCb.forEach(cb => {
+			const val = cb.value;
+			if(['GooglePlay','Tiktok','YouTube','Twitter（X）'].includes(val)) {
+				if(isDomesticIP) {
+					cb.disabled = true;
+					cb.checked = false;
+					const parent = cb.parentElement;
+					if(!parent.querySelector('.ip-warning')) {
+						const warnSpan = document.createElement('span');
+						warnSpan.className = 'ip-warning';
+						warnSpan.style.color = 'red';
+						warnSpan.style.fontSize = '0.7rem';
+						warnSpan.innerText = ' ⚠️当前IP位于国内，无法选择';
+						parent.appendChild(warnSpan);
+					}
+				} else {
+					cb.disabled = false;
+					const warnSpan = cb.parentElement.querySelector('.ip-warning');
+					if(warnSpan) warnSpan.remove();
+				}
+			}
+		});
+		if(isDomesticIP) {
+			networkAlertDiv.style.display = 'block';
+			networkAlertDiv.innerText = '⚠️ 当前IP位于国内，无法勾选GooglePlay/Tiktok/YouTube/Twitter！';
+		} else {
+			networkAlertDiv.style.display = 'none';
+		}
+	}
+
+	// 网络连接检测 (模拟在线)
+	function isNetworkOnline() { return navigator.onLine; }
+
+	// 兼容性主逻辑
+	function checkCompatibility() {
+		if(!isNetworkOnline()) {
+			resultPanel.style.display = 'block';
+			resultPanel.innerHTML = '<div class="warning">❌ 无法检测到网络连接，请检查网络状态，否则无法使用！</div>';
+			return;
+		}
+		// 获取游戏名/链接
+		const game = gameInput.value.trim() || "未命名游戏";
+		// 获取选中的下载来源 (多选)
+		const selectedSources = Array.from(document.querySelectorAll('.source-cb:checked')).map(cb => cb.value);
+		let otherLink = '';
+		if(selectedSources.includes('其他（需附链接）')) otherLink = otherLinkInput.value;
+		// 设备类型 & 投影双选模式
+		let selectedDevices = Array.from(deviceCheckboxes).filter(cb => cb.checked).map(cb => cb.value);
+		if(projectorCheck.checked && selectedDevices.length === 1) {
+			selectedDevices = [...selectedDevices, ...selectedDevices];
+		}
+		// 硬件参数
+		const gpu = parseFloat(document.getElementById('gpuMem').value) || 0;
+		const storage = parseFloat(document.getElementById('storageMem').value) || 0;
+		const ram = parseFloat(document.getElementById('ramMem').value) || 0;
+		const cpu = parseFloat(document.getElementById('cpuCores').value) || 0;
+		const features = Array.from(document.querySelectorAll('#featuresCheck input:checked')).map(cb => cb.value);
+		// 操作系统 带版本处理
+		const majorOS = osMajorSelect.value;
+		const subCat = osSubSelect.value;
+		let versionRaw = document.getElementById('versionSelect') ? document.getElementById('versionSelect').value : '';
+		let versionClean = versionRaw.replace(/\*/g,'').replace(/\*\*/g,'');
+		let versionWarning = (versionRaw.includes('*') && !versionRaw.includes('**')) ? "技术受限暂不支持分析此版本" : (versionRaw.includes('**') ? "未发布版本暂不支持分析" : "");
+		// 检查系统支持状态后台
+		if(!systemSupportStatus[majorOS]) {
+			resultPanel.style.display = 'block';
+			resultPanel.innerHTML = `<div class="warning">⚠️ 操作系统【${majorOS}】当前已在后台被禁用，无法分析兼容性。</div>`;
+			return;
+		}
+		// 简陋兼容规则演示: 基于ram, cpu, storage等基础阈值 + 额外判断
+		let pass = true;
+		let reasons = [];
+		if(ram < 4) { pass = false; reasons.push("运行内存不足4GB"); }
+		if(storage < 64) { pass = false; reasons.push("硬盘容量低于64GB"); }
+		if(cpu < 2) { pass = false; reasons.push("CPU核数过少(<2)"); }
+		if(majorOS === "Windows" && versionClean.includes("Windows 7") && ram<8) reasons.push("Windows 7建议8GB内存");
+		if(majorOS === "macOS" && ram<8) reasons.push("macOS环境建议8GB以上");
+		if(features.includes("TCP2.0") === false) reasons.push("未勾选TCP 2.0+支持");
+		let finalResult = pass ? "✅ 您的设备大致满足运行需求" : "⚠️ 您的设备可能无法流畅运行该游戏";
+		let detail = `<strong>游戏:</strong> ${game}<br><strong>来源:</strong> ${selectedSources.join(", ")} ${otherLink ? " 链接:"+otherLink : ""}<br>
+		<strong>系统:</strong> ${majorOS} / ${subCat} ${versionClean} ${versionWarning ? ` (${versionWarning})` : ''}<br>
+		<strong>设备:</strong> ${selectedDevices.join(", ")} ${projectorCheck.checked ? "(投影模式)" : ""}<br>
+		<strong>硬件:</strong> 显卡${gpu}GB / 硬盘${storage}GB / 内存${ram}GB / CPU${cpu}核<br>
+		<strong>特性:</strong> ${features.join(", ")}<br><hr>`;
+		detail += `<strong>结论:</strong> ${finalResult}<br>`;
+		if(reasons.length) detail += `<div class="warning">⚠️ 潜在问题: ${reasons.join("; ")}</div>`;
+		resultPanel.style.display = 'block';
+		resultPanel.innerHTML = detail;
+	}
+
+	// 后台管理构建列表
+	function renderAdminPanel() {
+		sysStatusListDiv.innerHTML = '';
+		for(let sys of osMajorList) {
+			const div = document.createElement('div');
+			div.className = 'sys-item';
+			const enabled = systemSupportStatus[sys];
+			div.innerHTML = `<span><strong>${sys}</strong></span>
+			<span class="toggle-status ${enabled ? 'status-enabled' : 'status-disabled'}" data-os="${sys}">${enabled ? '✅ 启用' : '❌ 禁用'}</span>`;
+			sysStatusListDiv.appendChild(div);
+		}
+		document.querySelectorAll('.toggle-status').forEach(el => {
+			el.addEventListener('click', (e) => {
+				const osName = e.currentTarget.getAttribute('data-os');
+				systemSupportStatus[osName] = !systemSupportStatus[osName];
+				renderAdminPanel();
+			});
+		});
+	}
+	// 保存状态至localStorage
+	function saveStatusToStorage() {
+		localStorage.setItem('sysSupportStatus', JSON.stringify(systemSupportStatus));
+		document.getElementById('saveToast').innerText = '✅ 状态已保存!';
+		setTimeout(() => document.getElementById('saveToast').innerText = '', 1500);
+	}
+	function loadStatusFromStorage() {
+		const stored = localStorage.getItem('sysSupportStatus');
+		if(stored) {
+			try {
+				const parsed = JSON.parse(stored);
+				systemSupportStatus = parsed;
+			} catch(e) {}
+		} else initSupportStatus();
+	}
+	loadStatusFromStorage();
+	// 重置
+	function resetForm() {
+		gameInput.value = "PUBG Mobile";
+		document.querySelectorAll('.source-cb').forEach(cb => cb.checked = false);
+		otherRow.style.display = 'none';
+		deviceCheckboxes.forEach(cb => cb.checked = false);
+		projectorCheck.checked = false;
+		document.getElementById('gpuMem').value = "4";
+		document.getElementById('storageMem').value = "256";
+		document.getElementById('ramMem').value = "8";
+		document.getElementById('cpuCores').value = "4";
+		document.querySelectorAll('#featuresCheck input').forEach(cb => cb.checked = false);
+		osMajorSelect.value = "Windows";
+		rebuildSubSelect("Windows");
+		resultPanel.style.display = 'none';
+	}
+	// 后台登录验证 (混淆凭证)
+	function adminLogin() {
+		const pwd = prompt("请输入管理员密码:");
+		const user = prompt("请输入用户名:");
+		// 混淆比较 admin-smry  / ipalzlabcdsmrygittthubiridicjcadmiiin
+		const correctUser = "admin-smry";
+		const correctPass = "ipalzlabcdsmrygittthubiridicjcadmiiin";
+		if(user === correctUser && pwd === correctPass) {
+			renderAdminPanel();
+			adminModal.style.display = 'flex';
+		} else {
+			alert("用户名或密码错误！");
+		}
+	}
+	adminBtn.onclick = adminLogin;
+	saveSysStatusBtn.onclick = saveStatusToStorage;
+	closeModalBtn.onclick = () => { adminModal.style.display = 'none'; };
+	window.onclick = (e) => { if(e.target === adminModal) adminModal.style.display = 'none'; };
+	checkBtn.onclick = checkCompatibility;
+	resetBtn.onclick = resetForm;
+
+	// 监听投影双选变化
+	projectorCheck.addEventListener('change', () => {});
+	detectIP();
+	window.addEventListener('online', () => { if(isNetworkOnline()) networkAlertDiv.style.display = 'none'; });
+	window.addEventListener('offline', () => { networkAlertDiv.innerHTML = '无法检测到网络连接，请检查网络状态，否则无法使用！'; networkAlertDiv.style.display = 'block'; });
+</script>
+</body>
+</html>
