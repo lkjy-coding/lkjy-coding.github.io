@@ -111,6 +111,8 @@ Also try <https://chenzheaya.github.io/OnlineJudgeMaintainerSimulator/>!
 > <https://lkjy-coding.github.io/GameCheck2.0.html>
 > 
 > <https://lkjy-coding.github.io/GameCheck3.0.html>
+>
+> <https://lkjy-coding.github.io/GameCheck4.0.html>
 
 ## 更新日志
 
@@ -145,3 +147,7 @@ Also try <https://chenzheaya.github.io/OnlineJudgeMaintainerSimulator/>!
 - **后台**：支持一键创建版本大类、版本小类及单个版本的功能，可以“一环套一环”。
 - **设计**：**AppStore与非macOS、tvOS、iOS系统不兼容**，选择即提示：“当前来源不支持当前系统，请重新选择！”并**自动取消选择**。
 - **修复BUG**：“转接投影”无论是否勾选都可以选择超过两个选项。
+
+### V4 `GameCheck4.0.html`
+
+- **修复BUG**：紧急修复了**选项“转接投影”的设备限制选择数量错误**、**部分系统在选择界面及后台界面中缺失**的问题。
