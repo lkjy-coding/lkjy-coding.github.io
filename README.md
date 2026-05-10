@@ -1,3 +1,6 @@
+###                                                看见右上角这个有三道杠的图标了吗？这是目录↗
+###                      Do you see the icon with three bars in the upper right corner? This is the table of contents ↗         
+
 # OJ 运维模拟器
 
 目前分为三个文件：`index.html`与`vertwo.html`以及`verthree.html`。第一个文件是前作，比较简洁；第二个是硬核版，更加复杂；第三个文件是 V 3.0，支持小游戏、自主出题。
