@@ -435,13 +435,12 @@
 		const user = document.getElementById("adminUser").value;
 		const pwd = document.getElementById("adminPwd").value;
 		const step2 = document.getElementById("step2Code").value;
-		const step3 = document.getElementById("step3Code").value;
 		
 		const userHash = CryptoJS.SHA256(user).toString();
 		const pwdHash = CryptoJS.SHA256(pwd).toString();
 		const step2Hash = CryptoJS.SHA256(step2).toString();
 		
-		if(userHash !== USER_HASH || pwdHash !== PWD_HASH || step2Hash !== STEP2_HASH || !verifyStep3(step3)) {
+		if(userHash !== USER_HASH || pwdHash !== PWD_HASH || step2Hash !== STEP2_HASH) {
 			alert("用户名、密码或验证码错误");
 			return;
 		}
