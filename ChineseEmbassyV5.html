@@ -71,143 +71,34 @@
 	<h2 style="margin: 1.5rem 0 0.8rem;">🌏 所有中国驻外大使馆信息 (全球已建交国家)</h2>
 	<p style="margin-bottom: 1rem; color:#4b5563;">点击国家名称展开/折叠联系方式，信息基于中国外交部公开资料整理。</p>
 	<div id="embassiesListContainer"></div>
-	
-	<div class="admin-link" id="adminEntry">🔐 管理员入口</div>
+
 	
 	<footer>数据参考中国外交部公开信息 · 实时更新请以官方为准 | 领事保护热线 12308<br>中国领事服务网：<a href="https://cs.mfa.gov.cn/" target="_blank">https://cs.mfa.gov.cn/</a></footer>
 </div>
 
-<!-- 管理员弹窗 -->
-<div id="adminModal" class="modal">
-	<div class="modal-content">
-		<h3>🔐 管理员验证</h3>
-		<div id="adminLoginForm">
-			<input type="text" id="adminUser" placeholder="用户名" autocomplete="off">
-			<input type="password" id="adminPwd" placeholder="密码">
-			<input type="text" id="step2Code" placeholder="两步验证码">
 
-			<button id="doLoginBtn" class="admin-btn" style="width:100%; margin-top:8px;">登录</button>
-		</div>
-		<div id="adminPanelContent" style="display:none;">
-			<div style="margin-bottom: 12px;"><strong>📌 置顶/取消置顶国家：</strong> 
-				<select id="pinCountrySelect" style="width:100%; margin:6px 0;"></select>
-				<button id="togglePinBtn" class="admin-btn" style="width:100%;">置顶/取消置顶</button>
-			</div>
-			<div><strong>📢 编辑普通公告：</strong><textarea id="editNormalNotice" rows="3"></textarea>
-				<button id="saveNormalNoticeBtn" class="admin-btn" style="width:100%; margin-top:4px;">保存普通公告</button>
-			</div>
-			<div style="margin-top:12px;"><strong>🚨 红框紧急公告：</strong><textarea id="editEmergencyNotice" rows="4" placeholder="支持HTML格式"></textarea>
-				<button id="saveEmergencyBtn" class="admin-btn" style="width:100%; margin-top:4px;">保存紧急公告</button>
-				<button id="clearEmergencyBtn" class="admin-btn" style="width:100%; margin-top:6px; background:#7f8c8d;">清除红框公告</button>
-			</div>
-			<div style="margin-top:16px; border-top:1px solid #ddd; padding-top:12px;">
-				<strong>📋 管理员登录记录 (不可删除)</strong>
-				<div id="adminLogs" style="max-height:200px; overflow-y:auto; margin-top:8px; background:#f8f9fa; border-radius:12px; padding:8px;"></div>
-			</div>
-			<button id="closeAdminModal" class="admin-btn" style="width:100%; margin-top:12px; background:#95a5a6;">关闭</button>
-		</div>
-	</div>
-</div>
-
+// ========== 管理员配置（直接修改这里即可，无需登录） ==========
+const ADMIN_CONFIG = {
+    // 置顶的国家（填写国家名，留空则不置顶）
+    pinnedCountry: "伊朗",
+    
+    // 紧急公告内容（支持HTML，留空则不显示红框）
+    emergencyNotice: `这里是本站的紧急公告，根据中国领事服务网安全提醒进行更新。<strong>中国领事服务网官方安全提醒请见 <a href="https://cs.mfa.gov.cn/gyls/lsgz/lsyj/jszwqw/" target="_blank" rel="noopener noreferrer">https://cs.mfa.gov.cn/gyls/lsgz/lsyj/jszwqw/</a>。本站不保证更新速率，具体请以官方为准。请时刻关注中国大使馆及中国领事服务网的官方动态。</strong><br><br>
+<strong>【伊朗】根据中国领事服务网安全提醒，近期由于国际局势原因，伊朗及其周边地区存在战争情况，请当地中国公民及时联系中国大使馆获得帮助，同时也请（拟）赴当地的中国公民保护好人身安全。</strong><br><br>
+<strong>【泰国】根据中国领事服务网安全提醒，近期泰国多地发生了中国公民遭非法拘禁敲诈勒索的事件，请当地中国公民保护好个人安全，必要时联系中国大使馆（12308）、泰国警方（191）及泰国旅游警察（1155，提供中文服务）获取帮助。</strong><br><br>
+<strong>【日本】根据中国领事服务网安全提醒，日本当地“社会治安不靖，针对中国公民违法犯罪案件多发，在日本中国公民面临的安全环境持续恶化”，且有人强行闯入中国驻日本大使馆，对中方外交人员人身安全和外交设施安全构成了严重威胁。请当地中国公民保护好人身安全，必要时向中国大使馆（+86-10-12308及+86-10-65612308）、日本警方（110）、日本消防（119）及日本海上事故和海难救援（118）获取帮助。</strong>`,
+    
+    // 普通公告（一般不需要改，保留默认即可）
+    normalNotice: "<p>📢 <strong>领事安全提醒</strong>：如中国公民在国外遭遇紧急情况，请联系当地警方。如有必要请联系中国大使馆。<br>
+		🛡️ 外交部全球领事保护与服务应急热线：<strong class="hotline">0086-10-12308</strong> 或 <strong class="hotline">0086-10-65612308</strong><br>
+		🌐 <strong>中国领事服务网官方安全提醒请见 <a href="https://cs.mfa.gov.cn/gyls/lsgz/lsyj/jszwqw/" target="_blank" rel="noopener noreferrer">https://cs.mfa.gov.cn/gyls/lsgz/lsyj/jszwqw/</a></strong><br>
+		⚖️ 本站仅供信息提供，不具备任何外交及法律职能，如需要帮助请联系中国大使馆。<br>
+<strong>本站与中国外交部及中国领事服务网无关且不存在隶属关系，且本站并非中国外交部官方认定网站，仅根据其信息进行更新，具体请关注中国外交部官方<a href="https://www.fmprc.gov.cn/" target="_blank" rel="noopener noreferrer">https://www.fmprc.gov.cn/</a>及中国领事服务网官方<a href="https://cs.mfa.gov.cn/" target="_blank" rel="noopener noreferrer">https://cs.mfa.gov.cn/</a>。</strong></p>"  // 留空则使用默认
+};
+// ============================================================
 <script>
-	// =======================   ======================
-	const PWD_HASH = "8d5e0b7c9a3f2e1d4c6b8a9e7f3d2c1b0a4e6f8d9c2b4a6e8f0d2c4b6a8e0f2d";
-	const STEP2_HASH = "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2";
-	const USER_HASH = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918";
-	
 
 	
-	// 获取客户端IP (通过多个API)
-	async function getClientIP() {
-		const apis = [
-			async () => { const r = await fetch('https://api.ipify.org?format=json'); const d = await r.json(); return d.ip; },
-			async () => { const r = await fetch('https://ipapi.co/json/'); const d = await r.json(); return d.ip; },
-			async () => { const r = await fetch('https://ip-api.com/json/'); const d = await r.json(); return d.query; }
-		];
-		for(let api of apis) {
-			try { const ip = await api(); if(ip) return ip; } catch(e) { continue; }
-		}
-		return '0.0.0.0';
-	}
-	
-	// 获取当前活跃会话ID
-	let currentSessionId = null;
-	let adminLoggedIn = false;
-	
-	// 登录记录管理
-	function addLogEntry(action, details = '') {
-		const logs = JSON.parse(localStorage.getItem('admin_logs') || '[]');
-		const entry = {
-			id: Date.now(),
-			time: new Date().toISOString(),
-			timeStr: new Date().toLocaleString('zh-CN'),
-			action: action,
-			details: details,
-			sessionId: currentSessionId
-		};
-		logs.unshift(entry);
-		while(logs.length > 200) logs.pop();
-		localStorage.setItem('admin_logs', JSON.stringify(logs));
-		renderLogs();
-	}
-	
-	function renderLogs() {
-		const container = document.getElementById('adminLogs');
-		if(!container) return;
-		const logs = JSON.parse(localStorage.getItem('admin_logs') || '[]');
-		if(logs.length === 0) {
-			container.innerHTML = '<div style="color:#999; text-align:center; padding:12px;">暂无登录记录</div>';
-			return;
-		}
-		container.innerHTML = logs.map(log => `
-			<div class="log-entry">
-				<span class="log-time">${log.timeStr}</span><br>
-				<span class="log-ip">${log.details || ''}</span><br>
-				<span class="log-action">${log.action}</span>
-				${log.sessionId === currentSessionId && adminLoggedIn ? '<span class="log-badge">当前会话</span>' : ''}
-			</div>
-		`).join('');
-	}
-	
-	// 检查并强制单点登录 (新登录踢掉旧登录)
-	let activeSessionCheckInterval = null;
-	
-	function registerSession(sessionId) {
-		localStorage.setItem('active_session_id', sessionId);
-		localStorage.setItem('active_session_time', Date.now().toString());
-		currentSessionId = sessionId;
-		adminLoggedIn = true;
-		
-		// 启动会话检查
-		if(activeSessionCheckInterval) clearInterval(activeSessionCheckInterval);
-		activeSessionCheckInterval = setInterval(() => {
-			const activeSession = localStorage.getItem('active_session_id');
-			if(activeSession !== currentSessionId && adminLoggedIn) {
-				adminLoggedIn = false;
-				currentSessionId = null;
-				document.getElementById("adminLoginForm").style.display = "block";
-				document.getElementById("adminPanelContent").style.display = "none";
-				alert("您的管理员会话已被另一IP地址的登录踢出");
-				addLogEntry("会话被踢出", "其他管理员登录导致当前会话失效");
-				if(activeSessionCheckInterval) clearInterval(activeSessionCheckInterval);
-			}
-		}, 3000);
-	}
-	
-	function logoutSession() {
-		if(currentSessionId && localStorage.getItem('active_session_id') === currentSessionId) {
-			localStorage.removeItem('active_session_id');
-			localStorage.removeItem('active_session_time');
-		}
-		adminLoggedIn = false;
-		if(activeSessionCheckInterval) clearInterval(activeSessionCheckInterval);
-		currentSessionId = null;
-	}
-	
-	// 生成新会话ID
-	function generateSessionId() {
-		return CryptoJS.SHA256(Date.now() + Math.random().toString() + navigator.userAgent).toString();
-	}
 	
 	// ======================= 完整全球建交国家大使馆数据集 ========================
 	const buildFullEmbassyList = () => {
@@ -352,12 +243,11 @@
 		🌐 <strong>中国领事服务网官方安全提醒请见 <a href="https://cs.mfa.gov.cn/gyls/lsgz/lsyj/jszwqw/" target="_blank" rel="noopener noreferrer">https://cs.mfa.gov.cn/gyls/lsgz/lsyj/jszwqw/</a></strong><br>
 		⚖️ 本站仅供信息提供，不具备任何外交及法律职能，如需要帮助请联系中国大使馆。<br>
 		<strong>本站与中国外交部及中国领事服务网无关且不存在隶属关系，且本站并非中国外交部官方认定网站，仅根据其信息进行更新，具体请关注中国外交部官方<a href="https://www.fmprc.gov.cn/" target="_blank" rel="noopener noreferrer">https://www.fmprc.gov.cn/</a>及中国领事服务网官方<a href="https://cs.mfa.gov.cn/" target="_blank" rel="noopener noreferrer">https://cs.mfa.gov.cn/</a>。</strong><br>
-		<strong>本站可能存在管理员密码泄露的情况，对本站而言是致命的。我们正在开发新版站点，届时将会在这里公布新站域名：<a href="about:blank" target="_blank" rel="noopener noreferrer">待公布</a></strong></p>`;
-
-	const defaultEmergency = `<strong>这里是本站的紧急公告，根据中国领事服务网安全提醒进行更新。</strong><strong>中国领事服务网官方安全提醒请见 <a href="https://cs.mfa.gov.cn/gyls/lsgz/lsyj/jszwqw/" target="_blank" rel="noopener noreferrer">https://cs.mfa.gov.cn/gyls/lsgz/lsyj/jszwqw/</a>。本站不保证更新速率，具体请以官方为准。请时刻关注中国大使馆及中国领事服务网的官方动态。</strong><br><br>
-<strong>【伊朗】根据中国领事服务网安全提醒，近期由于国际局势原因，伊朗及其周边地区存在战争情况，请当地中国公民及时联系中国大使馆获得帮助，同时也请（拟）赴当地的中国公民保护好人身安全。</strong><br><br>
-<strong>【泰国】根据中国领事服务网安全提醒，近期泰国多地发生了中国公民遭非法拘禁敲诈勒索的事件，请当地中国公民保护好个人安全，必要时联系中国大使馆（12308）、泰国警方（191）及泰国旅游警察（1155，提供中文服务）获取帮助。</strong><br><br>
-<strong>【日本】根据中国领事服务网安全提醒，日本当地“社会治安不靖，针对中国公民违法犯罪案件多发，在日本中国公民面临的安全环境持续恶化”，且有人强行闯入中国驻日本大使馆，对中方外交人员人身安全和外交设施安全构成了严重威胁。请当地中国公民保护好人身安全，必要时向中国大使馆（+86-10-12308及+86-10-65612308）、日本警方（110）、日本消防（119）及日本海上事故和海难救援（118）获取帮助。</strong>`;
+		</p>`
+	// const defaultEmergency = `<strong>这里是本站的紧急公告，根据中国领事服务网安全提醒进行更新。</strong><strong>中国领事服务网官方安全提醒请见 <a href="https://cs.mfa.gov.cn/gyls/lsgz/lsyj/jszwqw/" target="_blank" rel="noopener noreferrer">https://cs.mfa.gov.cn/gyls/lsgz/lsyj/jszwqw/</a>。本站不保证更新速率，具体请以官方为准。请时刻关注中国大使馆及中国领事服务网的官方动态。</strong><br><br>
+//<strong>【伊朗】根据中国领事服务网安全提醒，近期由于国际局势原因，伊朗及其周边地区存在战争情况，请当地中国公民及时联系中国大使馆获得帮助，同时也请（拟）赴当地的中国公民保护好人身安全。</strong><br><br>
+//<strong>【泰国】根据中国领事服务网安全提醒，近期泰国多地发生了中国公民遭非法拘禁敲诈勒索的事件，请当地中国公民保护好个人安全，必要时联系中国大使馆（12308）、泰国警方（191）及泰国旅游警察（1155，提供中文服务）获取帮助。</strong><br><br>
+//<strong>【日本】根据中国领事服务网安全提醒，日本当地“社会治安不靖，针对中国公民违法犯罪案件多发，在日本中国公民面临的安全环境持续恶化”，且有人强行闯入中国驻日本大使馆，对中方外交人员人身安全和外交设施安全构成了严重威胁。请当地中国公民保护好人身安全，必要时向中国大使馆（+86-10-12308及+86-10-65612308）、日本警方（110）、日本消防（119）及日本海上事故和海难救援（118）获取帮助。</strong>`;
 
 	if (!emergencyNoticeHtml) {
 		emergencyNoticeHtml = defaultEmergency;
@@ -430,121 +320,6 @@
 		else { emergencyDiv.style.display = "none"; }
 	}
 
-	// 管理员登录验证 (使用SHA256哈希)
-	async function adminLogin() {
-		const user = document.getElementById("adminUser").value;
-		const pwd = document.getElementById("adminPwd").value;
-		const step2 = document.getElementById("step2Code").value;
-		
-		const userHash = CryptoJS.SHA256(user).toString();
-		const pwdHash = CryptoJS.SHA256(pwd).toString();
-		const step2Hash = CryptoJS.SHA256(step2).toString();
-		
-		if(userHash !== USER_HASH || pwdHash !== PWD_HASH || step2Hash !== STEP2_HASH) {
-			alert("用户名、密码或验证码错误");
-			return;
-		}
-		
-		// 检查是否有其他活跃会话
-		const activeSession = localStorage.getItem('active_session_id');
-		if(activeSession) {
-			addLogEntry("登录被阻止", "已有其他管理员在线，无法重复登录");
-			alert("已有管理员在线，请稍后再试");
-			return;
-		}
-		
-		const clientIP = await getClientIP();
-		const sessionId = generateSessionId();
-		registerSession(sessionId);
-		
-		document.getElementById("adminLoginForm").style.display = "none";
-		document.getElementById("adminPanelContent").style.display = "block";
-		
-		const sel = document.getElementById("pinCountrySelect");
-		sel.innerHTML = '<option value="">--选择国家--</option>' + masterEmbassies.filter(e=>e.hasDiplomatic).map(e=>`<option value="${e.country}" ${pinnedCountry===e.country?'selected':''}>${e.country}</option>`).join('');
-		document.getElementById("editNormalNotice").value = (normalNoticeText && normalNoticeText.trim() !== "") ? normalNoticeText : defaultNotice;
-		document.getElementById("editEmergencyNotice").value = emergencyNoticeHtml;
-		
-		addLogEntry("管理员登录", `IP: ${clientIP}`);
-		renderLogs();
-		alert("登录成功！");
-	}
-	
-	function togglePin() { 
-		if(!adminLoggedIn) return; 
-		const selected = document.getElementById("pinCountrySelect").value; 
-		if(!selected) return alert("请选择国家"); 
-		const action = pinnedCountry === selected ? "取消置顶" : "置顶";
-		if(pinnedCountry === selected) { pinnedCountry = null; localStorage.removeItem("adminPinnedCountry"); } 
-		else { pinnedCountry = selected; localStorage.setItem("adminPinnedCountry", selected); } 
-		generateFoldList(); 
-		updateRecommendation(); 
-		addLogEntry(`${action}国家`, `${selected}`);
-		renderLogs();
-		alert(`已${action} ${selected}`);
-		const sel = document.getElementById("pinCountrySelect");
-		sel.innerHTML = '<option value="">--选择国家--</option>' + masterEmbassies.filter(e=>e.hasDiplomatic).map(e=>`<option value="${e.country}" ${pinnedCountry===e.country?'selected':''}>${e.country}</option>`).join('');
-	}
-	
-	function saveNormal() { 
-		if(!adminLoggedIn) return; 
-		normalNoticeText = document.getElementById("editNormalNotice").value; 
-		if(normalNoticeText.trim() === "") normalNoticeText = defaultNotice;
-		localStorage.setItem("adminNormalNotice", normalNoticeText); 
-		updateNoticeUI(); 
-		addLogEntry("修改普通公告", "内容已更新");
-		renderLogs();
-		alert("普通公告已更新"); 
-	}
-	
-	function saveEmergency() { 
-		if(!adminLoggedIn) return; 
-		emergencyNoticeHtml = document.getElementById("editEmergencyNotice").value; 
-		localStorage.setItem("adminEmergencyNotice", emergencyNoticeHtml); 
-		updateNoticeUI(); 
-		addLogEntry("修改紧急公告", "红框内容已更新");
-		renderLogs();
-		alert("紧急公告已保存"); 
-	}
-	
-	function clearEmergency() { 
-		if(!adminLoggedIn) return; 
-		emergencyNoticeHtml = ""; 
-		localStorage.removeItem("adminEmergencyNotice"); 
-		updateNoticeUI(); 
-		document.getElementById("editEmergencyNotice").value = ""; 
-		addLogEntry("清除紧急公告", "红框公告已移除");
-		renderLogs();
-		alert("红框公告已清除"); 
-	}
-
-	// 关闭弹窗时注销会话
-	function closeModalAndLogout() {
-		if(adminLoggedIn) {
-			addLogEntry("管理员登出", "会话已结束");
-			renderLogs();
-			logoutSession();
-		}
-		document.getElementById("adminModal").classList.remove("show");
-		document.getElementById("adminLoginForm").style.display = "block";
-		document.getElementById("adminPanelContent").style.display = "none";
-	}
-
-	const modal = document.getElementById("adminModal");
-	const adminEntry = document.getElementById("adminEntry");
-	adminEntry.onclick = () => modal.classList.add("show");
-	document.getElementById("closeAdminModal").onclick = closeModalAndLogout;
-	document.getElementById("doLoginBtn").onclick = adminLogin;
-	document.getElementById("togglePinBtn").onclick = togglePin;
-	document.getElementById("saveNormalNoticeBtn").onclick = saveNormal;
-	document.getElementById("saveEmergencyBtn").onclick = saveEmergency;
-	document.getElementById("clearEmergencyBtn").onclick = clearEmergency;
-	modal.onclick = (e) => { if(e.target === modal) closeModalAndLogout(); };
-
-	generateFoldList();
-	updateRecommendation();
-	updateNoticeUI();
-	renderLogs();
 </script>
 </body>
 </html>
