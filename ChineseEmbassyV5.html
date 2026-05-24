@@ -3,237 +3,506 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>站点维护中 · 中国领事服务</title>
+    <title>中国驻外大使馆信息 · 全球领事服务指南</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: system-ui, 'Segoe UI', 'Noto Sans', 'PingFang SC', Roboto, 'Helvetica Neue', sans-serif;
             background: #f0f2f5;
             color: #1e2a3a;
             padding: 20px;
             line-height: 1.5;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
-
-        .container {
-            max-width: 680px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        /* 核心黄框卡片 */
-        .notice-card {
+        .container { max-width: 1280px; margin: 0 auto; }
+        .notice-board {
             background: #fff8e7;
-            border-left: 8px solid #f5a623;
-            border-radius: 28px;
-            padding: 2rem 2rem 2rem 2rem;
-            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.05);
-            transition: all 0.2s ease;
-        }
-
-        /* 大标题区域 */
-        .title-block {
-            margin-bottom: 1.5rem;
-            text-align: left;
-        }
-
-        .main-title {
-            font-size: 2.2rem;
-            font-weight: 800;
-            letter-spacing: -0.01em;
-            background: linear-gradient(135deg, #b45f06, #e67e22);
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 0.5rem;
-        }
-
-        .main-title span {
-            font-size: 2.2rem;
-        }
-
-        /* 小文字说明区 */
-        .message-detail {
+            border-left: 6px solid #f5a623;
+            border-radius: 16px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            font-size: 0.9rem;
             color: #5a3e1b;
-            font-size: 1rem;
-            line-height: 1.5;
-            margin-bottom: 1.2rem;
-            border-left: 3px solid #f5a62380;
-            padding-left: 1rem;
         }
-
-        .message-detail p {
-            margin-bottom: 0.5rem;
+        .emergency-board { background: #ffe9e9; border-left: 6px solid #e74c3c; margin-bottom: 1.5rem; }
+        .hotline { font-weight: 600; background: #fce4d6; display: inline-block; padding: 0.2rem 0.6rem; border-radius: 24px; }
+        .geo-card { background: white; border-radius: 24px; padding: 1.2rem 1.8rem; margin-bottom: 2rem; box-shadow: 0 8px 20px rgba(0,0,0,0.08); border: 1px solid #e9ecef; }
+        .geo-header { display: flex; align-items: baseline; flex-wrap: wrap; justify-content: space-between; margin-bottom: 0.75rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+        .geo-title { font-size: 1.35rem; font-weight: 700; background: linear-gradient(135deg,#1e3c72,#2b4e8a); background-clip: text; -webkit-background-clip: text; color: transparent; }
+        .geo-badge { background: #eef2ff; padding: 0.2rem 0.8rem; border-radius: 30px; font-size: 0.75rem; font-weight: 500; }
+        .red-alert { background: #ffe9e9; border-left: 6px solid #e74c3c; padding: 1rem; border-radius: 16px; color: #a1220a; font-weight: 500; margin-top: 0.5rem; }
+        .diplo-card { background: #fefefe; border: 1px solid #e2edf2; border-radius: 20px; padding: 1rem 1.2rem; margin-bottom: 0.5rem; }
+        .contact-item { margin: 0.5rem 0 0.2rem; display: flex; flex-wrap: wrap; gap: 0.8rem; font-size: 0.9rem; }
+        .contact-detail { background: #f1f5f9; padding: 0.2rem 0.6rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; }
+        .copy-btn { background: none; border: none; color: #2c6e9e; cursor: pointer; font-size: 0.7rem; margin-left: 6px; padding: 2px 6px; border-radius: 30px; }
+        .fold-section { margin-bottom: 1rem; border-radius: 20px; background: white; border: 1px solid #e9ecef; overflow: hidden; }
+        .fold-header { background: white; padding: 1rem 1.5rem; cursor: pointer; font-weight: 600; font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center; }
+        .fold-header:hover { background: #f6f9fc; }
+        .fold-icon { font-size: 1.2rem; transition: transform 0.2s; }
+        .fold-content { padding: 0 1rem 1rem 1rem; border-top: 1px solid #eef2f6; display: none; }
+        .fold-content.open { display: block; }
+        footer { text-align: center; margin-top: 3rem; padding: 1.2rem; font-size: 0.75rem; color: #5c6f87; border-top: 1px solid #dce5ef; }
+        
+        /* 搜索框样式 */
+        .search-container {
+            background: white;
+            border-radius: 24px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            border: 1px solid #e9ecef;
         }
-
-        .small-text {
-            font-size: 0.9rem;
-            color: #7d5d2e;
-        }
-
-        /* 官方链接区块 — 温和蓝灰搭配，延续参考样式风格 */
-        .official-links {
-            background: #eef2fa;
-            border-radius: 20px;
-            padding: 1rem 1.2rem;
-            margin-top: 1.8rem;
-            border: 1px solid #dce5ef;
-        }
-
-        .official-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 700;
-            color: #1e5a7a;
-            margin-bottom: 12px;
-            font-size: 0.9rem;
-        }
-
-        .links-group {
+        .search-box {
             display: flex;
             flex-wrap: wrap;
             gap: 12px;
-            margin-bottom: 8px;
+            align-items: center;
+            margin-bottom: 12px;
         }
-
-        .links-group a {
-            color: #2c6e9e;
-            text-decoration: none;
-            background: rgba(44, 110, 158, 0.08);
-            padding: 5px 14px;
+        .search-box input {
+            flex: 1;
+            padding: 12px 16px;
+            font-size: 1rem;
+            border: 1px solid #dce5ef;
             border-radius: 40px;
+            outline: none;
+            transition: 0.2s;
+        }
+        .search-box input:focus {
+            border-color: #2c6e9e;
+            box-shadow: 0 0 0 3px rgba(44,110,158,0.1);
+        }
+        .search-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
             font-size: 0.85rem;
-            font-weight: 500;
-            transition: all 0.2s;
-            display: inline-flex;
+            color: #4a627a;
+        }
+        .search-options label {
+            display: flex;
             align-items: center;
             gap: 6px;
+            cursor: pointer;
         }
-
-        .links-group a:hover {
-            background: rgba(44, 110, 158, 0.2);
-            text-decoration: underline;
+        .search-options input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
         }
-
-        .emergency-hotline {
-            background: #fef1e0;
-            border-radius: 60px;
-            padding: 0.5rem 1rem;
-            margin-top: 1.2rem;
-            display: inline-block;
-            width: auto;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #b45309;
-            border: 1px solid #ffe0b5;
+        .search-results-info {
+            font-size: 0.8rem;
+            color: #6c86a3;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #eef2f6;
         }
-
-        .hotline-number {
-            font-family: monospace;
-            background: #fff3e6;
-            padding: 0.2rem 0.7rem;
-            border-radius: 36px;
-            margin: 0 4px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-
-        footer {
-            margin-top: 2rem;
-            text-align: center;
-            font-size: 0.7rem;
-            color: #8a9bb0;
-            border-top: 1px solid #e2e8f0;
-            padding-top: 1.2rem;
-        }
-
-        /* 小点缀动画 */
-        @keyframes gentlePulse {
-            0% { opacity: 0.7; transform: scale(1);}
-            100% { opacity: 1; transform: scale(1.02);}
-        }
-
-        .notice-card {
-            animation: gentlePulse 0.4s ease-out;
-        }
-
-        @media (max-width: 560px) {
-            body {
-                padding: 16px;
-            }
-            .notice-card {
-                padding: 1.5rem;
-            }
-            .main-title {
-                font-size: 1.8rem;
-            }
-            .main-title span {
-                font-size: 1.8rem;
-            }
-            .message-detail {
-                font-size: 0.9rem;
-            }
-            .links-group a {
-                padding: 4px 12px;
-                font-size: 0.8rem;
-            }
+        @media (max-width: 680px) {
+            body { padding: 12px; }
+            .geo-card { padding: 1rem; }
+            .search-box { flex-direction: column; }
+            .search-box input { width: 100%; }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <!-- 唯一核心黄框：完全符合“只有一个黄框，上面写（第一行大标题，剩下小文字）” -->
-    <div class="notice-card">
-        <div class="title-block">
-            <div class="main-title">
-                <span>⚠️</span> 功能开发中
-            </div>
-        </div>
-        <div class="message-detail">
-            <p>本站正在开发新功能，请稍等再访问。</p>
-            <p>这不会耽误太久。</p>
-            <p class="small-text">更多信息可关注下方官方渠道，紧急帮助请拨打领事保护热线。</p>
-        </div>
+    <div id="normalNotice" class="notice-board"></div>
+    <div id="emergencyNotice" class="notice-board emergency-board" style="display: none;"></div>
 
-        <!-- 官方信息板块 (延续参考风格：保持蓝框样式，但整体仍在黄框内部，满足布局完整性) -->
-        <div class="official-links">
-            <div class="official-header">
-                <span>🏛️</span> 官方权威信息源 · 领事服务
-            </div>
-            <div class="links-group">
-                <a href="https://cs.mfa.gov.cn/" target="_blank" rel="noopener noreferrer">📘 中国领事服务网</a>
-                <a href="https://www.fmprc.gov.cn/" target="_blank" rel="noopener noreferrer">🌐 中国外交部官网</a>
-                <a href="https://cs.mfa.gov.cn/gyls/lsgz/lsyj/jszwqw/" target="_blank" rel="noopener noreferrer">⚠️ 安全提醒专栏</a>
-                <a href="https://cs.mfa.gov.cn/zggmzhw/lsbh/" target="_blank" rel="noopener noreferrer">🛡️ 领事保护专栏</a>
-            </div>
-            <div class="emergency-hotline">
-                📞 外交部全球领事保护与服务应急热线：
-                <strong class="hotline-number">0086-10-12308</strong>
-                <span style="margin:0 4px">/</span>
-                <strong class="hotline-number">0086-10-65612308</strong>
-            </div>
-            <div style="font-size: 0.7rem; color: #6a7c8f; margin-top: 12px;">
-                如遇紧急情况，请第一时间联系当地警方及中国使领馆寻求帮助。
-            </div>
+    <!-- 官方链接集锦：蓝框 -->
+    <div id="officialLinks" style="background: #e8f4fd; border-left: 6px solid #2c6e9e; border-radius: 16px; padding: 0.8rem 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+            <span style="font-weight: 700; color: #1e5a7a;">🏛️ 官方权威信息源</span>
+            <span style="font-size: 0.7rem; background: #fff; padding: 2px 8px; border-radius: 20px; color: #2c6e9e;">领事保护 · 出行必读</span>
         </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.85rem;">
+            <a href="https://www.fmprc.gov.cn/" target="_blank" rel="noopener noreferrer" style="color: #2c6e9e; text-decoration: none; background: rgba(44,110,158,0.1); padding: 4px 12px; border-radius: 20px;">🌐 中国外交部官网</a>
+            <a href="https://cs.mfa.gov.cn/" target="_blank" rel="noopener noreferrer" style="color: #2c6e9e; text-decoration: none; background: rgba(44,110,158,0.1); padding: 4px 12px; border-radius: 20px;">📘 中国领事服务网</a>
+            <a href="https://cs.mfa.gov.cn/gyls/lsgz/lsyj/jszwqw/" target="_blank" rel="noopener noreferrer" style="color: #2c6e9e; text-decoration: none; background: rgba(44,110,158,0.1); padding: 4px 12px; border-radius: 20px;">🚫 安全提醒、暂勿前往专栏</a>
+            <a href="https://cs.mfa.gov.cn/gyls/lsgz/lsyj/zyaq/" target="_blank" rel="noopener noreferrer" style="color: #2c6e9e; text-decoration: none; background: rgba(44,110,158,0.1); padding: 4px 12px; border-radius: 20px;">⚠️ 注意安全专栏</a>
+            <a href="https://cs.mfa.gov.cn/zggmzhw/lsbh/" target="_blank" rel="noopener noreferrer" style="color: #2c6e9e; text-decoration: none; background: rgba(44,110,158,0.1); padding: 4px 12px; border-radius: 20px;">🗃 领事保护专栏</a>
+            <a href="https://cs.mfa.gov.cn/zggmcg/hz/sbhz/" target="_blank" rel="noopener noreferrer" style="color: #2c6e9e; text-decoration: none; background: rgba(44,110,158,0.1); padding: 4px 12px; border-radius: 20px;">📕 申办护照</a>
+            <a href="https://cs.mfa.gov.cn/zggmcg/cgqz/sbcgqz/" target="_blank" rel="noopener noreferrer" style="color: #2c6e9e; text-decoration: none; background: rgba(44,110,158,0.1); padding: 4px 12px; border-radius: 20px;">📘 申报出国签证</a>
+            <a href="https://cs.mfa.gov.cn/wgrlh/lhqz/lhqzjjs/" target="_blank" rel="noopener noreferrer" style="color: #2c6e9e; text-decoration: none; background: rgba(44,110,158,0.1); padding: 4px 12px; border-radius: 20px;">📔 来华签证须知/About Chinese Visa</a>
+            <a href="https://cs.mfa.gov.cn/zggmzhw/hzlxz/sbhzlxz/" target="_blank" rel="noopener noreferrer" style="color: #2c6e9e; text-decoration: none; background: rgba(44,110,158,0.1); padding: 4px 12px; border-radius: 20px;">📙 申办护照/旅行证</a>
+            <a href="https://cs.mfa.gov.cn/zggmzhw/lsgz/sqlsrzxz_660563/" target="_blank" rel="noopener noreferrer" style="color: #2c6e9e; text-decoration: none; background: rgba(44,110,158,0.1); padding: 4px 12px; border-radius: 20px;">✉️ 申办领事认证</a>
+            <a href="https://cs.mfa.gov.cn/gyls/lxfs/" target="_blank" rel="noopener noreferrer" style="color: #2c6e9e; text-decoration: none; background: rgba(44,110,158,0.1); padding: 4px 12px; border-radius: 20px;">📞 领事服务联系方式</a>
+            <a href="https://cs.mfa.gov.cn/zggmcg/apecshlxk/sqapeck_660487/" target="_blank" rel="noopener noreferrer" style="color: #2c6e9e; text-decoration: none; background: rgba(44,110,158,0.1); padding: 4px 12px; border-radius: 20px;">💳 申办APEC卡</a>
+            <a href="https://cs.mfa.gov.cn/wgrlh/lsrz/lsrzjjs/" target="_blank" rel="noopener noreferrer" style="color: #2c6e9e; text-decoration: none; background: rgba(44,110,158,0.1); padding: 4px 12px; border-radius: 20px;">💡 Consular Legalisation/Apostillisation</a>
+        </div>
+        <div style="font-size: 0.7rem; color: #5c8aa6; margin-top: 8px;">以上为官方机构网站，权威信息请以此为准</div>
     </div>
 
-    <footer>
-        中国领事服务网 · 权威领事信息平台<br>
-        本页面为临时维护公告，正式服务恢复后我们将第一时间开放。
-    </footer>
+    <!-- 搜索框 -->
+    <div class="search-container">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="🔍 搜索国家... 支持简体/繁体/拼音/英文" autocomplete="off">
+        </div>
+        <div class="search-options">
+            <label>
+                <input type="checkbox" id="showFlagCheckbox" checked> 显示国旗
+            </label>
+            <span style="color:#cbd5e1;">|</span>
+            <span>📌 多置顶: 最后选择的在最前</span>
+        </div>
+        <div class="search-results-info" id="searchResultsInfo"></div>
+    </div>
+
+    <div id="geoRecommendation" class="geo-card">
+        <div class="geo-header"><span class="geo-title">📍 根据您的位置推荐</span><span class="geo-badge" id="ipStatus">正在获取位置…</span></div>
+        <div id="recommendContent">加载中，请稍候...</div>
+    </div>
+
+    <h2 style="margin: 1.5rem 0 0.8rem;">🌏 所有中国驻外大使馆信息 (全球已建交国家)</h2>
+    <p style="margin-bottom: 1rem; color:#4b5563;">点击国家名称展开/折叠联系方式，信息基于中国外交部公开资料整理。</p>
+    <div id="embassiesListContainer"></div>
+
+    <footer>数据参考中国外交部公开信息 · 实时更新请以官方为准 | 领事保护热线 12308<br>中国领事服务网：<a href="https://cs.mfa.gov.cn/" target="_blank">https://cs.mfa.gov.cn/</a></footer>
 </div>
+
+<script>
+// ========== 管理员配置（直接修改这里即可，无需登录） ==========
+const ADMIN_CONFIG = {
+    // 置顶的国家列表（按顺序，最后选择的在最顶部）
+    pinnedCountries: ["伊朗", "泰国", "日本"],
+    
+    // 紧急公告内容（支持HTML，留空则不显示红框）
+    emergencyNotice: `这里是本站的紧急公告，根据中国领事服务网安全提醒进行更新。<strong>中国领事服务网官方安全提醒请见 <a href="https://cs.mfa.gov.cn/gyls/lsgz/lsyj/jszwqw/" target="_blank" rel="noopener noreferrer">https://cs.mfa.gov.cn/gyls/lsgz/lsyj/jszwqw/</a>。本站不保证更新速率，具体请以官方为准。请时刻关注中国大使馆及中国领事服务网的官方动态。</strong><br><br>
+<strong>【伊朗】根据中国领事服务网安全提醒，近期由于国际局势原因，伊朗及其周边地区存在战争情况，请当地中国公民及时联系中国大使馆获得帮助，同时也请（拟）赴当地的中国公民保护好人身安全。</strong><br><br>
+<strong>【泰国】根据中国领事服务网安全提醒，近期泰国多地发生了中国公民遭非法拘禁敲诈勒索的事件，请当地中国公民保护好个人安全，必要时联系中国大使馆（12308）、泰国警方（191）及泰国旅游警察（1155，提供中文服务）获取帮助。</strong><br><br>
+<strong>【日本】根据中国领事服务网安全提醒，日本当地“社会治安不靖，针对中国公民违法犯罪案件多发，在日本中国公民面临的安全环境持续恶化”，且有人强行闯入中国驻日本大使馆，对中方外交人员人身安全和外交设施安全构成了严重威胁。请当地中国公民保护好人身安全，必要时向中国大使馆（+86-10-12308及+86-10-65612308）、日本警方（110）、日本消防（119）及日本海上事故和海难救援（118）获取帮助。</strong>`,
+
+    // 普通公告
+    normalNotice: `<p>📢 <strong>领事安全提醒</strong>：如中国公民在国外遭遇紧急情况，请联系当地警方。如有必要请联系中国大使馆。<br>
+        🛡️ 外交部全球领事保护与服务应急热线：<strong class="hotline">0086-10-12308</strong> 或 <strong class="hotline">0086-10-65612308</strong><br>
+        🌐 <strong>中国领事服务网官方安全提醒请见 <a href="https://cs.mfa.gov.cn/gyls/lsgz/lsyj/jszwqw/" target="_blank" rel="noopener noreferrer">https://cs.mfa.gov.cn/gyls/lsgz/lsyj/jszwqw/</a></strong><br>
+        ⚖️ 本站仅供信息提供，不具备任何外交及法律职能，如需要帮助请联系中国大使馆。<br>
+        <strong>本站与中国外交部及中国领事服务网无关且不存在隶属关系，且本站并非中国外交部官方认定网站，仅根据其信息进行更新，具体请关注中国外交部官方<a href="https://www.fmprc.gov.cn/" target="_blank" rel="noopener noreferrer">https://www.fmprc.gov.cn/</a>及中国领事服务网官方<a href="https://cs.mfa.gov.cn/" target="_blank" rel="noopener noreferrer">https://cs.mfa.gov.cn/</a>。</strong></p>`
+};
+// ============================================================
+
+// ======================= 国旗映射表 ========================
+const flagMap = {
+    "朝鲜": "🇰🇵", "蒙古": "🇲🇳", "越南": "🇻🇳", "老挝": "🇱🇦", "柬埔寨": "🇰🇭",
+    "缅甸": "🇲🇲", "泰国": "🇹🇭", "马来西亚": "🇲🇾", "新加坡": "🇸🇬", "印度尼西亚": "🇮🇩",
+    "菲律宾": "🇵🇭", "东帝汶": "🇹🇱", "尼泊尔": "🇳🇵", "不丹": "🇧🇹", "孟加拉国": "🇧🇩",
+    "印度": "🇮🇳", "巴基斯坦": "🇵🇰", "斯里兰卡": "🇱🇰", "马尔代夫": "🇲🇻", "哈萨克斯坦": "🇰🇿",
+    "吉尔吉斯斯坦": "🇰🇬", "塔吉克斯坦": "🇹🇯", "乌兹别克斯坦": "🇺🇿", "土库曼斯坦": "🇹🇲",
+    "阿富汗": "🇦🇫", "伊朗": "🇮🇷", "伊拉克": "🇮🇶", "沙特阿拉伯": "🇸🇦", "也门": "🇾🇪",
+    "阿曼": "🇴🇲", "阿联酋": "🇦🇪", "卡塔尔": "🇶🇦", "巴林": "🇧🇭", "科威特": "🇰🇼",
+    "黎巴嫩": "🇱🇧", "叙利亚": "🇸🇾", "约旦": "🇯🇴", "以色列": "🇮🇱", "巴勒斯坦": "🇵🇸",
+    "土耳其": "🇹🇷", "塞浦路斯": "🇨🇾", "埃及": "🇪🇬", "阿尔及利亚": "🇩🇿", "摩洛哥": "🇲🇦",
+    "突尼斯": "🇹🇳", "利比亚": "🇱🇾", "苏丹": "🇸🇩", "南苏丹": "🇸🇸", "埃塞俄比亚": "🇪🇹",
+    "厄立特里亚": "🇪🇷", "吉布提": "🇩🇯", "索马里": "🇸🇴", "肯尼亚": "🇰🇪", "乌干达": "🇺🇬",
+    "坦桑尼亚": "🇹🇿", "卢旺达": "🇷🇼", "布隆迪": "🇧🇮", "刚果(金)": "🇨🇩", "刚果(布)": "🇨🇬",
+    "加蓬": "🇬🇦", "喀麦隆": "🇨🇲", "尼日利亚": "🇳🇬", "加纳": "🇬🇭", "科特迪瓦": "🇨🇮",
+    "马里": "🇲🇱", "布基纳法索": "🇧🇫", "贝宁": "🇧🇯", "多哥": "🇹🇬", "塞内加尔": "🇸🇳",
+    "毛里塔尼亚": "🇲🇷", "冈比亚": "🇬🇲", "几内亚": "🇬🇳", "几内亚比绍": "🇬🇼", "塞拉利昂": "🇸🇱",
+    "利比里亚": "🇱🇷", "津巴布韦": "🇿🇼", "赞比亚": "🇿🇲", "莫桑比克": "🇲🇿", "马拉维": "🇲🇼",
+    "博茨瓦纳": "🇧🇼", "纳米比亚": "🇳🇦", "南非": "🇿🇦", "俄罗斯": "🇷🇺", "英国": "🇬🇧",
+    "法国": "🇫🇷", "德国": "🇩🇪", "意大利": "🇮🇹", "西班牙": "🇪🇸", "葡萄牙": "🇵🇹",
+    "荷兰": "🇳🇱", "比利时": "🇧🇪", "卢森堡": "🇱🇺", "瑞士": "🇨🇭", "瑞典": "🇸🇪",
+    "挪威": "🇳🇴", "丹麦": "🇩🇰", "芬兰": "🇫🇮", "冰岛": "🇮🇸", "爱尔兰": "🇮🇪",
+    "波兰": "🇵🇱", "捷克": "🇨🇿", "匈牙利": "🇭🇺", "奥地利": "🇦🇹", "希腊": "🇬🇷",
+    "美国": "🇺🇸", "加拿大": "🇨🇦", "墨西哥": "🇲🇽", "巴西": "🇧🇷", "阿根廷": "🇦🇷",
+    "智利": "🇨🇱", "秘鲁": "🇵🇪", "古巴": "🇨🇺", "澳大利亚": "🇦🇺", "新西兰": "🇳🇿",
+    "斐济": "🇫🇯", "帕劳": "🇵🇼", "危地马拉": "🇬🇹", "巴拉圭": "🇵🇾"
+};
+
+// ======================= 拼音映射（简易版） ========================
+const pinyinMap = {
+    "yilang": "伊朗", "yilang": "伊朗", "taiguo": "泰国", "riben": "日本",
+    "meiguo": "美国", "yingguo": "英国", "faguo": "法国", "deguo": "德国",
+    "yidali": "意大利", "xibanya": "西班牙", "eluosi": "俄罗斯", "jiandada": "加拿大",
+    "aodaliya": "澳大利亚", "xinxilan": "新西兰", "yindu": "印度", "baxi": "巴西"
+};
+for(let [k,v] of Object.entries(pinyinMap)) pinyinMap[k] = v;
+
+// ======================= 多语言搜索辅助 ========================
+function getSearchVariants(countryName) {
+    const variants = [countryName.toLowerCase()];
+    // 繁体转换（简单映射）
+    const traditional = { "国":"國", "汉":"漢", "华":"華", "东":"東", "马":"馬", "亚":"亞", "来":"來", "门":"門", "尔":"爾", "罗":"羅", "苏":"蘇", "联":"聯", "几":"幾", "内":"內", "卢":"盧", "刚":"剛", "果":"果", "布":"布", "尼":"尼", "利":"利", "比":"比", "亚":"亞" };
+    let trad = countryName;
+    for(let [s,t] of Object.entries(traditional)) trad = trad.replaceAll(s, t);
+    if(trad !== countryName) variants.push(trad.toLowerCase());
+    // 英文名映射
+    const enMap = { "朝鲜":"north korea", "韩国":"south korea", "俄罗斯":"russia", "英国":"united kingdom", "美国":"united states", "阿联酋":"uae", "沙特阿拉伯":"saudi arabia" };
+    if(enMap[countryName]) variants.push(enMap[countryName].toLowerCase());
+    return variants;
+}
+
+function matchCountry(countryName, searchTerm) {
+    if(!searchTerm) return true;
+    const term = searchTerm.toLowerCase().trim();
+    if(countryName.toLowerCase().includes(term)) return true;
+    // 拼音匹配
+    for(let [pinyin, target] of Object.entries(pinyinMap)) {
+        if(target === countryName && pinyin.includes(term)) return true;
+    }
+    // 繁体匹配
+    const variants = getSearchVariants(countryName);
+    for(let v of variants) if(v.includes(term)) return true;
+    return false;
+}
+
+// ======================= 完整全球建交国家大使馆数据集 ========================
+const buildFullEmbassyList = () => {
+    const asia = [
+        { country: "朝鲜", hasDiplomatic: true, phone: "+850-2-3813116", email: "chinaemb_kp@mfa.gov.cn", address: "平壤市牡丹峰区凯旋门大街" },
+        { country: "蒙古", hasDiplomatic: true, phone: "+976-11-323940", email: "chinaemb_mn@mfa.gov.cn", address: "乌兰巴托市巴彦珠日赫区北京街2号" },
+        { country: "越南", hasDiplomatic: true, phone: "+84-24-3823-5569", email: "chinaemb_vn@mfa.gov.cn", address: "河内市黄耀街46号" },
+        { country: "老挝", hasDiplomatic: true, phone: "+856-21-315100", email: "chinaemb_la@mfa.gov.cn", address: "万象市西萨达纳县瓦纳村" },
+        { country: "柬埔寨", hasDiplomatic: true, phone: "+855-23-720920", email: "chinaemb_kh@mfa.gov.cn", address: "金边市毛泽东大道156号" },
+        { country: "缅甸", hasDiplomatic: true, phone: "+95-1-221280", email: "chinaemb_mm@mfa.gov.cn", address: "仰光市达贡镇区联邦路" },
+        { country: "泰国", hasDiplomatic: true, phone: "+66-2-245-0088", email: "chinaemb_th@mfa.gov.cn", address: "曼谷拉差达披色路57号" },
+        { country: "马来西亚", hasDiplomatic: true, phone: "+60-3-2163-6853", email: "chinaemb_my@mfa.gov.cn", address: "吉隆坡安邦路25号" },
+        { country: "新加坡", hasDiplomatic: true, phone: "+65-6418-0252", email: "chinaemb_sg@mfa.gov.cn", address: "东陵路150号" },
+        { country: "印度尼西亚", hasDiplomatic: true, phone: "+62-21-576-1021", email: "chinaemb_id@mfa.gov.cn", address: "雅加达南区梅加库宁冈东街6号" },
+        { country: "菲律宾", hasDiplomatic: true, phone: "+63-2-8844-3148", email: "chinaemb_ph@mfa.gov.cn", address: "马卡蒂市阿蒂旺街4896号" },
+        { country: "东帝汶", hasDiplomatic: true, phone: "+670-332-2168", email: "chinaemb_tl@mfa.gov.cn", address: "帝力市科摩罗区总统大道" },
+        { country: "尼泊尔", hasDiplomatic: true, phone: "+977-1-4411740", email: "chinaemb_np@mfa.gov.cn", address: "加德满都哈提萨区" },
+        { country: "不丹", hasDiplomatic: false, phone: null, email: null, address: null, note: "不丹与中国尚未建交，使馆未设立" },
+        { country: "孟加拉国", hasDiplomatic: true, phone: "+880-2-988-7923", email: "chinaemb_bd@mfa.gov.cn", address: "达卡市巴里达拉区" },
+        { country: "印度", hasDiplomatic: true, phone: "+91-11-2611-2345", email: "chinaemb_in@mfa.gov.cn", address: "新德里昌迪亚普里区香堤帕特50D" },
+        { country: "巴基斯坦", hasDiplomatic: true, phone: "+92-51-835-5000", email: "chinaemb_pk@mfa.gov.cn", address: "伊斯兰堡迪普洛马特大道" },
+        { country: "斯里兰卡", hasDiplomatic: true, phone: "+94-11-268-8610", email: "chinaemb_lk@mfa.gov.cn", address: "科伦坡七区佛光路" },
+        { country: "马尔代夫", hasDiplomatic: true, phone: "+960-301-0885", email: "chinaemb_mv@mfa.gov.cn", address: "马累市亨维鲁区" },
+        { country: "哈萨克斯坦", hasDiplomatic: true, phone: "+7-7172-793-577", email: "chinaemb_kz@mfa.gov.cn", address: "努尔苏丹市左岸区" },
+        { country: "吉尔吉斯斯坦", hasDiplomatic: true, phone: "+996-312-597-481", email: "chinaemb_kg@mfa.gov.cn", address: "比什凯克市托克托古尔大街" },
+        { country: "塔吉克斯坦", hasDiplomatic: true, phone: "+992-37-221-1706", email: "chinaemb_tj@mfa.gov.cn", address: "杜尚别市鲁达基大街" },
+        { country: "乌兹别克斯坦", hasDiplomatic: true, phone: "+998-71-233-8088", email: "chinaemb_uz@mfa.gov.cn", address: "塔什干市古丽亚莫夫街" },
+        { country: "土库曼斯坦", hasDiplomatic: true, phone: "+993-12-481-111", email: "chinaemb_tm@mfa.gov.cn", address: "阿什哈巴德市阿尔查比尔大道" },
+        { country: "阿富汗", hasDiplomatic: true, phone: "+93-20-210-0212", email: "chinaemb_af@mfa.gov.cn", address: "喀布尔市沙里诺区" },
+        { country: "伊朗", hasDiplomatic: true, phone: "+98-21-2229-1241", email: "chinaemb_ir@mfa.gov.cn", address: "德黑兰市帕斯达兰大街" },
+        { country: "伊拉克", hasDiplomatic: true, phone: "+964-790-192-2306", email: "chinaemb_iq@mfa.gov.cn", address: "巴格达曼苏尔区" },
+        { country: "沙特阿拉伯", hasDiplomatic: true, phone: "+966-11-483-2126", email: "chinaemb_sa@mfa.gov.cn", address: "利雅得市使馆区" },
+        { country: "也门", hasDiplomatic: true, phone: "+967-1-443-424", email: "chinaemb_ye@mfa.gov.cn", address: "萨那市扎贝里区 (临时)" },
+        { country: "阿曼", hasDiplomatic: true, phone: "+968-2-449-5492", email: "chinaemb_om@mfa.gov.cn", address: "马斯喀特市使馆区" },
+        { country: "阿联酋", hasDiplomatic: true, phone: "+971-2-443-4276", email: "chinaemb_ae@mfa.gov.cn", address: "阿布扎比市萨迪亚特岛" },
+        { country: "卡塔尔", hasDiplomatic: true, phone: "+974-4493-4203", email: "chinaemb_qa@mfa.gov.cn", address: "多哈西湾湖区" },
+        { country: "巴林", hasDiplomatic: true, phone: "+973-1772-3000", email: "chinaemb_bh@mfa.gov.cn", address: "麦纳麦扎拉克区" },
+        { country: "科威特", hasDiplomatic: true, phone: "+965-2533-3240", email: "chinaemb_kw@mfa.gov.cn", address: "科威特城使馆区" },
+        { country: "黎巴嫩", hasDiplomatic: true, phone: "+961-1-856-133", email: "chinaemb_lb@mfa.gov.cn", address: "贝鲁特市尼古拉斯易卜拉欣区" },
+        { country: "叙利亚", hasDiplomatic: true, phone: "+963-11-613-7732", email: "chinaemb_sy@mfa.gov.cn", address: "大马士革市迈泽区" },
+        { country: "约旦", hasDiplomatic: true, phone: "+962-6-551-5151", email: "chinaemb_jo@mfa.gov.cn", address: "安曼市代赫亚区" },
+        { country: "以色列", hasDiplomatic: true, phone: "+972-3-544-2638", email: "chinaemb_il@mfa.gov.cn", address: "特拉维夫市本耶胡达街" },
+        { country: "巴勒斯坦", hasDiplomatic: true, phone: "+970-2-274-3241", email: "chinaemb_ps@mfa.gov.cn", address: "拉姆安拉市" },
+        { country: "土耳其", hasDiplomatic: true, phone: "+90-312-439-1877", email: "chinaemb_tr@mfa.gov.cn", address: "安卡拉市奇亚区" },
+        { country: "塞浦路斯", hasDiplomatic: true, phone: "+357-22-352-182", email: "chinaemb_cy@mfa.gov.cn", address: "尼科西亚市阿克罗波利斯区" }
+    ];
+    const africa = [
+        { country: "埃及", hasDiplomatic: true, phone: "+20-2-2736-3219", email: "chinaemb_eg@mfa.gov.cn", address: "开罗扎马雷克区巴哈特阿里街14号" },
+        { country: "阿尔及利亚", hasDiplomatic: true, phone: "+213-23-504-638", email: "chinaemb_dz@mfa.gov.cn", address: "阿尔及尔市本阿克努区" },
+        { country: "摩洛哥", hasDiplomatic: true, phone: "+212-537-754-056", email: "chinaemb_ma@mfa.gov.cn", address: "拉巴特市苏维西区" },
+        { country: "突尼斯", hasDiplomatic: true, phone: "+216-71-780-264", email: "chinaemb_tn@mfa.gov.cn", address: "突尼斯市拉克苏区" },
+        { country: "利比亚", hasDiplomatic: true, phone: "+218-21-340-1605", email: "chinaemb_ly@mfa.gov.cn", address: "的黎波里市安达卢斯区" },
+        { country: "苏丹", hasDiplomatic: true, phone: "+249-183-272-730", email: "chinaemb_sd@mfa.gov.cn", address: "喀土穆市曼希亚区" },
+        { country: "南苏丹", hasDiplomatic: true, phone: "+211-912-736-241", email: "chinaemb_ss@mfa.gov.cn", address: "朱巴市哈亚特区" },
+        { country: "埃塞俄比亚", hasDiplomatic: true, phone: "+251-11-371-0066", email: "chinaemb_et@mfa.gov.cn", address: "亚的斯亚贝巴市老机场区" },
+        { country: "厄立特里亚", hasDiplomatic: true, phone: "+291-1-121-037", email: "chinaemb_er@mfa.gov.cn", address: "阿斯马拉市自由大道" },
+        { country: "吉布提", hasDiplomatic: true, phone: "+253-21-353-788", email: "chinaemb_dj@mfa.gov.cn", address: "吉布提市胡尔胡德区" },
+        { country: "索马里", hasDiplomatic: true, phone: "+252-61-775-5210", email: "chinaemb_so@mfa.gov.cn", address: "摩加迪沙市" },
+        { country: "肯尼亚", hasDiplomatic: true, phone: "+254-20-272-6859", email: "chinaemb_ke@mfa.gov.cn", address: "内罗毕伍德兰兹路" },
+        { country: "乌干达", hasDiplomatic: true, phone: "+256-414-259-881", email: "chinaemb_ug@mfa.gov.cn", address: "坎帕拉市布戈洛比区" },
+        { country: "坦桑尼亚", hasDiplomatic: true, phone: "+255-22-266-7475", email: "chinaemb_tz@mfa.gov.cn", address: "达累斯萨拉姆市海滨路" },
+        { country: "卢旺达", hasDiplomatic: true, phone: "+250-788-319-540", email: "chinaemb_rw@mfa.gov.cn", address: "基加利市基库基罗区" },
+        { country: "布隆迪", hasDiplomatic: true, phone: "+257-22-254-367", email: "chinaemb_bi@mfa.gov.cn", address: "布琼布拉市基里里区" },
+        { country: "刚果(金)", hasDiplomatic: true, phone: "+243-81-889-3333", email: "chinaemb_cd@mfa.gov.cn", address: "金沙萨市贡贝区" },
+        { country: "刚果(布)", hasDiplomatic: true, phone: "+242-05-788-888", email: "chinaemb_cg@mfa.gov.cn", address: "布拉柴维尔市姆福阿区" },
+        { country: "加蓬", hasDiplomatic: true, phone: "+241-01-742-058", email: "chinaemb_ga@mfa.gov.cn", address: "利伯维尔市玻璃区" },
+        { country: "喀麦隆", hasDiplomatic: true, phone: "+237-222-210-083", email: "chinaemb_cm@mfa.gov.cn", address: "雅温得市巴斯托斯区" },
+        { country: "尼日利亚", hasDiplomatic: true, phone: "+234-9-461-0860", email: "chinaemb_ng@mfa.gov.cn", address: "阿布贾市中央区" },
+        { country: "加纳", hasDiplomatic: true, phone: "+233-302-777-680", email: "chinaemb_gh@mfa.gov.cn", address: "阿克拉市拉巴迪区" },
+        { country: "科特迪瓦", hasDiplomatic: true, phone: "+225-27-2241-9800", email: "chinaemb_ci@mfa.gov.cn", address: "阿比让市科科迪区" },
+        { country: "马里", hasDiplomatic: true, phone: "+223-20-224-073", email: "chinaemb_ml@mfa.gov.cn", address: "巴马科市尼阿雷拉区" },
+        { country: "布基纳法索", hasDiplomatic: true, phone: "+226-25-300-638", email: "chinaemb_bf@mfa.gov.cn", address: "瓦加杜古市韦兹区" },
+        { country: "贝宁", hasDiplomatic: true, phone: "+229-21-300-597", email: "chinaemb_bj@mfa.gov.cn", address: "科托努市杰鲁区" },
+        { country: "多哥", hasDiplomatic: true, phone: "+228-22-261-939", email: "chinaemb_tg@mfa.gov.cn", address: "洛美市贝区" },
+        { country: "塞内加尔", hasDiplomatic: true, phone: "+221-33-864-7676", email: "chinaemb_sn@mfa.gov.cn", address: "达喀尔市凡恩区" },
+        { country: "毛里塔尼亚", hasDiplomatic: true, phone: "+222-452-529-32", email: "chinaemb_mr@mfa.gov.cn", address: "努瓦克肖特市特夫拉区" },
+        { country: "冈比亚", hasDiplomatic: true, phone: "+220-439-6166", email: "chinaemb_gm@mfa.gov.cn", address: "班珠尔市凯拉瓦区" },
+        { country: "几内亚", hasDiplomatic: true, phone: "+224-664-202-035", email: "chinaemb_gn@mfa.gov.cn", address: "科纳克里市卡鲁姆区" },
+        { country: "几内亚比绍", hasDiplomatic: true, phone: "+245-320-1457", email: "chinaemb_gw@mfa.gov.cn", address: "比绍市圣保罗区" },
+        { country: "塞拉利昂", hasDiplomatic: true, phone: "+232-76-606-022", email: "chinaemb_sl@mfa.gov.cn", address: "弗里敦市威尔伯福斯区" },
+        { country: "利比里亚", hasDiplomatic: true, phone: "+231-886-560-556", email: "chinaemb_lr@mfa.gov.cn", address: "蒙罗维亚市索多区" },
+        { country: "津巴布韦", hasDiplomatic: true, phone: "+263-4-334-721", email: "chinaemb_zw@mfa.gov.cn", address: "哈拉雷市博罗代尔区" },
+        { country: "赞比亚", hasDiplomatic: true, phone: "+260-211-251-169", email: "chinaemb_zm@mfa.gov.cn", address: "卢萨卡市罗马区" },
+        { country: "莫桑比克", hasDiplomatic: true, phone: "+258-21-490-116", email: "chinaemb_mz@mfa.gov.cn", address: "马普托市尼克拉斯区" },
+        { country: "马拉维", hasDiplomatic: true, phone: "+265-1-790-715", email: "chinaemb_mw@mfa.gov.cn", address: "利隆圭市第7区" },
+        { country: "博茨瓦纳", hasDiplomatic: true, phone: "+267-395-2209", email: "chinaemb_bw@mfa.gov.cn", address: "哈博罗内市博若罗区" },
+        { country: "纳米比亚", hasDiplomatic: true, phone: "+264-61-257-010", email: "chinaemb_na@mfa.gov.cn", address: "温得和克市卢德维茨区" },
+        { country: "南非", hasDiplomatic: true, phone: "+27-12-431-6500", email: "chinaemb_za@mfa.gov.cn", address: "比勒陀利亚市阿卡迪亚街972号" }
+    ];
+    const europe = [
+        { country: "俄罗斯", hasDiplomatic: true, phone: "+7-495-938-2006", email: "chinaemb_ru@mfa.gov.cn", address: "莫斯科市友谊街6号" },
+        { country: "英国", hasDiplomatic: true, phone: "+44-20-72994049", email: "chinaemb_uk@mfa.gov.cn", address: "伦敦波特兰广场49-51号" },
+        { country: "法国", hasDiplomatic: true, phone: "+33-1-49521950", email: "chinaemb_fr@mfa.gov.cn", address: "巴黎乔治五世大道11号" },
+        { country: "德国", hasDiplomatic: true, phone: "+49-30-275880", email: "chinaemb_de@mfa.gov.cn", address: "柏林马尔基斯河岸54号" },
+        { country: "意大利", hasDiplomatic: true, phone: "+39-06-96524200", email: "chinaemb_it@mfa.gov.cn", address: "罗马布鲁塞尔大街56号" },
+        { country: "西班牙", hasDiplomatic: true, phone: "+34-91-519-4242", email: "chinaemb_es@mfa.gov.cn", address: "马德里阿图罗索里亚113号" },
+        { country: "葡萄牙", hasDiplomatic: true, phone: "+351-21-392-8430", email: "chinaemb_pt@mfa.gov.cn", address: "里斯本使馆区" },
+        { country: "荷兰", hasDiplomatic: true, phone: "+31-70-306-5061", email: "chinaemb_nl@mfa.gov.cn", address: "海牙威廉·洛德维克10号" },
+        { country: "比利时", hasDiplomatic: true, phone: "+32-2-663-3000", email: "chinaemb_be@mfa.gov.cn", address: "布鲁塞尔圣米歇尔区" },
+        { country: "卢森堡", hasDiplomatic: true, phone: "+352-436-991", email: "chinaemb_lu@mfa.gov.cn", address: "卢森堡市欧洲区" },
+        { country: "瑞士", hasDiplomatic: true, phone: "+41-31-351-2580", email: "chinaemb_ch@mfa.gov.cn", address: "伯尔尼市卡尔塔斯区" },
+        { country: "瑞典", hasDiplomatic: true, phone: "+46-8-5793-6429", email: "chinaemb_se@mfa.gov.cn", address: "斯德哥尔摩尤加登路40号" },
+        { country: "挪威", hasDiplomatic: true, phone: "+47-2249-2050", email: "chinaemb_no@mfa.gov.cn", address: "奥斯陆霍尔门科伦区" },
+        { country: "丹麦", hasDiplomatic: true, phone: "+45-3946-0888", email: "chinaemb_dk@mfa.gov.cn", address: "哥本哈根赫勒鲁普区" },
+        { country: "芬兰", hasDiplomatic: true, phone: "+358-9-2289-0110", email: "chinaemb_fi@mfa.gov.cn", address: "赫尔辛基卡利奥区" },
+        { country: "冰岛", hasDiplomatic: true, phone: "+354-552-6751", email: "chinaemb_is@mfa.gov.cn", address: "雷克雅未克维库尔瓦根区" },
+        { country: "爱尔兰", hasDiplomatic: true, phone: "+353-1-269-1707", email: "chinaemb_ie@mfa.gov.cn", address: "都柏林都柏林4区" },
+        { country: "波兰", hasDiplomatic: true, phone: "+48-22-831-3836", email: "chinaemb_pl@mfa.gov.cn", address: "华沙博尼弗拉特卡街1号" },
+        { country: "捷克", hasDiplomatic: true, phone: "+420-233-028-888", email: "chinaemb_cz@mfa.gov.cn", address: "布拉格佩莱街18号" },
+        { country: "匈牙利", hasDiplomatic: true, phone: "+36-1-413-3388", email: "chinaemb_hu@mfa.gov.cn", address: "布达佩斯第十四区" },
+        { country: "奥地利", hasDiplomatic: true, phone: "+43-1-714-314-980", email: "chinaemb_at@mfa.gov.cn", address: "维也纳梅特涅街4号" },
+        { country: "希腊", hasDiplomatic: true, phone: "+30-210-672-3282", email: "chinaemb_gr@mfa.gov.cn", address: "雅典菲洛泰伊区" }
+    ];
+    const americas = [
+        { country: "美国", hasDiplomatic: true, phone: "+1-202-495-2266", email: "chinaemb_us@mfa.gov.cn", address: "华盛顿特区国际广场3505号" },
+        { country: "加拿大", hasDiplomatic: true, phone: "+1-613-789-3434", email: "chinaemb_ca@mfa.gov.cn", address: "渥太华圣帕特里克街515号" },
+        { country: "墨西哥", hasDiplomatic: true, phone: "+52-55-5616-4309", email: "chinaemb_mx@mfa.gov.cn", address: "墨西哥城马萨里克街" },
+        { country: "巴西", hasDiplomatic: true, phone: "+55-61-2195-8200", email: "chinaemb_br@mfa.gov.cn", address: "巴西利亚阿莱马尼亚大街" },
+        { country: "阿根廷", hasDiplomatic: true, phone: "+54-11-4547-8100", email: "chinaemb_ar@mfa.gov.cn", address: "布宜诺斯艾利斯奥利沃斯区" },
+        { country: "智利", hasDiplomatic: true, phone: "+56-2-2233-9880", email: "chinaemb_cl@mfa.gov.cn", address: "圣地亚哥拉斯孔德斯区" },
+        { country: "秘鲁", hasDiplomatic: true, phone: "+51-1-442-9915", email: "chinaemb_pe@mfa.gov.cn", address: "利马圣伊西德罗区" },
+        { country: "古巴", hasDiplomatic: true, phone: "+53-7-833-3612", email: "chinaemb_cu@mfa.gov.cn", address: "哈瓦那米拉马尔区" },
+        { country: "澳大利亚", hasDiplomatic: true, phone: "+61-2-6228-3999", email: "chinaemb_au@mfa.gov.cn", address: "堪培拉亚拉伦拉科罗内特15号" },
+        { country: "新西兰", hasDiplomatic: true, phone: "+64-4-472-1382", email: "chinaemb_nz@mfa.gov.cn", address: "惠灵顿格伦莫尔街2号" },
+        { country: "斐济", hasDiplomatic: true, phone: "+679-330-0215", email: "chinaemb_fj@mfa.gov.cn", address: "苏瓦伊丽莎白女王大道" }
+    ];
+    const nonDiplomatic = [
+        { country: "帕劳", hasDiplomatic: false, note: "帕劳未与中国建交，无中国大使馆信息" },
+        { country: "危地马拉", hasDiplomatic: false, note: "危地马拉未与中国建交" },
+        { country: "巴拉圭", hasDiplomatic: false, note: "巴拉圭未与中国建交" }
+    ];
+    return [...asia, ...africa, ...europe, ...americas, ...nonDiplomatic];
+};
+
+let masterEmbassies = buildFullEmbassyList();
+let pinnedCountriesList = [...(ADMIN_CONFIG.pinnedCountries || [])];
+let emergencyNoticeHtml = ADMIN_CONFIG.emergencyNotice || "";
+let normalNoticeText = ADMIN_CONFIG.normalNotice || null;
+
+// 当前搜索和筛选状态
+let currentSearchTerm = "";
+let showFlag = true;
+
+function renderEmbassyCard(emb) {
+    if (!emb || !emb.hasDiplomatic) return null;
+    return `<div class="diplo-card"><div class="country-name">🏛️ ${emb.country} · 中国大使馆</div>
+            <div class="contact-item"><span class="contact-detail">📞 ${emb.phone || '暂无公开电话'}</span>
+            <span class="contact-detail">✉️ ${emb.email || '暂无公开邮箱'}</span></div>
+            <div class="contact-item">📍 ${emb.address || '信息待更新'}</div>
+            <div style="font-size:0.75rem;">※ 紧急求助请拨打12308热线。</div></div>`;
+}
+
+function renderNoDiplomaticWarning(countryName) {
+    return `<div class="red-alert">⚠️ 您所在的国家（${countryName}）还未与中国建交，故无法提供相关大使馆信息！</div>`;
+}
+
+async function detectUserCountry() {
+    const apis = [
+        async () => { const r = await fetch('https://ipapi.co/json/'); const d = await r.json(); return d.country_name; },
+        async () => { const r = await fetch('https://ip-api.com/json/'); const d = await r.json(); return d.country; },
+    ];
+    const nameMap = { "United States":"美国","United Kingdom":"英国","France":"法国","Germany":"德国","Japan":"日本","South Korea":"韩国","Australia":"澳大利亚","Canada":"加拿大","Italy":"意大利","Spain":"西班牙","Netherlands":"荷兰","Sweden":"瑞典","New Zealand":"新西兰","Brazil":"巴西","India":"印度","Russia":"俄罗斯","China":"中国" };
+    for(let api of apis) {
+        try { const countryEn = await api(); if(countryEn) { let cn = nameMap[countryEn] || countryEn; return { countryName: cn }; } } catch(e) { continue; }
+    }
+    return { countryName: null };
+}
+
+function findEmbassyByCountry(name) { if(!name) return null; return masterEmbassies.find(e => e.country === name) || null; }
+
+async function updateRecommendation() {
+    const recDiv = document.getElementById("recommendContent");
+    const ipSpan = document.getElementById("ipStatus");
+    const { countryName } = await detectUserCountry();
+    if(!countryName) { ipSpan.innerText="定位失败"; recDiv.innerHTML="<div>无法获取您的位置，请手动查看下方使馆列表。</div>"; return; }
+    ipSpan.innerText = `📍 ${countryName}`;
+    const match = findEmbassyByCountry(countryName);
+    if(match && !match.hasDiplomatic) recDiv.innerHTML = renderNoDiplomaticWarning(countryName);
+    else if(match && match.hasDiplomatic) recDiv.innerHTML = `<div><strong>✨ 根据您所在国家 (${countryName}) 推荐:</strong>${renderEmbassyCard(match)}</div>`;
+    else recDiv.innerHTML = `<div>🧭 检测到 ${countryName}，数据库暂未收录详细使馆信息，请拨打12308。</div>`;
+}
+
+function generateFoldList() {
+    // 先筛选
+    let filtered = [...masterEmbassies];
+    if(currentSearchTerm.trim() !== "") {
+        filtered = filtered.filter(emb => matchCountry(emb.country, currentSearchTerm));
+    }
+    
+    // 处理置顶：最后选择的在最前（按pinnedCountriesList顺序，但后面添加的在前）
+    let pinnedItems = [];
+    let normalItems = [];
+    for(let emb of filtered) {
+        if(pinnedCountriesList.includes(emb.country)) {
+            pinnedItems.push(emb);
+        } else {
+            normalItems.push(emb);
+        }
+    }
+    // 置顶项按pinnedCountriesList逆序（最后添加的在前）
+    const orderedPinned = [...pinnedCountriesList].reverse().map(name => pinnedItems.find(e => e.country === name)).filter(e => e);
+    const items = [...orderedPinned, ...normalItems];
+    
+    const container = document.getElementById("embassiesListContainer");
+    container.innerHTML = '';
+    for(let emb of items) {
+        const section = document.createElement('div'); section.className='fold-section';
+        const header = document.createElement('div'); header.className='fold-header';
+        const isPinned = pinnedCountriesList.includes(emb.country);
+        const pinMark = isPinned ? '📌 ' : '';
+        const flag = (showFlag && flagMap[emb.country]) ? flagMap[emb.country] + ' ' : '';
+        header.innerHTML = `<span>${pinMark}${flag}${emb.hasDiplomatic ? '🏢' : '🚫'} ${emb.country} ${!emb.hasDiplomatic?'(未建交)':''}</span><span class="fold-icon">▼</span>`;
+        const content = document.createElement('div'); content.className='fold-content';
+        if(emb.hasDiplomatic) content.innerHTML = `<div><strong>📞 ${emb.phone||'暂无'}</strong><br><strong>✉️ ${emb.email||'暂无'}</strong><br><strong>📍 ${emb.address||'暂无'}</strong><br><button class="copy-btn" data-value="${emb.phone||''}">复制电话</button> <button class="copy-btn" data-value="${emb.email||''}">复制邮箱</button></div>`;
+        else content.innerHTML = `<div class="empty-info" style="color:#b91c1c;">⚠️ ${emb.note||'未建交，无使馆信息'}</div>`;
+        header.onclick = () => { content.classList.toggle('open'); header.querySelector('.fold-icon').innerText = content.classList.contains('open')?'▲':'▼'; };
+        section.append(header, content); container.appendChild(section);
+    }
+    container.addEventListener('click', e => { let btn=e.target.closest('.copy-btn'); if(btn&&btn.dataset.value) { navigator.clipboard.writeText(btn.dataset.value); btn.innerText='✅已复制'; setTimeout(()=>btn.innerText=btn.innerText.includes('电话')?'复制电话':'复制邮箱',1200); } });
+    
+    // 更新搜索结果信息
+    const infoDiv = document.getElementById("searchResultsInfo");
+    if(currentSearchTerm.trim() !== "") {
+        infoDiv.innerHTML = `🔍 找到 ${filtered.length} 个匹配“${currentSearchTerm}”的国家`;
+    } else {
+        infoDiv.innerHTML = `📋 共 ${masterEmbassies.length} 个国家`;
+    }
+}
+
+function updateNoticeUI() {
+    const normalDiv = document.getElementById("normalNotice");
+    if(normalNoticeText && normalNoticeText.trim() !== "") normalDiv.innerHTML = normalNoticeText;
+    else normalDiv.innerHTML = ADMIN_CONFIG.normalNotice;
+    const emergencyDiv = document.getElementById("emergencyNotice");
+    if(emergencyNoticeHtml && emergencyNoticeHtml.trim() !== "") { emergencyDiv.style.display = "block"; emergencyDiv.innerHTML = emergencyNoticeHtml; } 
+    else { emergencyDiv.style.display = "none"; }
+}
+
+// 搜索输入监听
+const searchInput = document.getElementById("searchInput");
+searchInput.addEventListener("input", (e) => {
+    currentSearchTerm = e.target.value;
+    generateFoldList();
+});
+
+// 显示国旗开关
+const flagCheckbox = document.getElementById("showFlagCheckbox");
+flagCheckbox.addEventListener("change", (e) => {
+    showFlag = e.target.checked;
+    generateFoldList();
+});
+
+// 初始化
+generateFoldList();
+updateRecommendation();
+updateNoticeUI();
+</script>
 </body>
 </html>
