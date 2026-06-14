@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+	<title>EasyAbroad · 出海助手</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		/* 跟随系统字体 */
+		body {
+			font-family: system-ui, -apple-system, 'Segoe UI', 'PingFang SC', Roboto, 'Helvetica Neue', sans-serif;
+			background: linear-gradient(145deg, #0B2B40 0%, #0D3B4F 100%);
+			padding: 20px;
+			min-height: 100vh;
+			transition: background 0.2s, color 0.2s;
+		}
+
+		/* 浅色模式变量 */
+		body.light {
+			background: linear-gradient(145deg, #e2f0f9 0%, #c9e0ec 100%);
+			color: #1e2a3a;
+		}
+
+		.container {
+			max-width: 1280px;
+			margin: 0 auto;
+		}
+
+		/* 头部与主题切换 */
+		.hero {
+			text-align: center;
+			padding: 1rem 1rem 1rem;
+			position: relative;
+		}
+		.hero h1 {
+			font-size: 3rem;
+			background: linear-gradient(135deg, #F6D365, #FDA085);
+			background-clip: text;
+			-webkit-background-clip: text;
+			color: transparent;
+			letter-spacing: -0.5px;
+		}
+		.hero p {
+			color: rgba(255,255,255,0.7);
+		}
+		body.light .hero p {
+			color: #2c6e9e;
+		}
+		.theme-switch {
+			position: absolute;
+			top: 1rem;
+			right: 1rem;
+			background: rgba(255,255,255,0.2);
+			backdrop-filter: blur(8px);
+			border: none;
+			padding: 8px 16px;
+			border-radius: 40px;
+			color: white;
+			font-weight: bold;
+			cursor: pointer;
+			font-size: 0.8rem;
+		}
+		body.light .theme-switch {
+			background: rgba(0,0,0,0.1);
+			color: #1e2a3a;
+		}
+
+		/* 卡片网格 */
+		.grid {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 1.5rem;
+			margin-top: 1.5rem;
+		}
+		.card {
+			background: rgba(255,255,255,0.95);
+			backdrop-filter: blur(2px);
+			border-radius: 32px;
+			padding: 1.5rem;
+			box-shadow: 0 20px 35px -10px rgba(0,0,0,0.2);
+			flex: 1;
+			min-width: 260px;
+			transition: all 0.2s;
+			border: 1px solid rgba(255,255,255,0.3);
+		}
+		body.light .card {
+			background: rgba(255,255,255,0.98);
+			box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+		}
+		.card:hover {
+			transform: translateY(-4px);
+		}
+		.card h2 {
+			font-size: 1.5rem;
+			margin-bottom: 1rem;
+			border-left: 5px solid #F6D365;
+			padding-left: 12px;
+			color: #0B2B40;
+		}
+
+		.info-row {
+			display: flex;
+			justify-content: space-between;
+			padding: 8px 0;
+			border-bottom: 1px solid #eee;
+			font-size: 0.9rem;
+		}
+		.info-label {
+			font-weight: 600;
+			color: #2c6e9e;
+		}
+		.big-value {
+			font-size: 2rem;
+			font-weight: 700;
+			text-align: center;
+			margin: 12px 0;
+			color: #1e5a7a;
+		}
+
+		/* 翻译区域 */
+		textarea, select, input {
+			font-family: inherit;
+		}
+		textarea {
+			width: 100%;
+			padding: 10px;
+			border-radius: 20px;
+			border: 1px solid #ccc;
+			margin: 8px 0;
+			resize: vertical;
+		}
+		.lang-select {
+			display: flex;
+			gap: 8px;
+			margin: 8px 0;
+			flex-wrap: wrap;
+			align-items: center;
+		}
+		select, input {
+			padding: 6px 12px;
+			border-radius: 40px;
+			background: white;
+			border: 1px solid #ccc;
+		}
+		button {
+			background: #2c6e9e;
+			border: none;
+			color: white;
+			padding: 8px 18px;
+			border-radius: 40px;
+			cursor: pointer;
+			font-weight: 600;
+			transition: 0.1s;
+		}
+		button:active {
+			transform: scale(0.96);
+		}
+		.link-grid {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 12px;
+			margin-top: 12px;
+		}
+		.nav-link {
+			background: #f0f2f5;
+			padding: 6px 16px;
+			border-radius: 40px;
+			text-decoration: none;
+			color: #1e5a7a;
+			font-weight: 500;
+			font-size: 0.85rem;
+		}
+		.rate-result, .holiday-info {
+			background: #e8f4fd;
+			border-radius: 20px;
+			padding: 12px;
+			margin-top: 12px;
+			text-align: center;
+			font-weight: 500;
+		}
+		/* 地图容器 */
+		.map-container {
+			width: 100%;
+			height: 300px;
+			margin-top: 12px;
+			border-radius: 24px;
+			overflow: hidden;
+			border: 1px solid #ddd;
+		}
+		iframe.map-frame {
+			width: 100%;
+			height: 100%;
+			border: none;
+		}
+		footer {
+			text-align: center;
+			margin-top: 2rem;
+			padding: 1rem;
+			color: #9ab3d0;
+			font-size: 0.7rem;
+		}
+		@media (max-width: 680px) {
+			.grid { flex-direction: column; }
+			.theme-switch { top: 0.5rem; right: 0.5rem; padding: 5px 12px; font-size: 0.7rem; }
+		}
+	</style>
+</head>
+<body>
+<div class="container">
+	<div class="hero">
+		<h1>EasyAbroad</h1>
+		<p>📍 自动定位 · 当地时间 · 实时汇率 · 智能翻译 · 节假日 · 在线地图</p>
+		<button class="theme-switch" id="themeToggle">🌓 浅色/深色</button>
+	</div>
+
+	<div class="grid">
+		<!-- 卡片1：国家/时间/节假日 -->
+		<div class="card">
+			<h2>📍 当前所在地 & 节假日</h2>
+			<div id="countryDisplay" class="big-value">检测中...</div>
+			<div class="info-row"><span class="info-label">🕘 当地时间</span><span id="localTime">--:--:--</span></div>
+			<div class="info-row"><span class="info-label">🌐 时区</span><span id="timezone">--</span></div>
+			<div class="info-row"><span class="info-label">🆙 IP 归属</span><span id="ipRegion">--</span></div>
+			<div id="holidayInfo" class="holiday-info">📅 节假日加载中...</div>
+		</div>
+
+		<!-- 卡片2：汇率换算 -->
+		<div class="card">
+			<h2>💱 汇率换算</h2>
+			<div class="info-row"><span class="info-label">💵 基准货币</span>
+				<select id="fromCurrency">
+					<option value="USD">USD 美元</option>
+					<option value="EUR">EUR 欧元</option>
+					<option value="GBP">GBP 英镑</option>
+					<option value="JPY">JPY 日元</option>
+					<option value="CNY" selected>CNY 人民币</option>
+					<option value="AUD">AUD 澳元</option>
+					<option value="CAD">CAD 加元</option>
+					<option value="CHF">CHF 瑞士法郎</option>
+					<option value="KRW">KRW 韩元</option>
+					<option value="SGD">SGD 新加坡元</option>
+				</select>
+			</div>
+			<div class="info-row"><span class="info-label">🎯 目标货币</span>
+				<select id="toCurrency">
+					<option value="USD">USD 美元</option>
+					<option value="EUR" selected>EUR 欧元</option>
+					<option value="GBP">GBP 英镑</option>
+					<option value="JPY">JPY 日元</option>
+					<option value="CNY">CNY 人民币</option>
+					<option value="AUD">AUD 澳元</option>
+					<option value="CAD">CAD 加元</option>
+					<option value="CHF">CHF 瑞士法郎</option>
+					<option value="KRW">KRW 韩元</option>
+					<option value="SGD">SGD 新加坡元</option>
+				</select>
+			</div>
+			<div style="display:flex; gap:8px; margin:12px 0;">
+				<input type="number" id="amountInput" placeholder="金额" value="100">
+				<button id="convertBtn">换算</button>
+			</div>
+			<div id="rateResult" class="rate-result">💡 点击换算，实时汇率</div>
+		</div>
+
+		<!-- 卡片3：智能翻译 -->
+		<div class="card">
+			<h2>🌍 智能翻译</h2>
+			<textarea id="srcText" rows="2" placeholder="输入要翻译的文字..."></textarea>
+			<div class="lang-select">
+				<select id="srcLang">
+					<option value="auto">自动识别</option>
+					<option value="zh">中文</option>
+					<option value="en">英语</option>
+					<option value="ja">日语</option>
+					<option value="ko">韩语</option>
+					<option value="fr">法语</option>
+					<option value="de">德语</option>
+					<option value="es">西班牙语</option>
+				</select>
+				<span>→</span>
+				<select id="tgtLang">
+					<option value="zh">中文</option>
+					<option value="en" selected>英语</option>
+					<option value="ja">日语</option>
+					<option value="ko">韩语</option>
+					<option value="fr">法语</option>
+					<option value="de">德语</option>
+					<option value="es">西班牙语</option>
+				</select>
+				<button id="translateBtn">翻译</button>
+			</div>
+			<textarea id="resultText" rows="2" readonly placeholder="翻译结果..."></textarea>
+		</div>
+	</div>
+
+	<!-- 卡片4：在线地图（OpenStreetMap） -->
+	<div class="card" style="margin-top: 1rem;">
+		<h2>🗺️ 在线地图（可拖拽/缩放）</h2>
+		<div class="map-container">
+			<iframe id="mapFrame" class="map-frame" title="EasyAbroad Map" src="https://www.openstreetmap.org/export/embed.html?bbox=-20,20,60,70&layer=mapnik&marker=30,20"></iframe>
+		</div>
+		<p style="margin-top: 8px; font-size:0.7rem; text-align:center;">🗺️ 地图数据 © OpenStreetMap 贡献者 | 可缩放/拖拽</p>
+	</div>
+
+	<!-- 卡片5：国际网站导航 -->
+	<div class="card" style="margin-top: 1rem;">
+		<h2>🌐 国际网站 · 一键直达</h2>
+		<div class="link-grid">
+			<a href="https://www.youtube.com" target="_blank" class="nav-link">📺 YouTube</a>
+			<a href="https://twitter.com" target="_blank" class="nav-link">🐦 X (Twitter)</a>
+			<a href="https://www.instagram.com" target="_blank" class="nav-link">📸 Instagram</a>
+			<a href="https://www.facebook.com" target="_blank" class="nav-link">📘 Facebook</a>
+			<a href="https://www.reddit.com" target="_blank" class="nav-link">🤖 Reddit</a>
+			<a href="https://www.netflix.com" target="_blank" class="nav-link">🎬 Netflix</a>
+			<a href="https://open.spotify.com" target="_blank" class="nav-link">🎧 Spotify</a>
+			<a href="https://www.amazon.com" target="_blank" class="nav-link">📦 Amazon</a>
+			<a href="https://www.google.com" target="_blank" class="nav-link">🔍 Google</a>
+			<a href="https://www.wikipedia.org" target="_blank" class="nav-link">📖 Wikipedia</a>
+		</div>
+		<p style="margin-top: 12px; font-size:0.7rem; color:#5c8aa6;">※ 某些网站可能需要代理访问，视当地网络情况而定</p>
+	</div>
+	<footer>EasyAbroad · 自动IP定位 · 汇率来自 exchangerate-api · 翻译 MyMemory · 节假日 API Calendarific</footer>
+</div>
+
+<script>
+	(function(){
+		// ---------- 1. 主题切换（深浅色 + 跟随系统）----------
+		const themeToggle = document.getElementById('themeToggle');
+		// 检测系统偏好
+		const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+		let currentTheme = localStorage.getItem('easyabroad_theme') || (prefersDark ? 'dark' : 'light');
+		function applyTheme(theme) {
+			if(theme === 'light') document.body.classList.add('light');
+			else document.body.classList.remove('light');
+			localStorage.setItem('easyabroad_theme', theme);
+		}
+		applyTheme(currentTheme);
+		themeToggle.addEventListener('click', () => {
+			currentTheme = document.body.classList.contains('light') ? 'dark' : 'light';
+			applyTheme(currentTheme);
+		});
+		// 监听系统主题变化
+		window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+			if(!localStorage.getItem('easyabroad_theme')) {
+				applyTheme(e.matches ? 'dark' : 'light');
+			}
+		});
+
+		// ---------- 2. IP 地理定位 + 时间 + 节假日 ----------
+		async function fetchGeoInfo() {
+			try {
+				const res = await fetch('https://ipapi.co/json/');
+				const data = await res.json();
+				return { country: data.country_name, countryCode: data.country_code, city: data.city, timezone: data.timezone, ip: data.ip };
+			} catch(e) {
+				try {
+					const res2 = await fetch('https://ip-api.com/json/');
+					const data2 = await res2.json();
+					return { country: data2.country, countryCode: data2.countryCode, city: data2.city, timezone: data2.timezone, ip: data2.query };
+				} catch(e2) { return null; }
+			}
+		}
+
+		function updateLocalTime(timezoneStr) {
+			if(!timezoneStr) return;
+			try {
+				const now = new Date();
+				const formatter = new Intl.DateTimeFormat('zh-CN', { timeZone: timezoneStr, hour12: false, hour:'2-digit', minute:'2-digit', second:'2-digit' });
+				document.getElementById('localTime').innerText = formatter.format(now);
+				document.getElementById('timezone').innerText = timezoneStr;
+			} catch(e) {
+				document.getElementById('localTime').innerText = new Date().toLocaleString();
+			}
+		}
+
+		// 节假日 API (Calendarific 免费版需要 key，这里使用 Nager.Date 免费无需key)
+		async function fetchHolidays(countryCode) {
+			if(!countryCode) return;
+			const year = new Date().getFullYear();
+			const url = `https://date.nager.at/api/v3/PublicHolidays/${year}/${countryCode}`;
+			try {
+				const res = await fetch(url);
+				if(!res.ok) throw new Error();
+				const holidays = await res.json();
+				if(holidays && holidays.length > 0) {
+					const today = new Date().toISOString().slice(0,10);
+					const todayHoliday = holidays.find(h => h.date === today);
+					if(todayHoliday) {
+						document.getElementById('holidayInfo').innerHTML = `🎉 今日节假日：${todayHoliday.localName}<br>📅 ${todayHoliday.name}`;
+					} else {
+						const next = holidays.find(h => h.date > today);
+						if(next) document.getElementById('holidayInfo').innerHTML = `📅 下一个节假日：${next.localName}<br>🗓️ ${next.date}`;
+						else document.getElementById('holidayInfo').innerHTML = `📅 今年暂无公开节假日信息`;
+					}
+				} else {
+					document.getElementById('holidayInfo').innerHTML = `📅 暂无公开节假日数据`;
+				}
+			} catch(e) {
+				document.getElementById('holidayInfo').innerHTML = `📅 节假日服务暂不可用`;
+			}
+		}
+
+		async function initLocation() {
+			const geo = await fetchGeoInfo();
+			if(geo && geo.country) {
+				document.getElementById('countryDisplay').innerHTML = `${geo.country} ${geo.city ? `· ${geo.city}` : ''}`;
+				document.getElementById('ipRegion').innerText = `${geo.country} ${geo.ip ? '('+geo.ip+')' : ''}`;
+				if(geo.timezone) {
+					updateLocalTime(geo.timezone);
+					setInterval(() => updateLocalTime(geo.timezone), 1000);
+				} else {
+					setInterval(() => document.getElementById('localTime').innerText = new Date().toLocaleString(), 1000);
+				}
+				if(geo.countryCode) fetchHolidays(geo.countryCode);
+			} else {
+				document.getElementById('countryDisplay').innerHTML = "未能定位";
+				document.getElementById('holidayInfo').innerHTML = "📅 无法获取节假日信息";
+			}
+		}
+
+		// ---------- 3. 汇率 ----------
+		async function getExchangeRate(from, to) {
+			const url = `https://api.exchangerate-api.com/v4/latest/${from}`;
+			try {
+				const res = await fetch(url);
+				const data = await res.json();
+				return data.rates ? data.rates[to] : null;
+			} catch(e) { return null; }
+		}
+		async function convertCurrency() {
+			const from = document.getElementById('fromCurrency').value;
+			const to = document.getElementById('toCurrency').value;
+			const amount = parseFloat(document.getElementById('amountInput').value);
+			if(isNaN(amount)) { document.getElementById('rateResult').innerHTML = "❌ 有效数字"; return; }
+			document.getElementById('rateResult').innerHTML = "⏳ 获取汇率...";
+			const rate = await getExchangeRate(from, to);
+			if(rate) {
+				const result = amount * rate;
+				document.getElementById('rateResult').innerHTML = `💰 ${amount} ${from} = ${result.toFixed(2)} ${to}<br>📈 1 ${from} ≈ ${rate.toFixed(4)} ${to}`;
+			} else {
+				document.getElementById('rateResult').innerHTML = "⚠️ 汇率获取失败";
+			}
+		}
+
+		// ---------- 4. 翻译 ----------
+		async function translateText(text, sourceLang, targetLang) {
+			if(!text.trim()) return "";
+			const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLang}|${targetLang}`;
+			try {
+				const res = await fetch(url);
+				const data = await res.json();
+				return data?.responseData?.translatedText || "翻译失败";
+			} catch(e) { return "服务暂不可用"; }
+		}
+		async function doTranslate() {
+			const src = document.getElementById('srcText').value;
+			if(!src.trim()) { document.getElementById('resultText').value = "请输入文字"; return; }
+			let srcLang = document.getElementById('srcLang').value;
+			const tgtLang = document.getElementById('tgtLang').value;
+			if(srcLang === "auto") srcLang = "";
+			document.getElementById('resultText').value = "翻译中...";
+			const translated = await translateText(src, srcLang, tgtLang);
+			document.getElementById('resultText').value = translated;
+		}
+
+		// ---------- 5. 地图跟随国家（根据定位移动地图）----------
+		async function updateMapByCountry() {
+			const geo = await fetchGeoInfo();
+			if(geo && geo.countryCode) {
+				const countryCode = geo.countryCode.toLowerCase();
+				// 根据国家代码调整地图视图（粗略坐标）
+				const coords = { us: [40,-100], cn: [35,105], jp: [36,138], gb: [54,-2], de: [51,10], fr: [46,2], au: [-25,135], ca: [56,-106], br: [-10,-55], in: [20,78], ru: [60,100] };
+				const center = coords[countryCode] || [30,20];
+				const newSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${center[1]-30},${center[0]-20},${center[1]+30},${center[0]+20}&layer=mapnik&marker=${center[0]},${center[1]}`;
+				document.getElementById('mapFrame').src = newSrc;
+			}
+		}
+
+		// 绑定事件
+		document.getElementById('convertBtn').addEventListener('click', convertCurrency);
+		document.getElementById('translateBtn').addEventListener('click', doTranslate);
+
+		initLocation();
+		setTimeout(() => convertCurrency(), 800);
+		setTimeout(() => updateMapByCountry(), 1500);
+	})();
+</script>
+</body>
+  </html>
