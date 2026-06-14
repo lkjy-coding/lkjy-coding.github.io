@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Surfer2 · 画板</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: system-ui, 'Segoe UI', monospace;
+            background: #1a1a2e;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .paint-container {
+            width: 100%;
+            max-width: 1400px;
+            height: 90vh;
+            background: #0f172a;
+            border-radius: 32px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #2d3e5f;
+            box-shadow: 0 25px 45px rgba(0,0,0,0.5);
+        }
+
+        .paint-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 12px;
+            background: #1e293b;
+            border-bottom: 1px solid #2d3e5f;
+            align-items: center;
+        }
+
+        .paint-canvas-area {
+            flex: 1;
+            overflow: auto;
+            background: #2d3748;
+            position: relative;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            transform-origin: 0 0;
+        }
+
+        #mainCanvas {
+            display: block;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            cursor: crosshair;
+            background: white;
+        }
+
+        .paint-btn {
+            background: #3b82f6;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+
+        .paint-btn.active {
+            background: #22c55e;
+        }
+
+        .board-selector {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 8px 12px;
+            background: #1e293b;
+            border-bottom: 1px solid #2d3e5f;
+        }
+
+        .board-tab {
+            background: #2d3748;
+            padding: 4px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            color: #e2e8f0;
+            font-size: 0.8rem;
+        }
+
+        .board-tab.active {
+            background: #3b82f6;
+        }
+
+        .paint-tool-group {
+            display: flex;
+            gap: 4px;
+            background: #0f172a;
+            padding: 4px 8px;
+            border-radius: 40px;
+            align-items: center;
+        }
+
+        .color-mixer {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            background: #0f172a;
+            padding: 4px 12px;
+            border-radius: 40px;
+        }
+
+        input[type="color"] {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        input[type="range"] {
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+<div class="paint-container">
+    <div class="board-selector" id="boardSelector"></div>
+    <div class="paint-toolbar">
+        <div class="paint-tool-group">
+            <button class="paint-btn" id="penToolBtn">✏️ 画笔</button>
+            <button class="paint-btn" id="eraserToolBtn">🧽 橡皮</button>
+            <button class="paint-btn" id="undoBtn">↩️ 撤销</button>
+            <button class="paint-btn" id="redoBtn">↪️ 重做</button>
+            <button class="paint-btn" id="clearCanvasBtn">🗑️ 清空</button>
+        </div>
+        <div class="color-mixer">
+            <input type="color" id="penColorPicker" value="#000000">
+            <input type="range" id="penSizeSlider" min="1" max="30" value="5">
+            <span id="sizeLabel">5px</span>
+        </div>
+        <div class="paint-tool-group">
+            <button class="paint-btn" id="moveLeftBtn">◀ 左移</button>
+            <button class="paint-btn" id="moveRightBtn">右移 ▶</button>
+            <button class="paint-btn" id="moveUpBtn">▲ 上移</button>
+            <button class="paint-btn" id="moveDownBtn">下移 ▼</button>
+        </div>
+        <div class="paint-tool-group">
+            <button class="paint-btn" id="addTextBoxBtn">📝 文字框</button>
+            <button class="paint-btn" id="exportCanvasBtn">💾 导出</button>
+            <button class="paint-btn" id="addNewBoardBtn">➕ 新画板</button>
+            <button class="paint-btn" id="renameBoardBtn">✏️ 重命名</button>
+        </div>
+    </div>
+    <div class="paint-canvas-area" id="paintCanvasArea">
+        <div class="canvas-wrapper" id="canvasWrapper">
+            <canvas id="mainCanvas" width="2000" height="2000" style="width:1000px; height:1000px;"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // 画板数据
+        let paintBoards = JSON.parse(localStorage.getItem('surfer2_paintboards') || '[{"id":"default","name":"画板1","imageData":null,"history":[],"historyIndex":-1}]');
+        let currentBoardId = localStorage.getItem('surfer2_currentBoard') || 'default';
+        let currentTool = 'pen';
+        let penColor = '#000000';
+        let penSize = 5;
+        let isDrawing = false;
+        let lastX = 0, lastY = 0;
+        let canvasCtx = null;
+        let canvasWidth = 2000, canvasHeight = 2000;
+        let viewX = 0, viewY = 0;
+        let textBoxes = JSON.parse(localStorage.getItem('surfer2_textboxes') || '[]');
+
+        function savePaintBoards() {
+            localStorage.setItem('surfer2_paintboards', JSON.stringify(paintBoards));
+            localStorage.setItem('surfer2_textboxes', JSON.stringify(textBoxes));
+        }
+
+        function saveCurrentBoardState() {
+            const board = paintBoards.find(b => b.id === currentBoardId);
+            if(board && canvasCtx) {
+                board.imageData = document.getElementById('mainCanvas').toDataURL();
+                if(board.historyIndex < board.history.length - 1) {
+                    board.history = board.history.slice(0, board.historyIndex + 1);
+                }
+                board.history.push(board.imageData);
+                board.historyIndex = board.history.length - 1;
+                if(board.history.length > 50) board.history.shift();
+                savePaintBoards();
+            }
+        }
+
+        function loadImageToCanvas(imgData) {
+            const img = new Image();
+            img.onload = function() {
+                canvasCtx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
+                renderTextBoxes();
+                saveCurrentBoardState();
+            };
+            img.src = imgData;
+        }
+
+        function renderTextBoxes() {
+            for(let i = 0; i < textBoxes.length; i++) {
+                const box = textBoxes[i];
+                canvasCtx.font = box.fontSize + 'px sans-serif';
+                canvasCtx.fillStyle = box.color;
+                canvasCtx.fillText(box.text, box.x, box.y);
+            }
+        }
+
+        function undo() {
+            const board = paintBoards.find(b => b.id === currentBoardId);
+            if(board && board.historyIndex > 0) {
+                board.historyIndex--;
+                loadImageToCanvas(board.history[board.historyIndex]);
+            }
+        }
+
+        function redo() {
+            const board = paintBoards.find(b => b.id === currentBoardId);
+            if(board && board.historyIndex < board.history.length - 1) {
+                board.historyIndex++;
+                loadImageToCanvas(board.history[board.historyIndex]);
+            }
+        }
+
+        function clearCanvas() {
+            if(confirm('清空画板？')) {
+                canvasCtx.fillStyle = '#ffffff';
+                canvasCtx.fillRect(0, 0, canvasWidth, canvasHeight);
+                saveCurrentBoardState();
+            }
+        }
+
+        function draw(e) {
+            if(!isDrawing) return;
+            const rect = document.getElementById('mainCanvas').getBoundingClientRect();
+            const scaleX = canvasWidth / rect.width;
+            const scaleY = canvasHeight / rect.height;
+            let clientX = e.clientX !== undefined ? e.clientX : (e.touches ? e.touches[0].clientX : 0);
+            let clientY = e.clientY !== undefined ? e.clientY : (e.touches ? e.touches[0].clientY : 0);
+            let x = (clientX - rect.left) * scaleX;
+            let y = (clientY - rect.top) * scaleY;
+            x = Math.max(0, Math.min(canvasWidth, x));
+            y = Math.max(0, Math.min(canvasHeight, y));
+            canvasCtx.beginPath();
+            canvasCtx.lineCap = 'round';
+            canvasCtx.lineJoin = 'round';
+            if(currentTool === 'eraser') {
+                canvasCtx.strokeStyle = '#ffffff';
+                canvasCtx.lineWidth = penSize * 2;
+            } else {
+                canvasCtx.strokeStyle = penColor;
+                canvasCtx.lineWidth = penSize;
+            }
+            if(lastX === 0 && lastY === 0) {
+                canvasCtx.moveTo(x, y);
+                canvasCtx.lineTo(x + 0.5, y + 0.5);
+            } else {
+                canvasCtx.moveTo(lastX, lastY);
+                canvasCtx.lineTo(x, y);
+            }
+            canvasCtx.stroke();
+            lastX = x;
+            lastY = y;
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const rect = document.getElementById('mainCanvas').getBoundingClientRect();
+            const scaleX = canvasWidth / rect.width;
+            const scaleY = canvasHeight / rect.height;
+            let clientX = e.clientX !== undefined ? e.clientX : (e.touches ? e.touches[0].clientX : 0);
+            let clientY = e.clientY !== undefined ? e.clientY : (e.touches ? e.touches[0].clientY : 0);
+            lastX = (clientX - rect.left) * scaleX;
+            lastY = (clientY - rect.top) * scaleY;
+            lastX = Math.max(0, Math.min(canvasWidth, lastX));
+            lastY = Math.max(0, Math.min(canvasHeight, lastY));
+            canvasCtx.beginPath();
+            canvasCtx.moveTo(lastX, lastY);
+        }
+
+        function endDrawing() {
+            isDrawing = false;
+            lastX = 0;
+            lastY = 0;
+            saveCurrentBoardState();
+        }
+
+        function initCanvas() {
+            const canvas = document.getElementById('mainCanvas');
+            if(!canvas) return;
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+            canvasCtx = canvas.getContext('2d');
+            const board = paintBoards.find(b => b.id === currentBoardId);
+            if(board && board.imageData) {
+                const img = new Image();
+                img.onload = function() {
+                    canvasCtx.drawImage(img, 0, 0);
+                    renderTextBoxes();
+                };
+                img.src = board.imageData;
+            } else {
+                canvasCtx.fillStyle = '#ffffff';
+                canvasCtx.fillRect(0, 0, canvasWidth, canvasHeight);
+            }
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', endDrawing);
+            canvas.addEventListener('mouseleave', endDrawing);
+            canvas.addEventListener('touchstart', function(e) { e.preventDefault(); startDrawing(e.touches[0]); });
+            canvas.addEventListener('touchmove', function(e) { e.preventDefault(); draw(e.touches[0]); });
+            canvas.addEventListener('touchend', endDrawing);
+            canvas.addEventListener('dblclick', function(e) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvasWidth / rect.width;
+                const scaleY = canvasHeight / rect.height;
+                const x = (e.clientX - rect.left) * scaleX;
+                const y = (e.clientY - rect.top) * scaleY;
+                for(let i = 0; i < textBoxes.length; i++) {
+                    const box = textBoxes[i];
+                    if(Math.abs(x - box.x) < 50 && Math.abs(y - box.y) < 30) {
+                        const newText = prompt('编辑文字:', box.text);
+                        if(newText !== null) box.text = newText;
+                        savePaintBoards();
+                        loadImageToCanvas(paintBoards.find(b => b.id === currentBoardId).imageData);
+                        break;
+                    }
+                }
+            });
+        }
+
+        function moveCanvas(dx, dy) {
+            viewX += dx;
+            viewY += dy;
+            const wrapper = document.getElementById('canvasWrapper');
+            if(wrapper) wrapper.style.transform = 'translate(' + viewX + 'px, ' + viewY + 'px)';
+        }
+
+        function addTextBox() {
+            textBoxes.push({
+                id: Date.now(),
+                x: 500,
+                y: 500,
+                text: '双击编辑',
+                color: penColor,
+                fontSize: 24
+            });
+            savePaintBoards();
+            loadImageToCanvas(paintBoards.find(b => b.id === currentBoardId).imageData);
+        }
+
+        function exportCanvas() {
+            const link = document.createElement('a');
+            link.download = 'surfer2_' + currentBoardId + '.png';
+            link.href = document.getElementById('mainCanvas').toDataURL();
+            link.click();
+        }
+
+        function addNewBoard() {
+            const name = prompt('新画板名称:');
+            if(name) {
+                const newId = Date.now().toString();
+                paintBoards.push({
+                    id: newId,
+                    name: name,
+                    imageData: null,
+                    history: [],
+                    historyIndex: -1
+                });
+                savePaintBoards();
+                currentBoardId = newId;
+                localStorage.setItem('surfer2_currentBoard', currentBoardId);
+                location.reload();
+            }
+        }
+
+        function renameBoard() {
+            const board = paintBoards.find(b => b.id === currentBoardId);
+            if(board) {
+                const newName = prompt('新名称:', board.name);
+                if(newName) board.name = newName;
+                savePaintBoards();
+                renderBoardSelector();
+            }
+        }
+
+        function renderBoardSelector() {
+            const container = document.getElementById('boardSelector');
+            if(!container) return;
+            let html = '';
+            for(let i = 0; i < paintBoards.length; i++) {
+                const b = paintBoards[i];
+                html += '<div class="board-tab ' + (b.id === currentBoardId ? 'active' : '') + '" onclick="window.switchBoard(\'' + b.id + '\')">' + b.name + '</div>';
+            }
+            container.innerHTML = html;
+        }
+
+        window.switchBoard = function(id) {
+            const currentBoard = paintBoards.find(b => b.id === currentBoardId);
+            if(currentBoard && canvasCtx) {
+                currentBoard.imageData = document.getElementById('mainCanvas').toDataURL();
+                savePaintBoards();
+            }
+            currentBoardId = id;
+            localStorage.setItem('surfer2_currentBoard', currentBoardId);
+            location.reload();
+        };
+
+        // 绑定按钮事件
+        function bindEvents() {
+            const penBtn = document.getElementById('penToolBtn');
+            const eraserBtn = document.getElementById('eraserToolBtn');
+            const undoBtn = document.getElementById('undoBtn');
+            const redoBtn = document.getElementById('redoBtn');
+            const clearBtn = document.getElementById('clearCanvasBtn');
+            const moveLeft = document.getElementById('moveLeftBtn');
+            const moveRight = document.getElementById('moveRightBtn');
+            const moveUp = document.getElementById('moveUpBtn');
+            const moveDown = document.getElementById('moveDownBtn');
+            const addTextBoxBtn = document.getElementById('addTextBoxBtn');
+            const exportBtn = document.getElementById('exportCanvasBtn');
+            const addBoardBtn = document.getElementById('addNewBoardBtn');
+            const renameBoardBtn = document.getElementById('renameBoardBtn');
+            const colorPicker = document.getElementById('penColorPicker');
+            const sizeSlider = document.getElementById('penSizeSlider');
+            const sizeLabel = document.getElementById('sizeLabel');
+
+            if(penBtn) penBtn.onclick = function() {
+                currentTool = 'pen';
+                penBtn.classList.add('active');
+                eraserBtn.classList.remove('active');
+            };
+            if(eraserBtn) eraserBtn.onclick = function() {
+                currentTool = 'eraser';
+                eraserBtn.classList.add('active');
+                penBtn.classList.remove('active');
+            };
+            if(undoBtn) undoBtn.onclick = undo;
+            if(redoBtn) redoBtn.onclick = redo;
+            if(clearBtn) clearBtn.onclick = clearCanvas;
+            if(moveLeft) moveLeft.onclick = function() { moveCanvas(-50, 0); };
+            if(moveRight) moveRight.onclick = function() { moveCanvas(50, 0); };
+            if(moveUp) moveUp.onclick = function() { moveCanvas(0, -50); };
+            if(moveDown) moveDown.onclick = function() { moveCanvas(0, 50); };
+            if(addTextBoxBtn) addTextBoxBtn.onclick = addTextBox;
+            if(exportBtn) exportBtn.onclick = exportCanvas;
+            if(addBoardBtn) addBoardBtn.onclick = addNewBoard;
+            if(renameBoardBtn) renameBoardBtn.onclick = renameBoard;
+            if(colorPicker) colorPicker.onchange = function(e) {
+                penColor = e.target.value;
+                currentTool = 'pen';
+                penBtn.classList.add('active');
+                eraserBtn.classList.remove('active');
+            };
+            if(sizeSlider) sizeSlider.oninput = function(e) {
+                penSize = parseInt(e.target.value);
+                if(sizeLabel) sizeLabel.innerText = penSize + 'px';
+            };
+        }
+
+        // 初始化
+        renderBoardSelector();
+        initCanvas();
+        bindEvents();
+    })();
+</script>
+</body>
+              </html>
