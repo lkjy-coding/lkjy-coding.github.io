@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows Online</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', '微软雅黑', sans-serif;
+            user-select: none;
+        }
+        body {
+            height: 100vh;
+            overflow: hidden;
+            background: #1a1a2e;
+        }
+        /* 桌面容器 */
+        #desktop {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background-size: cover;
+            background-position: center;
+            transition: background 0.3s;
+        }
+        /* Win10 风格 */
+        .theme-win10 #desktop {
+            background: radial-gradient(circle at 20% 30%, #2d3a4b, #0f1722);
+        }
+        .theme-win10 .taskbar {
+            background: rgba(20, 20, 30, 0.85);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+        .theme-win10 .start-btn {
+            background: rgba(255,255,255,0.05);
+        }
+        .theme-win10 .window {
+            background: rgba(30, 35, 48, 0.88);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.06);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            border-radius: 10px;
+        }
+        .theme-win10 .window-header {
+            background: rgba(40, 45, 60, 0.7);
+            border-radius: 10px 10px 0 0;
+        }
+        /* Win7 风格 (Aero) */
+        .theme-win7 #desktop {
+            background: radial-gradient(circle at 30% 40%, #3a6ea5, #1d3a5f);
+        }
+        .theme-win7 .taskbar {
+            background: rgba(0, 80, 160, 0.75);
+            backdrop-filter: blur(6px);
+            border-top: 2px solid rgba(255,255,255,0.3);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
+        }
+        .theme-win7 .start-btn {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .theme-win7 .window {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.5);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            border-radius: 12px 12px 8px 8px;
+        }
+        .theme-win7 .window-header {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 12px 12px 0 0;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+        }
+        /* 任务栏 */
+        .taskbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            z-index: 9999;
+            gap: 6px;
+            backdrop-filter: blur(10px);
+        }
+        .start-btn {
+            width: 48px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 22px;
+            color: #fff;
+            transition: 0.2s;
+            margin-right: 8px;
+        }
+        .start-btn:hover {
+            background: rgba(255,255,255,0.15);
+        }
+        .taskbar-items {
+            display: flex;
+            gap: 4px;
+            flex: 1;
+            overflow-x: auto;
+        }
+        .taskbar-item {
+            padding: 4px 16px;
+            height: 34px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 6px;
+            color: #eee;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: 0.15s;
+            border: 1px solid transparent;
+        }
+        .taskbar-item.active {
+            background: rgba(255,255,255,0.18);
+            border-color: rgba(255,255,255,0.25);
+        }
+        .taskbar-item:hover {
+            background: rgba(255,255,255,0.15);
+        }
+        .taskbar-time {
+            color: #fff;
+            font-size: 13px;
+            padding: 0 12px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+        /* 窗口 */
+        .window {
+            position: absolute;
+            min-width: 380px;
+            min-height: 260px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            backdrop-filter: blur(12px);
+            transition: box-shadow 0.2s;
+            resize: both;
+            overflow: hidden;
+        }
+        .window-header {
+            padding: 6px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: default;
+            flex-shrink: 0;
+            height: 36px;
+        }
+        .window-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .window-controls {
+            display: flex;
+            gap: 8px;
+        }
+        .window-controls span {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            color: #ccc;
+            transition: 0.15s;
+        }
+        .window-controls span:hover {
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+        }
+        .window-controls .close:hover {
+            background: #e74c3c;
+            color: #fff;
+        }
+        .window-body {
+            flex: 1;
+            overflow: auto;
+            padding: 0;
+            background: rgba(0,0,0,0.1);
+            border-radius: 0 0 10px 10px;
+        }
+        .window-body iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #fff;
+        }
+        .window-body .editor-area {
+            width: 100%;
+            height: 100%;
+            background: #1e1e2e;
+            color: #d4d4d4;
+            padding: 12px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            border: none;
+            outline: none;
+            resize: none;
+        }
+        /* 桌面图标 */
+        .desktop-icons {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 10;
+        }
+        .desktop-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 70px;
+            padding: 8px 4px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #fff;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+            transition: 0.15s;
+            font-size: 12px;
+            text-align: center;
+            background: rgba(0,0,0,0.15);
+            backdrop-filter: blur(4px);
+        }
+        .desktop-icon:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.02);
+        }
+        .desktop-icon .icon {
+            font-size: 32px;
+            margin-bottom: 4px;
+        }
+        /* 设置面板 */
+        #settingsPanel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 380px;
+            background: rgba(30,35,48,0.9);
+            backdrop-filter: blur(24px);
+            border-radius: 16px;
+            padding: 24px;
+            z-index: 99999;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            display: none;
+            color: #eee;
+        }
+        #settingsPanel h2 {
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+        #settingsPanel .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        #settingsPanel .setting-item select {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 8px;
+            outline: none;
+        }
+        #settingsPanel .close-settings {
+            margin-top: 20px;
+            width: 100%;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .hidden {
+            display: none !important;
+        }
+        /* 滚动条 */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="theme-win10">
+        <div id="desktop">
+            <!-- 桌面图标 -->
+            <div class="desktop-icons">
+                <div class="desktop-icon" data-app="browser"><span class="icon">🌐</span>Edge</div>
+                <div class="desktop-icon" data-app="cpp"><span class="icon">⚙️</span>C++</div>
+                <div class="desktop-icon" data-app="scratch"><span class="icon">🐱</span>Scratch</div>
+                <div class="desktop-icon" data-app="minesweeper"><span class="icon">💣</span>扫雷</div>
+                <div class="desktop-icon" data-app="oi"><span class="icon">📈</span>OI重开</div>
+                <div class="desktop-icon" data-app="surf"><span class="icon">🏄</span>Edge Surf</div>
+                <div class="desktop-icon" data-app="settings"><span class="icon">⚡</span>设置</div>
+            </div>
+            <!-- 窗口容器 -->
+            <div id="windowContainer"></div>
+            <!-- 任务栏 -->
+            <div class="taskbar" id="taskbar">
+                <div class="start-btn" id="startBtn">🪟</div>
+                <div class="taskbar-items" id="taskbarItems"></div>
+                <div class="taskbar-time" id="clock">12:00</div>
+            </div>
+        </div>
+        <!-- 设置面板 -->
+        <div id="settingsPanel">
+            <h2>⚙️ 个性化设置</h2>
+            <div class="setting-item">
+                <span>主题风格</span>
+                <select id="themeSelect">
+                    <option value="win10">Windows 10</option>
+                    <option value="win7">Windows 7 (Aero)</option>
+                </select>
+            </div>
+            <button class="close-settings" id="closeSettings">确认</button>
+        </div>
+    </div>
+
+    <script>
+        (function(){
+            // ---------- 核心数据 ----------
+            let windows = [];
+            let windowId = 0;
+            const appIcons = {
+                'browser': '🌐',
+                'cpp': '⚙️',
+                'scratch': '🐱',
+                'minesweeper': '💣',
+                'oi': '📈',
+                'surf': '🏄'
+            };
+            const appTitles = {
+                'browser': 'Microsoft Edge',
+                'cpp': 'C++ Compiler (O2)',
+                'scratch': 'Scratch 在线编辑器',
+                'minesweeper': '扫雷',
+                'oi': 'OI 重开模拟器',
+                'surf': 'Edge Surf 高仿'
+            };
+
+            // 当前主题
+            let currentTheme = 'win10';
+
+            // DOM 引用
+            const desktop = document.getElementById('desktop');
+            const windowContainer = document.getElementById('windowContainer');
+            const taskbarItems = document.getElementById('taskbarItems');
+            const settingsPanel = document.getElementById('settingsPanel');
+            const themeSelect = document.getElementById('themeSelect');
+            const closeSettingsBtn = document.getElementById('closeSettings');
+
+            // 时钟
+            function updateClock() {
+                const now = new Date();
+                const h = String(now.getHours()).padStart(2,'0');
+                const m = String(now.getMinutes()).padStart(2,'0');
+                document.getElementById('clock').textContent = h+':'+m;
+            }
+            setInterval(updateClock, 1000);
+            updateClock();
+
+            // 设置主题
+            function setTheme(theme) {
+                currentTheme = theme;
+                document.getElementById('app').className = 'theme-'+theme;
+                themeSelect.value = theme;
+            }
+            themeSelect.addEventListener('change', (e) => {
+                setTheme(e.target.value);
+            });
+            closeSettingsBtn.addEventListener('click', ()=>{
+                settingsPanel.style.display = 'none';
+            });
+
+            // 打开设置
+            document.querySelector('.desktop-icon[data-app="settings"]').addEventListener('click', ()=>{
+                settingsPanel.style.display = 'block';
+            });
+
+            // ---------- 窗口管理 ----------
+            function createWindow(appId, customTitle, customContent) {
+                const id = windowId++;
+                const title = customTitle || appTitles[appId] || appId;
+                const win = document.createElement('div');
+                win.className = 'window';
+                win.dataset.windowId = id;
+                win.style.width = '760px';
+                win.style.height = '520px';
+                win.style.left = (60 + id * 25) + 'px';
+                win.style.top = (40 + id * 20) + 'px';
+                win.style.zIndex = 100 + id;
+
+                // header
+                const header = document.createElement('div');
+                header.className = 'window-header';
+                header.innerHTML = `
+                    <div class="window-title"><span>${appIcons[appId] || '📄'}</span> ${title}</div>
+                    <div class="window-controls">
+                        <span class="minimize">─</span>
+                        <span class="maximize">☐</span>
+                        <span class="close">✕</span>
+                    </div>
+                `;
+                win.appendChild(header);
+
+                const body = document.createElement('div');
+                body.className = 'window-body';
+                body.style.position = 'relative';
+
+                // 内容
+                if (customContent) {
+                    body.innerHTML = customContent;
+                } else {
+                    // 根据app生成内容
+                    if (appId === 'browser') {
+                        const iframe = document.createElement('iframe');
+                        iframe.src = 'https://www.luogu.com.cn/';
+                        body.appendChild(iframe);
+                    } else if (appId === 'cpp') {
+                        body.innerHTML = `
+                            <textarea class="editor-area" id="cppEditor_${id}">#include <bits/stdc++.h>\nusing namespace std;\nint main() {\n    cout << "Hello, OI!" << endl;\n    return 0;\n}</textarea>
+                            <div style="position:absolute; bottom:10px; right:10px; display:flex; gap:8px; z-index:5;">
+                                <button style="background:rgba(255,255,255,0.1); border:1px solid #555; color:#eee; padding:4px 12px; border-radius:6px; cursor:pointer;" onclick="alert('编译成功 (O2 优化) 无错误')">编译 (O2)</button>
+                                <button style="background:rgba(255,255,255,0.1); border:1px solid #555; color:#eee; padding:4px 12px; border-radius:6px; cursor:pointer;" onclick="alert('运行输出:\\nHello, OI!')">运行</button>
+                            </div>
+                        `;
+                    } else if (appId === 'scratch') {
+                        const iframe = document.createElement('iframe');
+                        iframe.src = 'https://scratchers.cn/editor/';
+                        body.appendChild(iframe);
+                    } else if (appId === 'minesweeper') {
+                        body.innerHTML = `<div style="display:flex; align-items:center; justify-content:center; height:100%; color:#eee; font-size:18px; background:#2a2a3a;">💣 扫雷 · 简易版 (点击格子模拟)</div>`;
+                    } else if (appId === 'oi') {
+                        body.innerHTML = `<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#eee; padding:20px; background:#1e1e2e;">
+                            <h3>📈 OI 重开模拟器</h3>
+                            <p style="margin:10px 0;">你的CSP-S 2026 得分: ${Math.floor(Math.random()*400)}</p>
+                            <button style="background:#2d8f5e; border:none; color:#fff; padding:8px 24px; border-radius:20px; cursor:pointer;" onclick="this.parentElement.querySelector('p').textContent='你的CSP-S 2026 得分: '+Math.floor(Math.random()*400)">重开一次</button>
+                            <p style="margin-top:12px; font-size:12px; opacity:0.6;">(仅供娱乐，放松一下)</p>
+                        </div>`;
+                    } else if (appId === 'surf') {
+                        body.innerHTML = `<div style="display:flex; align-items:center; justify-content:center; height:100%; color:#eee; background:#0d1b2a; flex-direction:column;">
+                            <span style="font-size:48px;">🏄</span>
+                            <p style="margin-top:10px;">Edge Surf 高仿 · 方向键控制</p>
+                            <p style="font-size:12px; opacity:0.5;">(模拟冲浪小游戏，按 ↑ ↓ ← → )</p>
+                        </div>`;
+                    } else {
+                        body.innerHTML = `<div style="padding:20px; color:#eee;">应用 ${appId} 未实现</div>`;
+                    }
+                }
+                win.appendChild(body);
+
+                // 事件: 窗口控制
+                const closeBtn = header.querySelector('.close');
+                closeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    closeWindow(id);
+                });
+                const minimizeBtn = header.querySelector('.minimize');
+                minimizeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    win.style.display = 'none';
+                });
+                const maximizeBtn = header.querySelector('.maximize');
+                let isMax = false;
+                maximizeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (!isMax) {
+                        win.dataset.prevRect = JSON.stringify({left: win.style.left, top: win.style.top, width: win.style.width, height: win.style.height});
+                        win.style.left = '0';
+                        win.style.top = '0';
+                        win.style.width = '100%';
+                        win.style.height = 'calc(100% - 50px)';
+                        isMax = true;
+                    } else {
+                        const prev = JSON.parse(win.dataset.prevRect || '{"left":"60px","top":"40px","width":"760px","height":"520px"}');
+                        win.style.left = prev.left;
+                        win.style.top = prev.top;
+                        win.style.width = prev.width;
+                        win.style.height = prev.height;
+                        isMax = false;
+                    }
+                });
+
+                // 拖拽移动 (简单)
+                let drag = false, startX, startY, origX, origY;
+                header.addEventListener('mousedown', (e) => {
+                    if (e.target.closest('.window-controls')) return;
+                    drag = true;
+                    const rect = win.getBoundingClientRect();
+                    startX = e.clientX;
+                    startY = e.clientY;
+                    origX = rect.left;
+                    origY = rect.top;
+                    win.style.cursor = 'grabbing';
+                    e.preventDefault();
+                });
+                document.addEventListener('mousemove', (e) => {
+                    if (!drag) return;
+                    const dx = e.clientX - startX;
+                    const dy = e.clientY - startY;
+                    win.style.left = (origX + dx) + 'px';
+                    win.style.top = (origY + dy) + 'px';
+                });
+                document.addEventListener('mouseup', () => {
+                    if (drag) {
+                        drag = false;
+                        win.style.cursor = 'default';
+                    }
+                });
+
+                // 添加到桌面
+                windowContainer.appendChild(win);
+                windows.push({id, element: win, appId, title});
+                updateTaskbar();
+                return id;
+            }
+
+            function closeWindow(id) {
+                const idx = windows.findIndex(w => w.id === id);
+                if (idx !== -1) {
+                    windows[idx].element.remove();
+                    windows.splice(idx, 1);
+                    updateTaskbar();
+                }
+            }
+
+            function updateTaskbar() {
+                taskbarItems.innerHTML = '';
+                windows.forEach(w => {
+                    const item = document.createElement('div');
+                    item.className = 'taskbar-item active';
+                    item.innerHTML = `${appIcons[w.appId] || '📄'} ${w.title}`;
+                    item.addEventListener('click', () => {
+                        const el = w.element;
+                        if (el.style.display === 'none') {
+                            el.style.display = 'flex';
+                        }
+                        el.style.zIndex = 100 + windows.length;
+                    });
+                    taskbarItems.appendChild(item);
+                });
+            }
+
+            // 桌面图标点击
+            document.querySelectorAll('.desktop-icon').forEach(icon => {
+                icon.addEventListener('click', (e) => {
+                    const app = icon.dataset.app;
+                    if (app === 'settings') return;
+                    // 检查是否已打开
+                    const exist = windows.find(w => w.appId === app);
+                    if (exist) {
+                        exist.element.style.display = 'flex';
+                        exist.element.style.zIndex = 100 + windows.length;
+                        return;
+                    }
+                    createWindow(app);
+                });
+            });
+
+            // 开始按钮 (快速启动)
+            document.getElementById('startBtn').addEventListener('click', ()=>{
+                // 快速打开浏览器和编译器
+                if (!windows.find(w=>w.appId==='browser')) createWindow('browser');
+                if (!windows.find(w=>w.appId==='cpp')) createWindow('cpp');
+            });
+
+            // 额外：CSP/NOIP 帖子推荐 (浏览器iframe内默认洛谷，已经包含)
+            // 附加小游戏隐藏彩蛋：双击桌面空白处打开扫雷
+            desktop.addEventListener('dblclick', (e) => {
+                if (e.target === desktop || e.target === document.getElementById('desktop')) {
+                    if (!windows.find(w=>w.appId==='minesweeper')) createWindow('minesweeper');
+                }
+            });
+
+            // 默认打开浏览器和编译器
+            window.onload = function() {
+                setTimeout(() => {
+                    createWindow('browser');
+                    createWindow('cpp');
+                }, 300);
+            };
+
+            // 暴露一些函数给全局 (方便调试)
+            window.createWindow = createWindow;
+            window.closeWindow = closeWindow;
+        })();
+    </script>
+</body>
+  </html>
