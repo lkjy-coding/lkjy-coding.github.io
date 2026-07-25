@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows 95 模拟器</title>
+    <!-- 使用像素风格字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        /* 全局重置与基础 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: #008080; /* 经典 Win95 桌面背景色 */
+            font-family: 'Segoe UI', 'Microsoft Sans Serif', sans-serif;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 整个桌面容器 */
+        .desktop {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: #008080;
+            overflow: hidden;
+        }
+
+        /* ----- 图标区域 (桌面快捷方式) ----- */
+        .desktop-icons {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 10;
+        }
+
+        .desktop-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 70px;
+            cursor: pointer;
+            color: white;
+            text-shadow: 1px 1px 0 #00000080;
+            font-size: 12px;
+            text-align: center;
+            padding: 4px;
+        }
+
+        .desktop-icon img {
+            width: 48px;
+            height: 48px;
+            image-rendering: pixelated;
+            background: #c0c0c0;
+            border: 2px solid #ffffff;
+            border-right-color: #808080;
+            border-bottom-color: #808080;
+            padding: 2px;
+            margin-bottom: 4px;
+        }
+
+        .desktop-icon span {
+            background: #00000080;
+            padding: 2px 6px;
+            border-radius: 2px;
+        }
+
+        /* ----- 窗口 (模拟 Win95 风格) ----- */
+        .window {
+            position: absolute;
+            top: 40px;
+            left: 60px;
+            width: 540px;
+            height: 380px;
+            background: #c0c0c0;
+            border: 4px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            z-index: 20;
+            min-width: 300px;
+            min-height: 200px;
+            resize: both;
+            overflow: auto;
+        }
+
+        /* 窗口标题栏 */
+        .window-title {
+            background: #000080;
+            color: white;
+            padding: 4px 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: default;
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            flex-shrink: 0;
+        }
+
+        .window-title .title-text {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .window-title .title-text img {
+            width: 18px;
+            height: 18px;
+            image-rendering: pixelated;
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 4px;
+        }
+
+        .window-controls button {
+            width: 22px;
+            height: 22px;
+            background: #c0c0c0;
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            font-weight: bold;
+            font-size: 14px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 0;
+            color: black;
+        }
+
+        .window-controls button:active {
+            border-color: #808080 #ffffff #ffffff #808080;
+        }
+
+        /* 窗口主体 (包含菜单和内容) */
+        .window-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #c0c0c0;
+            padding: 4px;
+            overflow: auto;
+            border: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+        }
+
+        /* 菜单栏 */
+        .menu-bar {
+            display: flex;
+            gap: 2px;
+            background: #c0c0c0;
+            padding: 2px 0;
+            border-bottom: 2px solid #808080;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+
+        .menu-item {
+            padding: 2px 8px;
+            font-size: 13px;
+            cursor: pointer;
+            color: black;
+            background: #c0c0c0;
+            border: 2px solid;
+            border-color: #c0c0c0 #c0c0c0 #c0c0c0 #c0c0c0;
+        }
+
+        .menu-item:hover {
+            border-color: #ffffff #808080 #808080 #ffffff;
+            background: #000080;
+            color: white;
+        }
+
+        /* 窗口内容区域 - 模拟记事本 */
+        .window-content {
+            flex: 1;
+            background: white;
+            margin: 4px 0;
+            padding: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            border: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            overflow: auto;
+            white-space: pre-wrap;
+            color: black;
+        }
+
+        /* 状态栏 (模拟) */
+        .status-bar {
+            background: #c0c0c0;
+            border-top: 2px solid #808080;
+            padding: 2px 6px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        /* ----- 任务栏 (底部) ----- */
+        .taskbar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 44px;
+            background: #c0c0c0;
+            border-top: 4px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            display: flex;
+            align-items: center;
+            padding: 0 4px;
+            z-index: 100;
+            gap: 6px;
+        }
+
+        /* 开始按钮 */
+        .start-button {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: #c0c0c0;
+            border: 4px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            padding: 2px 12px 2px 6px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            height: 36px;
+            box-shadow: inset 0 0 0 1px #dfdfdf;
+        }
+
+        .start-button:active {
+            border-color: #808080 #ffffff #ffffff #808080;
+        }
+
+        .start-button img {
+            width: 28px;
+            height: 28px;
+            image-rendering: pixelated;
+        }
+
+        /* 任务栏任务按钮 */
+        .task-item {
+            background: #c0c0c0;
+            border: 4px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            padding: 2px 16px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            font-weight: bold;
+            color: black;
+            cursor: pointer;
+            box-shadow: inset 0 0 0 1px #dfdfdf;
+            flex: 1;
+            max-width: 180px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .task-item:active {
+            border-color: #808080 #ffffff #ffffff #808080;
+        }
+
+        /* 系统托盘 */
+        .system-tray {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: auto;
+            background: #c0c0c0;
+            border: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            padding: 0 8px;
+            height: 30px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .system-tray .time {
+            background: #c0c0c0;
+            padding: 0 4px;
+        }
+
+        /* ----- 开始菜单 (弹出) ----- */
+        .start-menu {
+            position: absolute;
+            bottom: 50px;
+            left: 4px;
+            width: 220px;
+            background: #c0c0c0;
+            border: 4px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            display: none;
+            flex-direction: column;
+            z-index: 200;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.4);
+        }
+
+        .start-menu.open {
+            display: flex;
+        }
+
+        .start-menu-header {
+            background: #000080;
+            color: white;
+            padding: 8px 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid #808080;
+        }
+
+        .start-menu-header img {
+            width: 40px;
+            height: 40px;
+            image-rendering: pixelated;
+        }
+
+        .start-menu-items {
+            padding: 6px 0;
+        }
+
+        .start-menu-item {
+            padding: 6px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            color: black;
+        }
+
+        .start-menu-item:hover {
+            background: #000080;
+            color: white;
+        }
+
+        .start-menu-item img {
+            width: 28px;
+            height: 28px;
+            image-rendering: pixelated;
+        }
+
+        .start-menu-separator {
+            height: 2px;
+            background: #808080;
+            margin: 4px 10px;
+        }
+
+        /* 滚动条美化 (模拟) */
+        ::-webkit-scrollbar {
+            width: 16px;
+            height: 16px;
+            background: #c0c0c0;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c0c0c0;
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #c0c0c0;
+            border: 2px solid #808080;
+        }
+
+        /* 其他小工具 */
+        .draggable {
+            cursor: grab;
+        }
+
+        .draggable:active {
+            cursor: grabbing;
+        }
+
+        /* 响应式微调 */
+        @media (max-width: 650px) {
+            .window {
+                width: 90%;
+                height: 70%;
+                left: 5%;
+                top: 5%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="desktop" id="desktop">
+
+    <!-- 桌面图标 -->
+    <div class="desktop-icons">
+        <div class="desktop-icon" onclick="openWindow('notepad')">
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAAAJklEQVR4Xu3PAQ0AAAgCoP2/7gQNqKqqqqqqqqqqqqqqqqqqqqqq7gYFNgABe1CmZgAAAABJRU5ErkJggg==" alt="记事本">
+            <span>记事本</span>
+        </div>
+        <div class="desktop-icon" onclick="openWindow('computer')">
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAAAJklEQVR4Xu3PAQ0AAAgCoP2/7gQNqKqqqqqqqqqqqqqqqqqqqqqq7gYFNgABe1CmZgAAAABJRU5ErkJggg==" alt="我的电脑">
+            <span>我的电脑</span>
+        </div>
+    </div>
+
+    <!-- 窗口 (默认打开一个记事本) -->
+    <div class="window" id="windowNotepad" style="display: flex; top: 60px; left: 80px; width: 560px; height: 400px; z-index: 30;">
+        <div class="window-title draggable" id="titleNotepad">
+            <span class="title-text">
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAAAHklEQVR4T2P8//8/Ay0x0gEoGigbKBsgG6TAgQPMwA8Aeb1MXQAAAABJRU5ErkJggg==" alt="记事本图标">
+                记事本
+            </span>
+            <span class="window-controls">
+                <button onclick="closeWindow('windowNotepad')">✕</button>
+            </span>
+        </div>
+        <div class="window-body">
+            <div class="menu-bar">
+                <span class="menu-item">文件</span>
+                <span class="menu-item">编辑</span>
+                <span class="menu-item">查看</span>
+            </div>
+            <div class="window-content" id="notepadContent">
+                欢迎使用 Windows 95 模拟器！
+                这是一个完全由 HTML + CSS + JavaScript 构建的复古界面。
+                
+                你可以拖动窗口、点击开始菜单、关闭窗口。
+                实时渲染，像素级还原。
+                
+                ———— 经典永流传 ————
+            </div>
+            <div class="status-bar">
+                <span>就绪</span>
+                <span>行 1, 列 1</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 任务栏 -->
+    <div class="taskbar">
+        <div class="start-button" id="startButton" onclick="toggleStartMenu()">
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAAAIklEQVR4T2P8//8/Ay0x0gEoGigbKBsgG6TAgQPMwA8Aeb1MXQAAAABJRU5ErkJggg==" alt="开始">
+            <span>开始</span>
+        </div>
+        <div class="task-item" onclick="openWindow('notepad')">📄 记事本</div>
+        <div class="system-tray">
+            <span>🔊</span>
+            <span class="time" id="clockDisplay">12:00</span>
+        </div>
+    </div>
+
+    <!-- 开始菜单 -->
+    <div class="start-menu" id="startMenu">
+        <div class="start-menu-header">
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAAAIklEQVR4T2P8//8/Ay0x0gEoGigbKBsgG6TAgQPMwA8Aeb1MXQAAAABJRU5ErkJggg==" alt="用户">
+            <span>用户</span>
+        </div>
+        <div class="start-menu-items">
+            <div class="start-menu-item" onclick="openWindow('notepad'); toggleStartMenu()">
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAAAHklEQVR4T2P8//8/Ay0x0gEoGigbKBsgG6TAgQPMwA8Aeb1MXQAAAABJRU5ErkJggg==" alt="记事本">
+                记事本
+            </div>
+            <div class="start-menu-item" onclick="alert('我的电脑 (模拟)')">
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAAAHklEQVR4T2P8//8/Ay0x0gEoGigbKBsgG6TAgQPMwA8Aeb1MXQAAAABJRU5ErkJggg==" alt="我的电脑">
+                我的电脑
+            </div>
+            <div class="start-menu-separator"></div>
+            <div class="start-menu-item" onclick="alert('关机 (模拟)')">🔌 关机</div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ----- 时钟更新 -----
+    function updateClock() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('clockDisplay').textContent = hours + ':' + minutes;
+    }
+    updateClock();
+    setInterval(updateClock, 10000);
+
+    // ----- 开始菜单切换 -----
+    function toggleStartMenu() {
+        const menu = document.getElementById('startMenu');
+        menu.classList.toggle('open');
+    }
+
+    // 点击其他地方关闭开始菜单 (简单处理)
+    document.addEventListener('click', function(e) {
+        const menu = document.getElementById('startMenu');
+        const startBtn = document.getElementById('startButton');
+        if (menu.classList.contains('open') && !menu.contains(e.target) && !startBtn.contains(e.target)) {
+            menu.classList.remove('open');
+        }
+    });
+
+    // ----- 窗口管理 -----
+    function openWindow(type) {
+        const win = document.getElementById('windowNotepad');
+        if (win.style.display === 'none' || win.style.display === '') {
+            win.style.display = 'flex';
+            // 置于顶层
+            win.style.zIndex = 30 + Math.floor(Math.random() * 10);
+            // 更新内容 (假装打开)
+            document.getElementById('notepadContent').innerHTML = '📄 记事本 (已打开)\n\n' + 
+                '这是 Windows 95 风格的记事本。\n' +
+                '你可以拖动标题栏移动窗口。\n' +
+                '双击关闭按钮关闭。\n' +
+                '— 实时渲染 —';
+        } else {
+            // 如果已经打开，聚焦
+            win.style.zIndex = 30 + Math.floor(Math.random() * 10);
+        }
+    }
+
+    function closeWindow(id) {
+        const win = document.getElementById(id);
+        win.style.display = 'none';
+        // 关闭开始菜单
+        document.getElementById('startMenu').classList.remove('open');
+    }
+
+    // ----- 窗口拖动 (简单实现) -----
+    let dragData = null;
+
+    document.addEventListener('mousedown', function(e) {
+        const title = e.target.closest('.window-title');
+        if (!title) return;
+        const win = title.closest('.window');
+        if (!win) return;
+        // 只允许左键拖动
+        if (e.button !== 0) return;
+
+        const rect = win.getBoundingClientRect();
+        dragData = {
+            window: win,
+            offsetX: e.clientX - rect.left,
+            offsetY: e.clientY - rect.top,
+        };
+        // 防止选中文本
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', function(e) {
+        if (!dragData) return;
+        const win = dragData.window;
+        const newX = e.clientX - dragData.offsetX;
+        const newY = e.clientY - dragData.offsetY;
+        // 限制不能超出屏幕太多
+        win.style.left = Math.max(0, newX) + 'px';
+        win.style.top = Math.max(0, newY) + 'px';
+        // 增加 z-index 使其置顶
+        win.style.zIndex = 30 + Math.floor(Math.random() * 10);
+    });
+
+    document.addEventListener('mouseup', function() {
+        dragData = null;
+    });
+
+    // ----- 窗口双击标题栏最大化/还原 (模拟) -----
+    document.addEventListener('dblclick', function(e) {
+        const title = e.target.closest('.window-title');
+        if (!title) return;
+        const win = title.closest('.window');
+        if (!win) return;
+        // 简单切换大小
+        if (win.style.width === '100%' || win.style.width === '100vw') {
+            win.style.width = '560px';
+            win.style.height = '400px';
+            win.style.left = '80px';
+            win.style.top = '60px';
+        } else {
+            win.style.width = '100%';
+            win.style.height = 'calc(100% - 50px)';
+            win.style.left = '0';
+            win.style.top = '0';
+        }
+    });
+
+    // 阻止窗口内容双击冒泡
+    document.querySelectorAll('.window-content, .menu-bar, .status-bar').forEach(el => {
+        el.addEventListener('dblclick', function(e) {
+            e.stopPropagation();
+        });
+    });
+
+    // 默认窗口显示
+    document.addEventListener('DOMContentLoaded', function() {
+        // 确保记事本窗口可见
+        const win = document.getElementById('windowNotepad');
+        win.style.display = 'flex';
+        // 更新内容
+        document.getElementById('notepadContent').innerHTML = '📄 记事本 (已打开)\n\n' + 
+            '这是 Windows 95 风格的记事本。\n' +
+            '你可以拖动标题栏移动窗口。\n' +
+            '双击关闭按钮关闭。\n' +
+            '— 实时渲染 —\n\n' +
+            '开始菜单有更多选项。';
+    });
+
+    // 对任务栏任务点击聚焦窗口
+    document.querySelector('.task-item').addEventListener('click', function() {
+        const win = document.getElementById('windowNotepad');
+        if (win.style.display !== 'none') {
+            win.style.zIndex = 30 + Math.floor(Math.random() * 10);
+        } else {
+            openWindow('notepad');
+        }
+    });
+
+    console.log('Windows 95 模拟器已启动！');
+</script>
+
+</body>
+  </html>
