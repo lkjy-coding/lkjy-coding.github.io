@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows 95 模拟器 · 增强版</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        body {
+            background: #008080;
+            font-family: 'Segoe UI', 'Microsoft Sans Serif', sans-serif;
+            height: 100vh; width: 100vw; overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .desktop {
+            width: 100%; height: 100%; position: relative;
+            background: #008080; overflow: hidden;
+        }
+
+        /* 桌面图标 */
+        .desktop-icons {
+            position: absolute; top: 12px; left: 12px;
+            display: flex; flex-direction: column; gap: 18px; z-index: 10;
+        }
+        .desktop-icon {
+            display: flex; flex-direction: column; align-items: center;
+            width: 70px; cursor: pointer; color: white;
+            text-shadow: 1px 1px 0 #00000080; font-size: 12px;
+            text-align: center; padding: 4px;
+        }
+        .desktop-icon img {
+            width: 48px; height: 48px; image-rendering: pixelated;
+            background: #c0c0c0;
+            border: 2px solid #ffffff; border-right-color: #808080; border-bottom-color: #808080;
+            padding: 2px; margin-bottom: 4px;
+        }
+        .desktop-icon span {
+            background: #00000080; padding: 2px 6px; border-radius: 2px;
+        }
+
+        /* 窗口 */
+        .window {
+            position: absolute; top: 60px; left: 80px;
+            width: 560px; height: 400px;
+            background: #c0c0c0;
+            border: 4px solid; border-color: #ffffff #808080 #808080 #ffffff;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+            display: none; flex-direction: column; z-index: 20;
+            min-width: 300px; min-height: 200px; resize: both; overflow: auto;
+        }
+        .window-title {
+            background: #000080; color: white; padding: 4px 6px;
+            display: flex; justify-content: space-between; align-items: center;
+            font-weight: bold; font-size: 14px; cursor: default;
+            border: 2px solid; border-color: #ffffff #808080 #808080 #ffffff;
+            flex-shrink: 0;
+        }
+        .window-title .title-text { display: flex; align-items: center; gap: 6px; }
+        .window-title .title-text img { width: 18px; height: 18px; image-rendering: pixelated; }
+        .window-controls { display: flex; gap: 4px; }
+        .window-controls button {
+            width: 22px; height: 22px; background: #c0c0c0;
+            border: 2px solid; border-color: #ffffff #808080 #808080 #ffffff;
+            font-weight: bold; font-size: 14px; line-height: 1;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; padding: 0; color: black;
+        }
+        .window-controls button:active { border-color: #808080 #ffffff #ffffff #808080; }
+        .window-body {
+            flex: 1; display: flex; flex-direction: column;
+            background: #c0c0c0; padding: 4px; overflow: auto;
+            border: 2px solid; border-color: #808080 #ffffff #ffffff #808080;
+        }
+        .menu-bar {
+            display: flex; gap: 2px; background: #c0c0c0;
+            padding: 2px 0; border-bottom: 2px solid #808080;
+            flex-shrink: 0; flex-wrap: wrap;
+        }
+        .menu-item {
+            padding: 2px 8px; font-size: 13px; cursor: pointer;
+            color: black; background: #c0c0c0;
+            border: 2px solid; border-color: #c0c0c0 #c0c0c0 #c0c0c0 #c0c0c0;
+        }
+        .menu-item:hover {
+            border-color: #ffffff #808080 #808080 #ffffff;
+            background: #000080; color: white;
+        }
+        .window-content {
+            flex: 1; background: white; margin: 4px 0; padding: 8px;
+            font-family: 'Courier New', monospace; font-size: 14px;
+            border: 2px solid; border-color: #808080 #ffffff #ffffff #808080;
+            overflow: auto; white-space: pre-wrap; color: black;
+        }
+        .status-bar {
+            background: #c0c0c0; border-top: 2px solid #808080;
+            padding: 2px 6px; font-size: 12px;
+            display: flex; justify-content: space-between; flex-shrink: 0;
+        }
+
+        /* 任务栏 */
+        .taskbar {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            height: 44px; background: #c0c0c0;
+            border-top: 4px solid; border-color: #ffffff #808080 #808080 #ffffff;
+            display: flex; align-items: center; padding: 0 4px; z-index: 100; gap: 6px;
+        }
+        .start-button {
+            display: flex; align-items: center; gap: 4px;
+            background: #c0c0c0; border: 4px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            padding: 2px 12px 2px 6px; font-weight: bold; font-size: 16px;
+            cursor: pointer; height: 36px; box-shadow: inset 0 0 0 1px #dfdfdf;
+        }
+        .start-button:active { border-color: #808080 #ffffff #ffffff #808080; }
+        .start-button img { width: 28px; height: 28px; image-rendering: pixelated; }
+        .task-item {
+            background: #c0c0c0; border: 4px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            padding: 2px 16px; height: 34px; display: flex; align-items: center;
+            font-size: 13px; font-weight: bold; color: black; cursor: pointer;
+            box-shadow: inset 0 0 0 1px #dfdfdf;
+            flex: 1; max-width: 180px; overflow: hidden;
+            white-space: nowrap; text-overflow: ellipsis;
+        }
+        .task-item:active { border-color: #808080 #ffffff #ffffff #808080; }
+        .system-tray {
+            display: flex; align-items: center; gap: 4px;
+            margin-left: auto; background: #c0c0c0;
+            border: 2px solid; border-color: #808080 #ffffff #ffffff #808080;
+            padding: 0 8px; height: 30px; font-size: 13px; font-weight: bold;
+        }
+        .system-tray .time { background: #c0c0c0; padding: 0 4px; }
+
+        /* 开始菜单 - 增强版 */
+        .start-menu {
+            position: absolute; bottom: 50px; left: 4px;
+            width: 280px; background: #c0c0c0;
+            border: 4px solid; border-color: #ffffff #808080 #808080 #ffffff;
+            display: none; flex-direction: column; z-index: 200;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.4);
+        }
+        .start-menu.open { display: flex; }
+        .start-menu-header {
+            background: #000080; color: white; padding: 8px 12px;
+            font-weight: bold; display: flex; align-items: center; gap: 10px;
+            border-bottom: 2px solid #808080;
+        }
+        .start-menu-header img { width: 40px; height: 40px; image-rendering: pixelated; }
+        .start-menu-items { padding: 4px 0; max-height: 360px; overflow-y: auto; }
+        .start-menu-item {
+            padding: 6px 20px; display: flex; align-items: center;
+            gap: 12px; cursor: pointer; font-size: 14px; color: black;
+        }
+        .start-menu-item:hover { background: #000080; color: white; }
+        .start-menu-item img { width: 28px; height: 28px; image-rendering: pixelated; }
+        .start-menu-separator { height: 2px; background: #808080; margin: 4px 10px; }
+        .start-menu-sub {
+            padding-left: 36px; font-size: 13px; color: #333;
+        }
+        .start-menu-sub:hover { background: #000080; color: white; }
+
+        /* 滚动条 */
+        ::-webkit-scrollbar { width: 16px; height: 16px; background: #c0c0c0; }
+        ::-webkit-scrollbar-thumb {
+            background: #c0c0c0; border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+        }
+        ::-webkit-scrollbar-track { background: #c0c0c0; border: 2px solid #808080; }
+
+        .draggable { cursor: grab; }
+        .draggable:active { cursor: grabbing; }
+
+        /* 开机动画 */
+        #bootScreen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000000; z-index: 9999;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            color: #c0c0c0; font-family: 'Segoe UI', sans-serif;
+            transition: opacity 0.8s;
+        }
+        #bootScreen.hidden { opacity: 0; pointer-events: none; }
+        #bootScreen .boot-logo {
+            background: url('https://raw.githubusercontent.com/lkjy-coding/lkjy-coding.github.io/main/Windows95Start.jpg') no-repeat center/contain;
+            width: 400px; height: 240px; margin-bottom: 20px;
+            image-rendering: pixelated;
+        }
+        #bootScreen .boot-text {
+            font-size: 28px; font-weight: bold; letter-spacing: 2px;
+            color: #c0c0c0; text-shadow: 1px 1px 0 #000;
+            margin-bottom: 20px;
+        }
+        .boot-loading {
+            width: 320px; height: 24px; background: #808080;
+            border: 4px solid; border-color: #ffffff #000000 #000000 #ffffff;
+            padding: 2px;
+        }
+        .boot-loading-bar {
+            height: 100%; width: 0%; background: #000080;
+            transition: width 0.1s;
+        }
+        .boot-sub {
+            margin-top: 16px; font-size: 14px; color: #c0c0c0;
+        }
+
+        @media (max-width: 650px) {
+            .window { width: 90%; height: 70%; left: 5%; top: 5%; }
+            #bootScreen .boot-logo { width: 280px; height: 160px; }
+            .boot-loading { width: 240px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 开机动画 -->
+<div id="bootScreen">
+    <div class="boot-logo"></div>
+    <div class="boot-text">Start Windows 95...</div>
+    <div class="boot-loading">
+        <div class="boot-loading-bar" id="bootBar"></div>
+    </div>
+    <div class="boot-sub" id="bootStatus">正在启动 ...</div>
+</div>
+
+<!-- 桌面 -->
+<div class="desktop" id="desktop">
+    <!-- 桌面图标 -->
+    <div class="desktop-icons">
+        <div class="desktop-icon" onclick="openWindow('notepad')">
+            <img src="https://raw.githubusercontent.com/lkjy-coding/lkjy-coding.github.io/main/Windows95MSNIcon.jpg" alt="MSN">
+            <span>MSN</span>
+        </div>
+        <div class="desktop-icon" onclick="openExplorer()">
+            <img src="https://raw.githubusercontent.com/lkjy-coding/lkjy-coding.github.io/main/Windows95MyComputerIcon.jpg" alt="我的电脑">
+            <span>我的电脑</span>
+        </div>
+        <div class="desktop-icon" onclick="openWindow('folder')">
+            <img src="https://raw.githubusercontent.com/lkjy-coding/lkjy-coding.github.io/main/Windows95FolderIcon.jpg" alt="文件夹">
+            <span>文档</span>
+        </div>
+        <div class="desktop-icon" onclick="openRecycleBin()">
+            <img src="https://raw.githubusercontent.com/lkjy-coding/lkjy-coding.github.io/main/Windows95BinIcon.jpg" alt="回收站">
+            <span>回收站</span>
+        </div>
+    </div>
+
+    <!-- 窗口：记事本 / MSN (共用) -->
+    <div class="window" id="windowNotepad">
+        <div class="window-title draggable" id="titleNotepad">
+            <span class="title-text">
+                <img src="https://raw.githubusercontent.com/lkjy-coding/lkjy-coding.github.io/main/Windows95MSNIcon.jpg" alt="图标">
+                <span id="notepadTitle">MSN</span>
+            </span>
+            <span class="window-controls">
+                <button onclick="closeWindow('windowNotepad')">✕</button>
+            </span>
+        </div>
+        <div class="window-body">
+            <div class="menu-bar">
+                <span class="menu-item">文件</span>
+                <span class="menu-item">编辑</span>
+                <span class="menu-item">查看</span>
+                <span class="menu-item">帮助</span>
+            </div>
+            <div class="window-content" id="notepadContent">
+                MSN 欢迎您！\n\n这是 Windows 95 风格的 MSN 窗口。\n您可以通过开始菜单访问更多功能。
+            </div>
+            <div class="status-bar">
+                <span>就绪</span>
+                <span>行 1, 列 1</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 窗口：我的电脑 / 资源管理器 -->
+    <div class="window" id="windowExplorer">
+        <div class="window-title draggable">
+            <span class="title-text">
+                <img src="https://raw.githubusercontent.com/lkjy-coding/lkjy-coding.github.io/main/Windows95MyComputerIcon.jpg" alt="我的电脑">
+                我的电脑
+            </span>
+            <span class="window-controls">
+                <button onclick="closeWindow('windowExplorer')">✕</button>
+            </span>
+        </div>
+        <div class="window-body">
+            <div class="menu-bar">
+                <span class="menu-item">文件</span>
+                <span class="menu-item">编辑</span>
+                <span class="menu-item">查看</span>
+                <span class="menu-item">工具</span>
+            </div>
+            <div class="window-content" id="explorerContent">
+                📁 我的电脑\n\n- 3.5 软盘 (A:)\n- 本地磁盘 (C:)\n- 光驱 (D:)\n- 控制面板\n- 打印机
+            </div>
+            <div class="status-bar">
+                <span>对象 5 个</span>
+                <span>我的电脑</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 窗口：文件夹 -->
+    <div class="window" id="windowFolder">
+        <div class="window-title draggable">
+            <span class="title-text">
+                <img src="https://raw.githubusercontent.com/lkjy-coding/lkjy-coding.github.io/main/Windows95FolderIcon.jpg" alt="文件夹">
+                文档
+            </span>
+            <span class="window-controls">
+                <button onclick="closeWindow('windowFolder')">✕</button>
+            </span>
+        </div>
+        <div class="window-body">
+            <div class="menu-bar">
+                <span class="menu-item">文件</span>
+                <span class="menu-item">编辑</span>
+                <span class="menu-item">查看</span>
+            </div>
+            <div class="window-content">
+                📂 我的文档\n\n- 工作报告.txt\n- 项目计划.doc\n- 图片文件夹\n- 音乐文件夹
+            </div>
+            <div class="status-bar">
+                <span>4 个对象</span>
+                <span>文档</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 窗口：回收站 -->
+    <div class="window" id="windowRecycle">
+        <div class="window-title draggable">
+            <span class="title-text">
+                <img src="https://raw.githubusercontent.com/lkjy-coding/lkjy-coding.github.io/main/Windows95BinIcon.jpg" alt="回收站">
+                回收站
+            </span>
+            <span class="window-controls">
+                <button onclick="closeWindow('windowRecycle')">✕</button>
+            </span>
+        </div>
+        <div class="window-body">
+            <div class="menu-bar">
+                <span class="menu-item">文件</span>
+                <span class="menu-item">编辑</span>
+                <span class="menu-item">查看</span>
+            </div>
+            <div class="window-content">
+                🗑️ 回收站\n\n- 旧文档.txt\n- 临时文件.tmp\n- 已删除的图片.jpg\n\n回收站为空？ 不，这里有一些示例文件。
+            </div>
+            <div class="status-bar">
+                <span>3 个对象</span>
+                <span>回收站</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 任务栏 -->
+    <div class="taskbar">
+        <div class="start-button" id="startButton" onclick="toggleStartMenu()">
+            <img src="https://raw.githubusercontent.com/lkjy-coding/lkjy-coding.github.io/main/Windows95MSNIcon.jpg" alt="开始">
+            <span>开始</span>
+        </div>
+        <div class="task-item" onclick="openWindow('notepad')">📟 MSN</div>
+        <div class="task-item" onclick="openExplorer()">💻 我的电脑</div>
+        <div class="system-tray">
+            <span>🔊</span>
+            <span class="time" id="clockDisplay">12:00</span>
+        </div>
+    </div>
+
+    <!-- 开始菜单 - 增强版 -->
+    <div class="start-menu" id="startMenu">
+        <div class="start-menu-header">
+            <img src="https://raw.githubusercontent.com/lkjy-coding/lkjy-coding.github.io/main/Windows95MSNIcon.jpg" alt="用户">
+            <span>用户</span>
+        </div>
+        <div class="start-menu-items">
+            <div class="start-menu-item" onclick="openWindow('notepad'); toggleStartMenu()">
+                <img src="https://raw.githubusercontent.com/lkjy-coding/lkjy-coding.github.io/main/Windows95MSNIcon.jpg" alt="MSN">
+                MSN
+            </div>
+            <div class="start-menu-item" onclick="openExplorer(); toggleStartMenu()">
+                <img src="https://raw.githubusercontent.com/lkjy-coding/lkjy-coding.github.io/main/Windows95MyComputerIcon.jpg" alt="我的电脑">
+                我的电脑
+            </div>
+            <div class="start-menu-item" onclick="openWindow('folder'); toggleStartMenu()">
+                <img src="https://raw.githubusercontent.com/lkjy-coding/lkjy-coding.github.io/main/Windows95FolderIcon.jpg" alt="文档">
+                文档
+            </div>
+            <div class="start-menu-item" onclick="openRecycleBin(); toggleStartMenu()">
+                <img src="https://raw.githubusercontent.com/lkjy-coding/lkjy-coding.github.io/main/Windows95BinIcon.jpg" alt="回收站">
+                回收站
+            </div>
+            <div class="start-menu-separator"></div>
+            <div class="start-menu-item" onclick="alert('📞 拨号网络 (模拟)')">📞 拨号网络</div>
+            <div class="start-menu-item" onclick="alert('🖨️ 打印机 (模拟)')">🖨️ 打印机</div>
+            <div class="start-menu-item" onclick="alert('🎮 游戏 (模拟)')">🎮 游戏</div>
+            <div class="start-menu-separator"></div>
+            <div class="start-menu-item" onclick="alert('🔒 注销 (模拟)')">🔒 注销</div>
+            <div class="start-menu-item" onclick="alert('🔌 关机 (模拟)')">🔌 关机</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ----- 开机动画 -----
+    let bootProgress = 0;
+    const bootBar = document.getElementById('bootBar');
+    const bootStatus = document.getElementById('bootStatus');
+    const bootScreen = document.getElementById('bootScreen');
+
+    function bootSequence() {
+        const interval = setInterval(() => {
+            bootProgress += Math.floor(Math.random() * 8) + 2;
+            if (bootProgress > 100) bootProgress = 100;
+            bootBar.style.width = bootProgress + '%';
+            if (bootProgress < 30) bootStatus.textContent = '正在加载核心组件 ...';
+            else if (bootProgress < 60) bootStatus.textContent = '正在初始化系统 ...';
+            else if (bootProgress < 90) bootStatus.textContent = '正在启动图形界面 ...';
+            else bootStatus.textContent = '即将完成 ...';
+
+            if (bootProgress >= 100) {
+                clearInterval(interval);
+                bootScreen.classList.add('hidden');
+                setTimeout(() => { bootScreen.style.display = 'none'; }, 800);
+            }
+        }, 120);
+    }
+    window.addEventListener('load', bootSequence);
+
+    // ----- 时钟 -----
+    function updateClock() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('clockDisplay').textContent = hours + ':' + minutes;
+    }
+    updateClock();
+    setInterval(updateClock, 10000);
+
+    // ----- 开始菜单 -----
+    function toggleStartMenu() {
+        document.getElementById('startMenu').classList.toggle('open');
+    }
+    document.addEventListener('click', function(e) {
+        const menu = document.getElementById('startMenu');
+        const startBtn = document.getElementById('startButton');
+        if (menu.classList.contains('open') && !menu.contains(e.target) && !startBtn.contains(e.target)) {
+            menu.classList.remove('open');
+        }
+    });
+
+    // ----- 窗口管理 -----
+    function openWindow(type) {
+        const map = {
+            'notepad': 'windowNotepad',
+            'folder': 'windowFolder',
+            'recycle': 'windowRecycle'
+        };
+        const id = map[type] || 'windowNotepad';
+        const win = document.getElementById(id);
+        if (!win) return;
+        win.style.display = 'flex';
+        win.style.zIndex = 30 + Math.floor(Math.random() * 10);
+        if (id === 'windowNotepad') {
+            document.getElementById('notepadTitle').textContent = type === 'notepad' ? 'MSN' : 'MSN';
+            document.getElementById('notepadContent').textContent = 
+                type === 'notepad' ? 'MSN 欢迎您！\n\n这是 Windows 95 风格的 MSN 窗口。\n您可以通过开始菜单访问更多功能。' 
+                : '📨 消息中心\n\n- 收件箱 (1 封未读)\n- 联系人列表\n- 设置';
+        }
+    }
+
+    function openExplorer() {
+        const win = document.getElementById('windowExplorer');
+        win.style.display = 'flex';
+        win.style.zIndex = 30 + Math.floor(Math.random() * 10);
+    }
+
+    function openRecycleBin() {
+        const win = document.getElementById('windowRecycle');
+        win.style.display = 'flex';
+        win.style.zIndex = 30 + Math.floor(Math.random() * 10);
+    }
+
+    function closeWindow(id) {
+        document.getElementById(id).style.display = 'none';
+        document.getElementById('startMenu').classList.remove('open');
+    }
+
+    // ----- 拖动 -----
+    let dragData = null;
+    document.addEventListener('mousedown', function(e) {
+        const title = e.target.closest('.window-title');
+        if (!title) return;
+        const win = title.closest('.window');
+        if (!win || win.style.display === 'none') return;
+        if (e.button !== 0) return;
+        const rect = win.getBoundingClientRect();
+        dragData = { window: win, offsetX: e.clientX - rect.left, offsetY: e.clientY - rect.top };
+        e.preventDefault();
+    });
+    document.addEventListener('mousemove', function(e) {
+        if (!dragData) return;
+        const win = dragData.window;
+        win.style.left = Math.max(0, e.clientX - dragData.offsetX) + 'px';
+        win.style.top = Math.max(0, e.clientY - dragData.offsetY) + 'px';
+        win.style.zIndex = 30 + Math.floor(Math.random() * 10);
+    });
+    document.addEventListener('mouseup', function() { dragData = null; });
+
+    // 双击标题栏最大化/还原
+    document.addEventListener('dblclick', function(e) {
+        const title = e.target.closest('.window-title');
+        if (!title) return;
+        const win = title.closest('.window');
+        if (!win || win.style.display === 'none') return;
+        if (win.style.width === '100%' || win.style.width === '100vw') {
+            win.style.width = '560px'; win.style.height = '400px';
+            win.style.left = '80px'; win.style.top = '60px';
+        } else {
+            win.style.width = '100%'; win.style.height = 'calc(100% - 50px)';
+            win.style.left = '0'; win.style.top = '0';
+        }
+    });
+
+    // 阻止内容双击冒泡
+    document.querySelectorAll('.window-content, .menu-bar, .status-bar').forEach(el => {
+        el.addEventListener('dblclick', e => e.stopPropagation());
+    });
+
+    // 任务栏点击聚焦
+    document.querySelectorAll('.task-item').forEach((item, idx) => {
+        item.addEventListener('click', function() {
+            const wins = ['windowNotepad', 'windowExplorer', 'windowFolder', 'windowRecycle'];
+            if (idx < wins.length) {
+                const win = document.getElementById(wins[idx]);
+                if (win.style.display !== 'none') {
+                    win.style.zIndex = 30 + Math.floor(Math.random() * 10);
+                } else {
+                    if (idx === 0) openWindow('notepad');
+                    else if (idx === 1) openExplorer();
+                    else if (idx === 2) openWindow('folder');
+                    else if (idx === 3) openRecycleBin();
+                }
+            }
+        });
+    });
+</script>
+</body>
+  </html>
