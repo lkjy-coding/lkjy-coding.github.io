@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RNGdle · 资源站</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        body {
+            background: #0b0d10;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 1.5rem 1rem;
+            color: #e8ecf1;
+        }
+        .container {
+            max-width: 1300px;
+            width: 100%;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-bottom: 1px solid #282e36;
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+        .logo h1 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #f5e68b, #d4af37);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .logo small {
+            -webkit-text-fill-color: #8e939b;
+            font-size: 0.85rem;
+            margin-left: 8px;
+            background: none;
+        }
+        .text-muted { color: #7f8998; font-size: 0.9rem; }
+
+        /* roll 区域 */
+        .roll-area {
+            background: #14181f;
+            border-radius: 32px;
+            padding: 1.8rem 2rem;
+            border: 1px solid #2a303a;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+            margin-bottom: 2rem;
+        }
+        .roll-display {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .number-box {
+            background: #1e232b;
+            padding: 0.6rem 1.8rem;
+            border-radius: 60px;
+            border: 1px solid #3a424e;
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #f0f4fa;
+            font-family: 'JetBrains Mono', monospace;
+            min-width: 180px;
+            text-align: center;
+        }
+        .rarity-badge {
+            font-size: 1.1rem;
+            font-weight: 700;
+            padding: 0.4rem 1.6rem;
+            border-radius: 40px;
+            text-transform: uppercase;
+            background: #1f242b;
+            border: 1px solid #3f4856;
+        }
+        .roll-btn {
+            background: #2f3742;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            padding: 0.7rem 2.2rem;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: 0.15s;
+            border: 1px solid #4a5563;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .roll-btn:hover { background: #3d4757; border-color: #6a7a8f; transform: scale(1.02); }
+        .roll-btn:active { transform: scale(0.97); }
+
+        .stats-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.8rem 3rem;
+            margin-top: 1.5rem;
+            padding-top: 1.2rem;
+            border-top: 1px solid #262d36;
+        }
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            color: #b6bfca;
+        }
+        .stat-item i { color: #6f7a88; width: 20px; }
+        .stat-item strong { color: #eef2f7; font-weight: 600; margin-right: 4px; }
+
+        /* 等级颜色 */
+        .rarity-TRASH    { background: #3f1b1b; border-color: #8b2a2a; color: #e68383; }
+        .rarity-COMMON   { background: #282e36; border-color: #4f5864; color: #cdd5de; }
+        .rarity-UNCOMMON { background: #1d3a25; border-color: #2f8a47; color: #86d194; }
+        .rarity-RARE     { background: #1b2d46; border-color: #2f6cb0; color: #7db3f0; }
+        .rarity-EPIC     { background: #31244a; border-color: #6f41b0; color: #c39ceb; }
+        .rarity-ANOMALY  { background: #3f351a; border-color: #b8942a; color: #f5da7a; }
+        .rarity-MYTHIC   { background: #46263b; border-color: #b8437a; color: #f096c2; }
+
+        /* 定量roll */
+        .batch-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #262d36;
+        }
+        .batch-control label {
+            color: #aab2bd;
+            font-size: 0.95rem;
+        }
+        .batch-control input {
+            background: #1a1f27;
+            border: 1px solid #3a424e;
+            border-radius: 40px;
+            padding: 0.4rem 1rem;
+            color: #eef2f7;
+            font-size: 1rem;
+            width: 100px;
+            outline: none;
+        }
+        .batch-control input:focus { border-color: #6a7a8f; }
+        .batch-btn {
+            background: #2a313d;
+            border: 1px solid #4a5563;
+            color: white;
+            padding: 0.4rem 1.6rem;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.15s;
+        }
+        .batch-btn:hover { background: #3d4757; }
+        .batch-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* 历史 & 分析 */
+        .history-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.8rem;
+            margin-top: 1rem;
+        }
+        @media (max-width: 760px) {
+            .history-section { grid-template-columns: 1fr; }
+        }
+
+        .history-box {
+            background: #11151b;
+            border-radius: 24px;
+            padding: 1.2rem 1.2rem 0.8rem;
+            border: 1px solid #262d36;
+        }
+        .history-box h3 {
+            font-size: 1rem;
+            color: #aab2bd;
+            letter-spacing: 1px;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .history-list {
+            max-height: 320px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding-right: 4px;
+        }
+        .history-list::-webkit-scrollbar { width: 4px; }
+        .history-list::-webkit-scrollbar-track { background: #1a1f26; border-radius: 10px; }
+        .history-list::-webkit-scrollbar-thumb { background: #3e4856; border-radius: 10px; }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 1rem;
+            background: #1a1f27;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            border-left: 4px solid #3f4856;
+        }
+        .history-item .h-number { font-weight: 600; font-family: monospace; }
+        .history-item .h-rarity { font-size: 0.7rem; font-weight: 700; padding: 0.1rem 0.8rem; border-radius: 40px; background: #222932; }
+
+        .analysis-box {
+            background: #11151b;
+            border-radius: 24px;
+            padding: 1.2rem 1.5rem;
+            border: 1px solid #262d36;
+        }
+        .analysis-box h3 {
+            font-size: 1rem;
+            color: #aab2bd;
+            letter-spacing: 1px;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .analysis-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .analysis-row {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #1f252e;
+            padding-bottom: 0.4rem;
+            font-size: 0.9rem;
+        }
+        .analysis-row .label { color: #99a3b0; }
+        .analysis-row .value { font-weight: 600; color: #e8ecf1; }
+
+        .dist-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 0.5rem 0 0.2rem;
+        }
+        .dist-control label { font-size: 0.8rem; color: #99a3b0; }
+        .dist-control select {
+            background: #1a1f27;
+            border: 1px solid #3a424e;
+            border-radius: 20px;
+            padding: 0.2rem 0.8rem;
+            color: #eef2f7;
+            font-size: 0.8rem;
+            outline: none;
+        }
+        .dist-control select:focus { border-color: #6a7a8f; }
+
+        .empty-state { color: #5b6573; text-align: center; padding: 1.2rem 0; font-style: italic; }
+        .mt-1 { margin-top: 0.5rem; }
+        .flex { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <header class="header">
+        <div class="logo">
+            <h1>🎲 RNGdle 资源站 <small>无限模拟 · 数字 roll</small></h1>
+        </div>
+        <div class="text-muted">
+            <i class="fas fa-infinity"></i> 无限次数 · 即时分析
+        </div>
+    </header>
+
+    <!-- Roll 主区域 -->
+    <div class="roll-area">
+        <div class="roll-display">
+            <div class="number-box" id="currentNumber">——</div>
+            <div class="rarity-badge" id="currentRarity">WAIT</div>
+            <button class="roll-btn" id="rollBtn"><i class="fas fa-dice"></i> ROLL</button>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-item"><i class="fas fa-hashtag"></i> <strong id="totalRolls">0</strong> 次</div>
+            <div class="stat-item"><i class="fas fa-star"></i> 当前 <strong id="currentEP">0</strong> EP</div>
+            <div class="stat-item"><i class="fas fa-trophy"></i> 最高 <strong id="bestRarity">—</strong></div>
+        </div>
+
+        <!-- 定量roll -->
+        <div class="batch-control">
+            <label for="batchCount">定量 Roll</label>
+            <input type="number" id="batchCount" value="10" min="1" max="9999">
+            <button class="batch-btn" id="batchBtn"><i class="fas fa-play"></i> 执行</button>
+            <span id="batchProgress" style="color:#8e939b; font-size:0.85rem; margin-left:4px;"></span>
+        </div>
+    </div>
+
+    <!-- 历史 & 分析 -->
+    <div class="history-section">
+        <div class="history-box">
+            <h3><i class="fas fa-list-ul"></i> 最近记录</h3>
+            <div class="history-list" id="historyList">
+                <div class="empty-state">还没有 Roll 记录，点击 ROLL 开始</div>
+            </div>
+        </div>
+
+        <div class="analysis-box">
+            <h3><i class="fas fa-chart-pie"></i> 战绩分析</h3>
+            <div class="analysis-grid" id="analysisGrid">
+                <div class="analysis-row"><span class="label">总次数</span><span class="value" id="analTotal">0</span></div>
+                <div class="analysis-row"><span class="label">平均 EP</span><span class="value" id="analAvgEP">0.0</span></div>
+                <div class="analysis-row"><span class="label">最高等级</span><span class="value" id="analBest">—</span></div>
+            </div>
+            <!-- 自定义等级分布 -->
+            <div class="dist-control">
+                <label>分布分析 (等级)</label>
+                <select id="distSelect1"><option>EPIC</option><option>ANOMALY</option><option>MYTHIC</option></select>
+                <select id="distSelect2"><option>ANOMALY</option><option>EPIC</option><option>MYTHIC</option></select>
+                <select id="distSelect3"><option>MYTHIC</option><option>EPIC</option><option>ANOMALY</option></select>
+                <button class="batch-btn" id="distAnalyzeBtn" style="padding:0.2rem 1.2rem; font-size:0.8rem;">分析</button>
+            </div>
+            <div id="distResult" style="margin-top:0.6rem; font-size:0.9rem; color:#c8d0da;">
+                点击「分析」查看分布
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- 等级配置 (EP 大幅提升) ----------
+        const RARITY_ORDER = ['TRASH', 'COMMON', 'UNCOMMON', 'RARE', 'EPIC', 'ANOMALY', 'MYTHIC'];
+        const RARITY_CONFIG = {
+            'TRASH':    { label: 'TRASH',  epMin: 0, epMax: 500,   color: '#d45a5a' },
+            'COMMON':   { label: 'COMMON', epMin: 501, epMax: 1500, color: '#b0b8c0' },
+            'UNCOMMON': { label: 'UNCOMMON', epMin: 1501, epMax: 3200, color: '#6fbf7a' },
+            'RARE':     { label: 'RARE', epMin: 3201, epMax: 5500, color: '#4d8fd4' },
+            'EPIC':     { label: 'EPIC', epMin: 5501, epMax: 8500, color: '#a77bdb' },
+            'ANOMALY':  { label: 'ANOMALY', epMin: 8501, epMax: 12000, color: '#e6c351' },
+            'MYTHIC':   { label: 'MYTHIC', epMin: 12001, epMax: 20000, color: '#e072a8' }
+        };
+
+        // ---------- 数字特征计算 (EP 放大) ----------
+        function calculateEP(num) {
+            if (num === undefined || num === null) return 0;
+            let ep = 0;
+            const str = num.toString();
+            const len = str.length;
+
+            // 基础分 + 放大系数 (让COMMON轻松过1000)
+            ep += 200;
+
+            // 质数 +80
+            const isPrime = (n) => { if (n < 2) return false; for (let i=2; i*i<=n; i++) if (n%i===0) return false; return true; };
+            if (isPrime(num)) ep += 80;
+
+            // 回文 +70
+            if (str === str.split('').reverse().join('')) ep += 70;
+
+            // 完全平方数 +60
+            const sqrt = Math.sqrt(num);
+            if (Number.isInteger(sqrt)) ep += 60;
+
+            // 连续数字 +65
+            const isConsecutive = (s) => {
+                if (s.length < 2) return false;
+                let diff = parseInt(s[1]) - parseInt(s[0]);
+                if (Math.abs(diff) !== 1) return false;
+                for (let i=1; i<s.length-1; i++) {
+                    if (parseInt(s[i+1]) - parseInt(s[i]) !== diff) return false;
+                }
+                return true;
+            };
+            if (isConsecutive(str)) ep += 65;
+
+            // 重复数字 +50
+            if (new Set(str).size === 1) ep += 50;
+
+            // 数字和特殊 +45
+            const digitSum = str.split('').reduce((a,b) => a + parseInt(b), 0);
+            if (digitSum === 7 || digitSum === 13 || digitSum === 21) ep += 45;
+            if (digitSum % 9 === 0 && num > 0) ep += 25;
+
+            // 特殊模式 +35
+            if (/666/.test(str)) ep += 35;
+            if (/888/.test(str)) ep += 35;
+            if (/999/.test(str)) ep += 35;
+
+            // 长度加成
+            if (len >= 6) ep += 30;
+            if (len >= 7) ep += 40;
+
+            // 奇偶 / 尾数
+            if (num % 2 === 0) ep += 15;
+            if (num % 10 === 0) ep += 20;
+            if (num % 10 === 7) ep += 25;
+
+            // 随机波动 (让结果更丰富)
+            ep += Math.floor(Math.random() * 80) + 10;
+
+            // 保证最低 100，最高 20000
+            return Math.min(Math.max(Math.floor(ep), 100), 20000);
+        }
+
+        function getRarity(ep) {
+            for (let r of RARITY_ORDER) {
+                const cfg = RARITY_CONFIG[r];
+                if (ep >= cfg.epMin && ep <= cfg.epMax) return r;
+            }
+            return 'COMMON';
+        }
+
+        // ---------- 状态 ----------
+        let history = [];
+        let totalRolls = 0;
+        let bestRarity = null;
+        let bestEP = 0;
+        let isBatchRunning = false;
+
+        // DOM
+        const currentNumberEl = document.getElementById('currentNumber');
+        const currentRarityEl = document.getElementById('currentRarity');
+        const totalRollsEl = document.getElementById('totalRolls');
+        const currentEPEl = document.getElementById('currentEP');
+        const bestRarityEl = document.getElementById('bestRarity');
+        const historyListEl = document.getElementById('historyList');
+        const analTotalEl = document.getElementById('analTotal');
+        const analAvgEPEl = document.getElementById('analAvgEP');
+        const analBestEl = document.getElementById('analBest');
+        const batchCountInput = document.getElementById('batchCount');
+        const batchBtn = document.getElementById('batchBtn');
+        const batchProgress = document.getElementById('batchProgress');
+        const distSelect1 = document.getElementById('distSelect1');
+        const distSelect2 = document.getElementById('distSelect2');
+        const distSelect3 = document.getElementById('distSelect3');
+        const distAnalyzeBtn = document.getElementById('distAnalyzeBtn');
+        const distResult = document.getElementById('distResult');
+
+        // ---------- 核心 Roll ----------
+        function performRoll() {
+            const num = Math.floor(Math.random() * 1_000_001);
+            const ep = calculateEP(num);
+            const rarity = getRarity(ep);
+
+            totalRolls++;
+            history.unshift({ number: num, ep, rarity });
+            if (history.length > 500) history.pop();
+
+            if (ep > bestEP) {
+                bestEP = ep;
+                bestRarity = rarity;
+            }
+
+            updateDisplay(num, ep, rarity);
+            renderHistory();
+            renderAnalysis();
+            return { num, ep, rarity };
+        }
+
+        function updateDisplay(num, ep, rarity) {
+            currentNumberEl.textContent = num;
+            currentNumberEl.style.color = RARITY_CONFIG[rarity].color;
+            currentRarityEl.textContent = rarity;
+            currentRarityEl.className = `rarity-badge rarity-${rarity}`;
+            currentEPEl.textContent = ep;
+            totalRollsEl.textContent = totalRolls;
+            bestRarityEl.textContent = bestRarity || '—';
+            bestRarityEl.style.color = bestRarity ? RARITY_CONFIG[bestRarity].color : '#8e939b';
+        }
+
+        function renderHistory() {
+            if (history.length === 0) {
+                historyListEl.innerHTML = `<div class="empty-state">还没有 Roll 记录，点击 ROLL 开始</div>`;
+                return;
+            }
+            let html = '';
+            const show = history.slice(0, 30);
+            for (let item of show) {
+                const color = RARITY_CONFIG[item.rarity].color;
+                html += `
+                    <div class="history-item" style="border-left-color: ${color};">
+                        <span class="h-number">${item.number}</span>
+                        <span class="h-rarity" style="background:${color}22; color:${color}; border:1px solid ${color}55;">${item.rarity} · ${item.ep}EP</span>
+                    </div>
+                `;
+            }
+            historyListEl.innerHTML = html;
+        }
+
+        function renderAnalysis() {
+            const total = history.length;
+            analTotalEl.textContent = total;
+            if (total === 0) {
+                analAvgEPEl.textContent = '0.0';
+                analBestEl.textContent = '—';
+                return;
+            }
+            const sumEP = history.reduce((acc, h) => acc + h.ep, 0);
+            analAvgEPEl.textContent = (sumEP / total).toFixed(1);
+
+            let bestRarityLabel = '—';
+            let bestRarityOrder = -1;
+            for (let item of history) {
+                const idx = RARITY_ORDER.indexOf(item.rarity);
+                if (idx > bestRarityOrder) { bestRarityOrder = idx; bestRarityLabel = item.rarity; }
+            }
+            analBestEl.textContent = bestRarityLabel;
+            analBestEl.style.color = bestRarityLabel !== '—' ? RARITY_CONFIG[bestRarityLabel].color : '#e8ecf1';
+        }
+
+        // ---------- 定量 Roll ----------
+        function runBatch(count) {
+            if (isBatchRunning) return;
+            if (count < 1 || count > 9999) return;
+            isBatchRunning = true;
+            batchBtn.disabled = true;
+            batchProgress.textContent = '进行中...';
+
+            // 使用 requestAnimationFrame 分批执行，避免卡顿
+            let done = 0;
+            const chunkSize = Math.min(count, 50);
+            let remaining = count;
+
+            function doChunk() {
+                const chunk = Math.min(remaining, chunkSize);
+                for (let i = 0; i < chunk; i++) {
+                    performRoll();
+                }
+                done += chunk;
+                remaining -= chunk;
+                batchProgress.textContent = `${done} / ${count}`;
+
+                if (remaining > 0) {
+                    requestAnimationFrame(doChunk);
+                } else {
+                    isBatchRunning = false;
+                    batchBtn.disabled = false;
+                    batchProgress.textContent = `✅ 完成 ${count} 次`;
+                    setTimeout(() => { batchProgress.textContent = ''; }, 3000);
+                }
+            }
+            doChunk();
+        }
+
+        // ---------- 等级分布分析 (自定义) ----------
+        function analyzeDistribution(targets) {
+            if (history.length === 0) {
+                distResult.textContent = '⚠️ 暂无数据，请先 Roll 一些数字。';
+                return;
+            }
+            const counts = {};
+            for (let t of targets) counts[t] = 0;
+            for (let item of history) {
+                if (counts.hasOwnProperty(item.rarity)) {
+                    counts[item.rarity]++;
+                }
+            }
+            const total = history.length;
+            let parts = [];
+            for (let t of targets) {
+                const pct = total > 0 ? ((counts[t] / total) * 100).toFixed(1) : 0;
+                parts.push(`${t}: ${counts[t]} (${pct}%)`);
+            }
+            distResult.innerHTML = `📊 分布：${parts.join(' ｜ ')}  (总 ${total} 次)`;
+        }
+
+        // ---------- 事件绑定 ----------
+        document.getElementById('rollBtn').addEventListener('click', () => performRoll());
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && !e.repeat && !isBatchRunning) {
+                e.preventDefault();
+                performRoll();
+            }
+        });
+
+        batchBtn.addEventListener('click', () => {
+            const val = parseInt(batchCountInput.value);
+            if (val > 0 && val <= 9999) runBatch(val);
+        });
+
+        distAnalyzeBtn.addEventListener('click', () => {
+            const targets = [distSelect1.value, distSelect2.value, distSelect3.value];
+            analyzeDistribution(targets);
+        });
+
+        // 初始化
+        (function init() {
+            totalRolls = 0;
+            bestRarity = null;
+            bestEP = 0;
+            history = [];
+            currentNumberEl.textContent = '——';
+            currentNumberEl.style.color = '#f0f4fa';
+            currentRarityEl.textContent = 'WAIT';
+            currentRarityEl.className = 'rarity-badge';
+            totalRollsEl.textContent = '0';
+            currentEPEl.textContent = '0';
+            bestRarityEl.textContent = '—';
+            bestRarityEl.style.color = '#8e939b';
+            renderHistory();
+            renderAnalysis();
+            distResult.textContent = '点击「分析」查看分布';
+        })();
+
+    })();
+</script>
+</body>
+  </html>
