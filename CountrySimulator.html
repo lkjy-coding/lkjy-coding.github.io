@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文明进化 · 国家模拟</title>
+    <style>
+        * { box-sizing: border-box; font-family: system-ui, 'Segoe UI', Roboto, sans-serif; }
+        body { background: #1a2a2f; color: #e8f0e8; display: flex; justify-content: center; padding: 20px; margin: 0; min-height: 100vh; }
+        #app { max-width: 1400px; width: 100%; display: flex; flex-direction: column; gap: 16px; }
+        header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; background: #0f1a1e; padding: 12px 20px; border-radius: 24px; box-shadow: 0 8px 20px rgba(0,0,0,0.6); }
+        h1 { margin: 0; font-weight: 400; font-size: 1.8rem; letter-spacing: 2px; background: linear-gradient(135deg, #c0e0c0, #a0c0a0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .toolbar { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+        .toolbar button { background: #2c4a4f; border: none; color: #d0e8d0; padding: 6px 16px; border-radius: 40px; cursor: pointer; font-weight: 500; transition: 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+        .toolbar button:hover { background: #3e6a70; transform: scale(0.96); }
+        .main-grid { display: grid; grid-template-columns: 1fr 1.2fr 0.9fr; gap: 16px; }
+        @media (max-width: 1000px) { .main-grid { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 700px) { .main-grid { grid-template-columns: 1fr; } }
+        .panel { background: #122226; border-radius: 24px; padding: 18px 16px; box-shadow: inset 0 2px 6px rgba(0,0,0,0.6), 0 6px 16px rgba(0,0,0,0.5); backdrop-filter: blur(2px); border: 1px solid #2d4a4f; }
+        .panel h2 { margin: 0 0 12px 0; font-weight: 300; font-size: 1.2rem; border-bottom: 1px solid #2f4f55; padding-bottom: 8px; display: flex; justify-content: space-between; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; }
+        .stat-item { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px dotted #2a4045; }
+        .stat-label { color: #9ab0b0; }
+        .stat-value { font-weight: 600; color: #d0f0d0; }
+        .event-log { background: #0d1a1e; border-radius: 16px; padding: 8px 12px; max-height: 180px; overflow-y: auto; font-size: 0.9rem; border: 1px solid #2e4e54; }
+        .event-log div { padding: 4px 0; border-bottom: 1px solid #1a3236; color: #bcd0d0; }
+        .event-log .highlight { color: #f5d98a; }
+        .btn-group { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 6px; }
+        .btn-group button { background: #2b4a4a; border: none; color: #e0f0e0; padding: 6px 14px; border-radius: 40px; cursor: pointer; font-size: 0.8rem; transition: 0.15s; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .btn-group button:hover { background: #3f6a6a; }
+        .danger { background: #6a3a3a !important; }
+        .danger:hover { background: #8a4a4a !important; }
+        .success { background: #2a6a4a !important; }
+        .success:hover { background: #3a8a5a !important; }
+        .input-small { width: 70px; background: #1e363a; border: 1px solid #3a5a5a; color: #d0e8e0; border-radius: 20px; padding: 4px 10px; }
+        .flex-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+        .mt-2 { margin-top: 12px; }
+        .badge { background: #2a4a4a; border-radius: 40px; padding: 2px 12px; font-size: 0.7rem; }
+        .progress { background: #1e363a; height: 6px; border-radius: 12px; margin: 8px 0; }
+        .progress-fill { height: 6px; border-radius: 12px; background: #8bc34a; width: 0%; }
+        .achievement { background: #1f3530; border-radius: 40px; padding: 4px 12px; font-size: 0.8rem; display: inline-block; margin: 2px; }
+        .footer { font-size: 0.7rem; text-align: center; opacity: 0.6; margin-top: 12px; }
+        .blink { animation: blink 1s infinite; }
+        @keyframes blink { 0%{opacity:1} 50%{opacity:0.3} 100%{opacity:1} }
+    </style>
+</head>
+<body>
+<div id="app">
+    <header>
+        <h1>🌍 文明进化 · 国家</h1>
+        <div class="toolbar">
+            <span id="dateDisplay" style="font-weight:300;">元年 1月1日</span>
+            <button id="pauseBtn">⏸️ 暂停</button>
+            <button id="saveBtn">💾 存档</button>
+            <button id="loadBtn">📂 读档</button>
+            <input type="file" id="fileInput" accept=".txt" style="display:none">
+            <button id="rollbackBtn">⏪ 回溯</button>
+        </div>
+    </header>
+
+    <div class="main-grid">
+        <!-- 左：资源/人口 -->
+        <div class="panel">
+            <h2>📊 国家概况 <span class="badge" id="governmentBadge">🏛️ 君主制</span></h2>
+            <div class="stat-grid">
+                <div class="stat-item"><span class="stat-label">👨‍👩‍👧‍👦 总人口</span><span class="stat-value" id="popTotal">100</span></div>
+                <div class="stat-item"><span class="stat-label">🧑‍🌾 劳动人口</span><span class="stat-value" id="popLabor">50</span></div>
+                <div class="stat-item"><span class="stat-label">⚔️ 军人</span><span class="stat-value" id="popArmy">0</span></div>
+                <div class="stat-item"><span class="stat-label">🏠 房屋 (木/牢/坚)</span><span class="stat-value" id="houseStats">0 / 0 / 0</span></div>
+                <div class="stat-item"><span class="stat-label">🌾 粮食 (日产量)</span><span class="stat-value" id="foodStats">200 (0)</span></div>
+                <div class="stat-item"><span class="stat-label">🪵 木材</span><span class="stat-value" id="woodStats">6</span></div>
+                <div class="stat-item"><span class="stat-label">⛏️ 矿石</span><span class="stat-value" id="oreStats">0</span></div>
+                <div class="stat-item"><span class="stat-label">🧱 钢筋</span><span class="stat-value" id="steelStats">0</span></div>
+                <div class="stat-item"><span class="stat-label">🛤️ 交通 (km)</span><span class="stat-value" id="roadStats">0</span></div>
+                <div class="stat-item"><span class="stat-label">😊 幸福度</span><span class="stat-value" id="happiness">100</span></div>
+                <div class="stat-item"><span class="stat-label">🔬 科技水平</span><span class="stat-value" id="techLevel">0</span></div>
+                <div class="stat-item"><span class="stat-label">🌾 耕地 (m²)</span><span class="stat-value" id="farmland">0</span></div>
+                <div class="stat-item"><span class="stat-label">🦠 疫情指数</span><span class="stat-value" id="pandemicIdx">0</span></div>
+            </div>
+            <div class="progress"><div class="progress-fill" id="happinessBar" style="width:100%"></div></div>
+            <div class="btn-group">
+                <button onclick="buildVillage()">🏡 建木屋 (5木)</button>
+                <button onclick="buildStoneHouse()">🏰 建牢屋 (3木+3钢)</button>
+                <button onclick="buildStrongHouse()">🏯 建坚屋 (15钢)</button>
+                <button onclick="buildFarm()">🌱 耕地 (2木)</button>
+                <button onclick="upgradeLumber()">🪓 升伐木</button>
+                <button onclick="upgradeMine()">⛏️ 升采矿</button>
+                <button onclick="buildRoad()">🛤️ 修路 (3钢/km)</button>
+                <button onclick="recruitArmy()">⚔️ 招军 (消耗粮)</button>
+                <button onclick="synthesizeSteel()">🧱 合成钢筋 (2矿)</button>
+                <button onclick="techResearch()">🔬 研究 (5木+8矿)</button>
+                <button onclick="kuangyiAction()">⚡ 匡义行动</button>
+            </div>
+            <div class="flex-row mt-2">
+                <span>🌲伐木场 Lv.<span id="lumberLevel">1</span> (日产 <span id="lumberProd">3</span>)</span>
+                <span>⛰️采矿场 Lv.<span id="mineLevel">0</span> (日产 <span id="mineProd">0</span>)</span>
+            </div>
+        </div>
+
+        <!-- 中：事件/日志/天气 -->
+        <div class="panel">
+            <h2>🌦️ 天气 · 事件 <span id="weatherDisplay" style="font-weight:300; font-size:1rem;">☀️ 晴</span></h2>
+            <div class="event-log" id="eventLog">
+                <div>🏁 欢迎来到文明进化！开始你的统治。</div>
+                <div>📖 提示：伐木场建成后才能解锁建筑/军队/交通。</div>
+            </div>
+            <div class="btn-group">
+                <button id="speedBtn" onclick="toggleSpeed()">⏩ 1x</button>
+                <button onclick="forceWeather()">🌀 随机天气</button>
+                <button onclick="addDiplomacy()">🤝 外交尝试</button>
+                <button class="danger" onclick="triggerDisaster()">💥 随机灾害</button>
+            </div>
+            <div id="diplomacyInfo" style="font-size:0.8rem; margin-top:6px; color:#b0d0d0;">建交: 0 | 断交: 0 | 盟友: 0</div>
+        </div>
+
+        <!-- 右：成就 / 存档管理 -->
+        <div class="panel">
+            <h2>🏆 成就 <span style="font-weight:300;font-size:0.8rem;" id="achCount">0</span></h2>
+            <div id="achievementList" style="max-height:200px; overflow-y:auto; display:flex; flex-wrap:wrap; gap:4px;"></div>
+            <hr style="border-color:#2a4a4a; margin:12px 0;">
+            <div class="flex-row">
+                <button onclick="exportSave()">📤 导出TXT</button>
+                <button onclick="document.getElementById('fileInput').click()">📥 导入TXT</button>
+                <span style="font-size:0.7rem; opacity:0.7;">校验防篡改</span>
+            </div>
+            <div style="font-size:0.7rem; margin-top:6px;" id="saveStatus">✅ 存档正常</div>
+        </div>
+    </div>
+    <div class="footer">⚡ 时间流逝: 1秒 = 1天 · 无限模式 · 随机事件驱动</div>
+</div>
+<script>
+    // ========== 核心状态 ==========
+    let state = {
+        date: { year: 0, month: 1, day: 1, dayCount: 0 },
+        paused: false,
+        speed: 1,
+        wood: 6, ore: 0, steel: 0, food: 200, farmland: 0,
+        houses: [0, 0, 0],
+        lumberLevel: 1, mineLevel: 0,
+        population: 100, labor: 50, army: 0,
+        roadKm: 0, roadDurability: 0,
+        tech: 0,
+        happiness: 100,
+        diplomacy: { allies: 0, warCount: 0, peaceCount: 0, totalWars: 0 },
+        achievements: [],
+        flag: { hasLumber: false, hasMine: false, firstBlood: false, firstWar: false, firstTyphoon: false, firstFoodShort: false, firstArmy: false, firstHouse: false, firstRain: false, firstSnow: false, firstWind: false, firstCold: false, firstBlizzard: false, firstThunder: false, firstEarthquake: false, firstHeat: false, firstDrought: false, firstFlood: false, firstPandemic: false },
+        disasterCooldown: 0,
+        pandemic: { active: false, daysLeft: 0, deathRate: 0, index: 0 },
+        weather: { name: '晴', type: 'normal', effect: 'normal', duration: 1 },
+        kuangyi: { active: false, cooldown: 0 },
+        saveChecksum: 0,
+        history: [], // 存档回溯
+    };
+
+    // ========== 辅助函数 ==========
+    function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+    function pick(arr) { return arr[rand(0, arr.length-1)]; }
+
+    // 天气生成
+    function generateWeather() {
+        const month = state.date.month;
+        const isWinter = (month >= 11 || month <= 2);
+        const isSummer = (month >= 6 && month <= 8);
+        let r = Math.random() * 100;
+        if (r < 60) return { name: '晴', type: 'normal', effect: 'good', duration: rand(1,3) };
+        if (r < 75) {
+            if (isWinter) return { name: pick(['小雪','中雪','阴']), type: 'normal', effect: 'normal', duration: rand(1,2) };
+            else return { name: pick(['小雨','中雨','阴']), type: 'normal', effect: 'good', duration: rand(1,2) };
+        }
+        // 破坏性
+        let pool = [];
+        if (isWinter) pool = ['暴风雪','寒潮','冰雹','大雪'];
+        else if (isSummer) pool = ['龙卷风','热带风暴','台风','雷阵雨','大雨','冰雹','高温'];
+        else pool = ['中雨','大雨','雷阵雨','冰雹','大风'];
+        let name = pick(pool);
+        let effect = 'bad';
+        let duration = rand(1,3);
+        if (name === '高温') duration = rand(7,15);
+        if (name === '台风') duration = rand(20,30);
+        if (name === '地震') duration = rand(15,20);
+        return { name, type: 'storm', effect, duration };
+    }
+
+    function updateWeather() {
+        const w = generateWeather();
+        state.weather = w;
+        document.getElementById('weatherDisplay').innerHTML = w.name + (w.effect==='bad'?' ⚠️':'');
+        if (w.name === '台风' && !state.flag.firstTyphoon) { state.flag.firstTyphoon = true; unlockAchievement('【啊啊啊啊——放我下来——】'); }
+        if (w.name === '地震' && !state.flag.firstEarthquake) { state.flag.firstEarthquake = true; unlockAchievement('【大地在移动！】'); }
+        if (w.name === '高温' && !state.flag.firstHeat) { state.flag.firstHeat = true; unlockAchievement('【蝉在鸣叫】'); }
+        if (w.name === '干旱' && !state.flag.firstDrought) { state.flag.firstDrought = true; unlockAchievement('【龟裂】'); }
+        if (w.name === '洪水' && !state.flag.firstFlood) { state.flag.firstFlood = true; unlockAchievement('【决堤】'); }
+        if (w.name.includes('雨') && !state.flag.firstRain) { state.flag.firstRain = true; unlockAchievement('【下雨啦！收衫啦！】'); }
+        if (w.name.includes('雪') && !state.flag.firstSnow) { state.flag.firstSnow = true; unlockAchievement('【雪！是雪！】'); }
+        if (w.name === '大风' && !state.flag.firstWind) { state.flag.firstWind = true; unlockAchievement('【刮风咯——】'); }
+        if (w.name === '寒潮' && !state.flag.firstCold) { state.flag.firstCold = true; unlockAchievement('【好冷啊——】'); }
+        if (w.name === '暴风雪' && !state.flag.firstBlizzard) { state.flag.firstBlizzard = true; unlockAchievement('【要被吹走了——】'); }
+        if ((w.name === '雷阵雨' || w.name === '雷电') && !state.flag.firstThunder) { state.flag.firstThunder = true; unlockAchievement('【打雷了！】'); }
+        if (w.effect === 'bad') applyDisaster(w);
+    }
+
+    function applyDisaster(weather) {
+        if (state.disasterCooldown > 0) return;
+        state.disasterCooldown = 3;
+        let popLoss = 0, foodLoss = 0, houseDamage = 0;
+        const severity = Math.random();
+        if (['台风','龙卷风','热带风暴'].includes(weather.name)) {
+            popLoss = Math.floor(state.population * (0.02 + severity * 0.08));
+            foodLoss = Math.floor(state.food * (0.05 + severity * 0.15));
+            houseDamage = Math.floor((state.houses[0]+state.houses[1]+state.houses[2]) * 0.1);
+        } else if (['暴风雪','寒潮'].includes(weather.name)) {
+            popLoss = Math.floor(state.population * (0.01 + severity * 0.06));
+            foodLoss = Math.floor(state.food * (0.10 + severity * 0.20));
+        } else if (['洪水','海啸'].includes(weather.name)) {
+            popLoss = Math.floor(state.population * (0.03 + severity * 0.10));
+            foodLoss = Math.floor(state.food * 0.20);
+            houseDamage = Math.floor((state.houses[0]+state.houses[1]+state.houses[2]) * 0.15);
+            if (!state.flag.firstFlood) { state.flag.firstFlood = true; unlockAchievement('【决堤】'); }
+        } else if (weather.name === '干旱') {
+            foodLoss = Math.floor(state.food * (0.20 + severity * 0.30));
+            if (!state.flag.firstDrought) { state.flag.firstDrought = true; unlockAchievement('【龟裂】'); }
+        } else if (weather.name === '冰雹') {
+            foodLoss = Math.floor(state.food * 0.10);
+            popLoss = Math.floor(state.population * 0.01);
+        } else if (weather.name === '高温') {
+            popLoss = Math.floor(state.population * 0.02);
+            if (state.weather.duration >= 15) unlockAchievement('【高温黄色预警】');
+            if (state.weather.duration >= 25) unlockAchievement('【高温橙色预警】');
+            if (state.weather.duration >= 30) unlockAchievement('【高温红色预警】');
+        } else if (weather.name === '地震') {
+            popLoss = Math.floor(state.population * (0.05 + severity * 0.15));
+            houseDamage = Math.floor((state.houses[0]+state.houses[1]+state.houses[2]) * 0.20);
+        }
+        if (state.population - popLoss < 1) popLoss = state.population - 1;
+        state.population -= popLoss;
+        state.food = Math.max(0, state.food - foodLoss);
+        if (houseDamage > 0) {
+            let total = state.houses[0]+state.houses[1]+state.houses[2];
+            if (total > 0) {
+                let dmg = Math.min(houseDamage, total);
+                for (let i=0; i<3; i++) {
+                    let reduce = Math.min(state.houses[i], dmg);
+                    state.houses[i] -= reduce;
+                    dmg -= reduce;
+                    if (dmg<=0) break;
+                }
+            }
+        }
+        if (state.population <= 0) unlockAchievement('【啊哦，重开吧】');
+        if (state.food <= 0) unlockAchievement('【好……饿……啊……】');
+        addEvent(`💥 ${weather.name} 造成损失: 人口-${popLoss}, 粮食-${foodLoss}`, true);
+        updateUI();
+    }
+
+    // 疫情系统
+    function pandemicTick() {
+        if (state.pandemic.active) {
+            state.pandemic.daysLeft--;
+            let deaths = rand(1, 600) - state.tech * 2;
+            deaths = Math.max(0, deaths);
+            state.population = Math.max(1, state.population - deaths);
+            if (state.population <= 1) unlockAchievement('【全员阵亡……】');
+            if (state.pandemic.daysLeft <= 0) {
+                state.pandemic.active = false;
+                unlockAchievement('【最可爱的人】');
+                addEvent('🦠 疫情结束！', true);
+            }
+            return;
+        }
+        // 每年检测
+        if (state.date.month === 1 && state.date.day === 1 && state.date.year >= 4) {
+            let idx = state.pandemic.index;
+            let prob = 0.0001 + idx * 0.001;
+            if (Math.random() < prob) {
+                let duration = 30 + rand(0, 60) - state.tech * 5;
+                duration = Math.max(15, duration);
+                state.pandemic.active = true;
+                state.pandemic.daysLeft = duration;
+                state.pandemic.index = 0;
+                unlockAchievement('【疫情公司】');
+                addEvent(`🦠 大规模疫情爆发！持续 ${duration} 天`, true);
+                if (duration > 365) unlockAchievement('【哦不！口罩事件！】');
+            } else {
+                // 疫情指数变化
+                let badWeatherCount = 0;
+                // 简化：统计破坏性天气次数
+                if (state.weather.effect === 'bad') badWeatherCount++;
+                if (badWeatherCount > 0 && badWeatherCount <= 15) state.pandemic.index += 0.5;
+                else if (badWeatherCount > 15 && badWeatherCount <= 30) state.pandemic.index += 1;
+                else if (badWeatherCount > 30) state.pandemic.index += 2;
+                else state.pandemic.index += 1;
+            }
+        }
+    }
+
+    // 人口增长
+    function growPopulation() {
+        if (state.population <= 0) return;
+        let foodProd = (state.farmland * 5) + (state.lumberLevel * 0.5);
+        let houseTotal = state.houses[0]*50 + state.houses[1]*100 + state.houses[2]*600;
+        let growth = Math.floor((foodProd * 0.4) + (houseTotal * 0.32));
+        if (growth < 0) growth = 0;
+        if (state.date.year < 3) {
+            state.population += growth;
+        } else {
+            let homeless = Math.max(0, state.population - houseTotal);
+            if (homeless > 0 && Math.random() < 0.03) {
+                state.population -= Math.floor(homeless * 0.03);
+            } else {
+                state.population += growth;
+            }
+        }
+        if (state.population < 1) state.population = 1;
+        let laborRate = 0.5 + (state.happiness/100)*0.25;
+        state.labor = Math.floor(state.population * laborRate);
+        if (state.labor < 0) state.labor = 0;
+        if (state.army > 0) {
+            let foodCost = Math.floor(state.army * 0.125);
+            state.food = Math.max(0, state.food - foodCost);
+        }
+        if (state.population < 1000) state.happiness = Math.max(0, state.happiness-0.1);
+        if (state.population > 0 && houseTotal > 0 && (state.population/houseTotal) < 0.1) {
+            state.happiness = Math.max(0, state.happiness-0.1);
+        }
+        state.happiness = Math.min(100, Math.max(0, state.happiness));
+        if (state.population >= 100000) unlockAchievement('【豆橛子和线面的组合技】');
+        if (state.population >= 100000000) unlockAchievement('【编者还欠费功夫】');
+        updateUI();
+    }
+
+    // 资源产出
+    function produceResources() {
+        let woodProd = [0,3,5,8,13,23,30][state.lumberLevel] || 3;
+        let oreProd = state.mineLevel === 0 ? 0 : [0,6,10,16,80,92,120][state.mineLevel] || 0;
+        state.wood += woodProd;
+        state.ore += oreProd;
+        let foodFromFarm = state.farmland * 5;
+        if (state.weather.effect === 'good') foodFromFarm = Math.floor(foodFromFarm * 1.2);
+        else if (state.weather.effect === 'bad') foodFromFarm = Math.floor(foodFromFarm * 0.5);
+        state.food += Math.max(0, foodFromFarm);
+        if (state.lumberLevel >= 1 && !state.flag.hasLumber) {
+            state.flag.hasLumber = true;
+            state.tech += 1;
+            unlockAchievement('【伐伐伐伐伐木工】');
+        }
+        if (state.mineLevel >= 1 && !state.flag.hasMine) {
+            state.flag.hasMine = true;
+            state.tech += 3;
+            unlockAchievement('【You are mine.】');
+        }
+        if (state.wood >= 10000 && state.ore >= 10000 && state.steel >= 10000 && state.roadKm >= 10000) {
+            unlockAchievement('【想成功，先发疯】');
+        }
+        updateUI();
+    }
+
+    // 每日tick
+    function tick() {
+        if (state.paused) return;
+        state.date.dayCount++;
+        state.date.day++;
+        if (state.date.day > 30) { state.date.day = 1; state.date.month++; }
+        if (state.date.month > 12) { state.date.month = 1; state.date.year++; }
+        if (state.disasterCooldown > 0) state.disasterCooldown--;
+        updateWeather();
+        growPopulation();
+        produceResources();
+        pandemicTick();
+        // 公路维护
+        if (state.roadKm > 0 && state.date.day % 30 === 0) {
+            let cost = Math.floor(state.roadKm * 1);
+            if (state.steel >= cost) state.steel -= cost;
+            else state.roadDurability = Math.max(0, state.roadDurability - 10);
+        }
+        // 坚固房屋维护
+        if (state.houses[2] > 0 && state.date.month === 1 && state.date.day === 1) {
+            let need = state.houses[2] * 5;
+            if (state.steel >= need) state.steel -= need;
+            else state.houses[2] = Math.max(0, state.houses[2] - 1);
+        }
+        // 自动参军
+        let possible = Math.floor(state.population * 0.08);
+        let join = Math.floor(possible * 0.42);
+        if (join > 0 && state.food > 100) {
+            state.army += join;
+            state.population -= join;
+        }
+        // 匡义行动冷却
+        if (state.kuangyi.cooldown > 0) state.kuangyi.cooldown--;
+        updateUI();
+        // 自动存档（每30天）
+        if (state.date.day % 30 === 0) saveHistory();
+    }
+
+    // ========== UI ==========
+    function updateUI() {
+        document.getElementById('popTotal').innerText = state.population;
+        document.getElementById('popLabor').innerText = state.labor;
+        document.getElementById('popArmy').innerText = state.army;
+        document.getElementById('houseStats').innerText = `${state.houses[0]} / ${state.houses[1]} / ${state.houses[2]}`;
+        let foodProd = (state.farmland * 5);
+        document.getElementById('foodStats').innerHTML = `${Math.floor(state.food)} (${foodProd})`;
+        document.getElementById('woodStats').innerText = state.wood;
+        document.getElementById('oreStats').innerText = state.ore;
+        document.getElementById('steelStats').innerText = state.steel;
+        document.getElementById('roadStats').innerText = state.roadKm;
+        document.getElementById('happiness').innerText = Math.floor(state.happiness);
+        document.getElementById('happinessBar').style.width = state.happiness + '%';
+        document.getElementById('techLevel').innerText = state.tech;
+        document.getElementById('farmland').innerText = state.farmland;
+        document.getElementById('lumberLevel').innerText = state.lumberLevel;
+        document.getElementById('lumberProd').innerText = [0,3,5,8,13,23,30][state.lumberLevel] || 3;
+        document.getElementById('mineLevel').innerText = state.mineLevel;
+        document.getElementById('mineProd').innerText = state.mineLevel === 0 ? 0 : [0,6,10,16,80,92,120][state.mineLevel] || 0;
+        document.getElementById('dateDisplay').innerHTML = `${state.date.year}年 ${state.date.month}月${state.date.day}日`;
+        document.getElementById('achCount').innerText = state.achievements.length;
+        document.getElementById('diplomacyInfo').innerHTML = `建交: ${state.diplomacy.warCount} | 断交: ${state.diplomacy.peaceCount} | 盟友: ${state.diplomacy.allies}`;
+        document.getElementById('pandemicIdx').innerText = state.pandemic.index.toFixed(1);
+        let achHtml = '';
+        state.achievements.forEach(a => {
+            achHtml += `<span class="achievement">${a}</span>`;
+        });
+        document.getElementById('achievementList').innerHTML = achHtml || '尚无成就';
+    }
+
+    function addEvent(msg, highlight=false) {
+        let log = document.getElementById('eventLog');
+        let div = document.createElement('div');
+        div.innerHTML = msg;
+        if (highlight) div.style.color = '#f5d98a';
+        log.prepend(div);
+        if (log.children.length > 30) log.removeChild(log.lastChild);
+    }
+
+    // ========== 成就系统 ==========
+    function unlockAchievement(name) {
+        if (!state.achievements.includes(name)) {
+            state.achievements.push(name);
+            addEvent(`🏆 解锁成就: ${name}`, true);
+            updateUI();
+        }
+    }
+
+    // ========== 交互函数 ==========
+    function buildVillage() {
+        if (state.wood < 5) { addEvent('❌ 木材不足'); return; }
+        state.wood -= 5;
+        state.houses[0] += 1;
+        if (!state.flag.firstHouse) { state.flag.firstHouse = true; unlockAchievement('【开家酒店！】'); }
+        addEvent('🏡 木屋建成！容纳50人');
+        updateUI();
+    }
+    function buildStoneHouse() {
+        if (state.wood < 3 || state.steel < 3) { addEvent('❌ 资源不足'); return; }
+        state.wood -= 3; state.steel -= 3;
+        state.houses[1] += 1;
+        addEvent('🏰 牢固房屋建成！容纳100人');
+        updateUI();
+    }
+    function buildStrongHouse() {
+        if (state.steel < 15) { addEvent('❌ 钢筋不足'); return; }
+        state.steel -= 15;
+        state.houses[2] += 1;
+        addEvent('🏯 十分坚固房屋建成！容纳600人');
+        updateUI();
+    }
+    function buildFarm() {
+        if (state.wood < 2) { addEvent('❌ 木材不足'); return; }
+        state.wood -= 2;
+        state.farmland += 1;
+        if (state.farmland === 1) unlockAchievement('【面朝黄土背朝天】');
+        addEvent('🌱 耕地+1㎡，日增5粮食');
+        updateUI();
+    }
+    function upgradeLumber() {
+        let cost = [0,0,6,136,220,435,680];
+        let next = state.lumberLevel + 1;
+        if (next > 6) { addEvent('⚠️ 已达满级'); return; }
+        if (state.wood < cost[next]) { addEvent('❌ 木材不足'); return; }
+        state.wood -= cost[next];
+        state.lumberLevel = next;
+        if (next === 6) unlockAchievement('【惹我光头强，揍你没商量】');
+        addEvent(`🪓 伐木场升级至 ${next}级`);
+        updateUI();
+    }
+    function upgradeMine() {
+        let cost = [0,0,18,408,1980,2540,8160];
+        let next = state.mineLevel + 1;
+        if (next > 6) { addEvent('⚠️ 已达满级'); return; }
+        if (state.ore < cost[next]) { addEvent('❌ 矿石不足'); return; }
+        state.ore -= cost[next];
+        state.mineLevel = next;
+        if (next === 6) unlockAchievement('【Mine!All Mine!】');
+        addEvent(`⛏️ 采矿场升级至 ${next}级`);
+        updateUI();
+    }
+    function buildRoad() {
+        if (state.steel < 3) { addEvent('❌ 钢筋不足'); return; }
+        state.steel -= 3;
+        state.roadKm += 1;
+        state.roadDurability += 100;
+        if (state.roadKm === 1) unlockAchievement('【要致富，先修路！】');
+        addEvent(`🛤️ 交通 +1km，总长 ${state.roadKm}km`);
+        updateUI();
+    }
+    function recruitArmy() {
+        if (state.population < 10) { addEvent('❌ 人口不足'); return; }
+        let cost = Math.floor(state.population * 0.05);
+        if (state.food < cost) { addEvent('❌ 粮食不足'); return; }
+        state.food -= cost;
+        let recruits = Math.floor(state.population * 0.02) + 1;
+        state.army += recruits;
+        state.population -= recruits;
+        if (!state.flag.firstArmy) { state.flag.firstArmy = true; unlockAchievement('【我们的征途是星辰大海】'); }
+        addEvent(`⚔️ 招募 ${recruits} 名军人`);
+        updateUI();
+    }
+    function synthesizeSteel() {
+        if (state.ore < 2) { addEvent('❌ 矿石不足'); return; }
+        state.ore -= 2;
+        state.steel += 1;
+        if (state.steel === 1) unlockAchievement('【获得升级】');
+        addEvent('🧱 合成1钢筋');
+        updateUI();
+    }
+    function techResearch() {
+        if (state.wood < 5 || state.ore < 8) { addEvent('❌ 资源不足'); return; }
+        state.wood -= 5; state.ore -= 8;
+        state.tech += 2;
+        addEvent('🔬 科技+2');
+        updateUI();
+    }
+    function kuangyiAction() {
+        if (state.kuangyi.cooldown > 0) { addEvent('⏳ 匡义行动冷却中'); return; }
+        state.kuangyi.cooldown = 30;
+        let success = Math.random() < 0.4 + state.tech * 0.01;
+        if (success) {
+            state.happiness = Math.min(100, state.happiness + 5);
+            state.tech += 1;
+            unlockAchievement('【大捷！】');
+            addEvent('⚡ 匡义行动成功！清除腐败官员', true);
+        } else {
+            state.happiness = Math.max(0, state.happiness - 8);
+            state.tech = Math.max(0, state.tech - 1);
+            addEvent('⚡ 匡义行动失败，误伤忠良', true);
+        }
+        if (!state.kuangyi.active) { state.kuangyi.active = true; unlockAchievement('【匡义！】'); }
+        updateUI();
+    }
+
+    function toggleSpeed() {
+        let btn = document.getElementById('speedBtn');
+        if (state.speed === 1) { state.speed = 5; btn.innerText = '⏩ 5x'; }
+        else if (state.speed === 5) { state.speed = 20; btn.innerText = '⏩ 20x'; }
+        else { state.speed = 1; btn.innerText = '⏩ 1x'; }
+        applySpeed();
+    }
+
+    function forceWeather() { updateWeather(); }
+    function triggerDisaster() {
+        let w = pick(['台风','龙卷风','暴风雪','寒潮','洪水','干旱','冰雹','高温','海啸','地震']);
+        state.weather = { name: w, type: 'storm', effect: 'bad', duration: rand(1,3) };
+        applyDisaster(state.weather);
+    }
+    function addDiplomacy() {
+        let chance = Math.min(80, 30 + state.tech*0.5 + state.army*0.1 + state.roadKm*0.05);
+        if (Math.random()*100 < chance) {
+            state.diplomacy.allies += 1;
+            unlockAchievement('【幸会幸会】');
+            addEvent('🤝 建交成功！');
+            if (state.diplomacy.allies >= 30) unlockAchievement('【朋友满天下】');
+        } else {
+            state.diplomacy.peaceCount += 1;
+            unlockAchievement('【爱来不来！】');
+            addEvent('💔 断交...');
+        }
+        updateUI();
+    }
+
+    // ========== 存档/读档 ==========
+    function exportSave() {
+        let data = JSON.stringify(state);
+        let blob = new Blob([data], {type: 'text/plain'});
+        let a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `save_${state.date.year}_${state.date.month}_${state.date.day}.txt`;
+        a.click();
+        addEvent('💾 存档已导出');
+    }
+
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        let file = e.target.files[0];
+        if (!file) return;
+        let reader = new FileReader();
+        reader.onload = function(ev) {
+            try {
+                let data = JSON.parse(ev.target.result);
+                if (data.population === undefined || data.wood === undefined) {
+                    addEvent('❌ 存档校验失败: 内容损坏', true);
+                    return;
+                }
+                Object.assign(state, data);
+                addEvent('📂 读档成功！', true);
+                updateUI();
+            } catch (err) {
+                addEvent('❌ 导入失败: 格式错误', true);
+            }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+    });
+
+    // 回溯
+    function saveHistory() {
+        let data = JSON.stringify(state);
+        state.history.push(data);
+        if (state.history.length > 10) state.history.shift();
+    }
+    document.getElementById('rollbackBtn').addEventListener('click', function() {
+        if (state.history.length === 0) { addEvent('⏪ 无回溯点'); return; }
+        let last = state.history.pop();
+        try {
+            let data = JSON.parse(last);
+            Object.assign(state, data);
+            addEvent('⏪ 回溯成功', true);
+            updateUI();
+        } catch (e) {
+            addEvent('❌ 回溯失败');
+        }
+    });
+
+    // ========== 初始化 ==========
+    function init() {
+        addEvent('🏁 开局赠送6木材，建设伐木场开始发展！');
+        unlockAchievement('【第一话】');
+        state.flag.hasLumber = true;
+        updateUI();
+        setInterval(tick, 1000);
+        document.getElementById('pauseBtn').addEventListener('click', function() {
+            state.paused = !state.paused;
+            this.innerText = state.paused ? '▶️ 继续' : '⏸️ 暂停';
+        });
+        // 速度控制
+        let tickInterval = setInterval(tick, 1000);
+        window.applySpeed = function() {
+            clearInterval(tickInterval);
+            tickInterval = setInterval(tick, 1000 / state.speed);
+        };
+        applySpeed();
+    }
+
+    init();
+</script>
+</body>
+  </html>
