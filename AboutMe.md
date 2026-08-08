@@ -1,4 +1,4 @@
-这里是英语版本。如果你要看简体中文版本，请访问[这个链接](https://github.com/lkjy-coding/lkjy-coding.github.io/blob/main/ReadMe_CN.md)。
+这里是英语版本。如果你要看简体中文版本，请访问[这个链接](https://github.com/lkjy-coding/lkjy-coding.github.io/blob/main/AboutMe_CN.md)。
 
 ---
 
