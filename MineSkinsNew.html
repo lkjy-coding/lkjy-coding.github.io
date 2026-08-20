@@ -146,7 +146,7 @@
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 2rem;
+      margin-bottom: 1.2rem;
       gap: 0.8rem 1.2rem;
     }
 
@@ -246,6 +246,78 @@
 
     .btn i {
       font-size: 0.9rem;
+    }
+
+    /* ===== 新增：首字母导航 & 文件夹筛选 ===== */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem 0.6rem;
+      margin-bottom: 1.2rem;
+      padding: 0.4rem 1rem;
+      background: rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(4px);
+      border-radius: 60px;
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+
+    .filter-bar .label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #2a4057;
+      margin-right: 0.2rem;
+      opacity: 0.7;
+      letter-spacing: 0.3px;
+    }
+
+    .filter-btn {
+      background: transparent;
+      border: 1px solid #d3deed;
+      border-radius: 30px;
+      padding: 0.1rem 0.6rem;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: #1f3a4b;
+      cursor: pointer;
+      transition: 0.1s;
+      line-height: 1.6;
+      min-width: 28px;
+      text-align: center;
+    }
+    .filter-btn:hover {
+      background: #1e2b3c;
+      color: white;
+      border-color: #1e2b3c;
+      transform: scale(0.95);
+    }
+    .filter-btn.active {
+      background: #1e2b3c;
+      color: white;
+      border-color: #1e2b3c;
+    }
+
+    .folder-select {
+      background: white;
+      border: 1px solid #cbd6e4;
+      border-radius: 60px;
+      padding: 0.2rem 1.2rem 0.2rem 1rem;
+      font-size: 0.8rem;
+      color: #1d2f40;
+      outline: none;
+      cursor: pointer;
+      max-width: 220px;
+      height: 30px;
+    }
+    .folder-select:focus {
+      border-color: #6f89a3;
+    }
+
+    .filter-divider {
+      width: 1px;
+      height: 22px;
+      background: #d3deed;
+      margin: 0 0.2rem;
     }
 
     /* 网格 */
@@ -516,6 +588,8 @@
       .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; }
       .preview-card { padding: 1.2rem; }
       .search-wrapper input { width: 100px; }
+      .filter-bar { border-radius: 30px; padding: 0.3rem 0.6rem; }
+      .filter-btn { font-size: 0.6rem; min-width: 22px; padding: 0 0.4rem; }
     }
   </style>
 </head>
@@ -545,13 +619,25 @@
       <i class="fas fa-images"></i> <span id="countDisplay">0</span> 个皮肤
     </div>
     <div class="action-group">
-      <!-- 搜索栏 -->
       <div class="search-wrapper">
         <input type="text" id="searchInput" placeholder="搜索文件名..." aria-label="搜索皮肤">
         <button id="searchButton"><i class="fas fa-search"></i> 搜索</button>
       </div>
       <button class="btn" id="refreshButton"><i class="fas fa-sync-alt"></i> 刷新</button>
     </div>
+  </div>
+
+  <!-- ===== 新增：首字母导航 + 文件夹筛选 ===== -->
+  <div class="filter-bar" id="filterBar">
+    <span class="label"><i class="fas fa-filter"></i> 筛选</span>
+    <!-- 首字母按钮 1-9 A-Z 动态生成 -->
+    <div id="alphaButtons" style="display:flex; flex-wrap:wrap; gap:0.2rem; align-items:center;"></div>
+    <span class="filter-divider"></span>
+    <!-- 文件夹下拉 -->
+    <select class="folder-select" id="folderSelect">
+      <option value="">📁 全部文件夹</option>
+    </select>
+    <button class="filter-btn" id="clearFiltersBtn" style="background:#eef3fa; border-color:#c0cedc;">✕ 清除</button>
   </div>
 
   <!-- 网格 -->
@@ -598,6 +684,9 @@
     const countSpan = document.getElementById('countDisplay');
     const searchInput = document.getElementById('searchInput');
     const searchButton = document.getElementById('searchButton');
+    const folderSelect = document.getElementById('folderSelect');
+    const alphaContainer = document.getElementById('alphaButtons');
+    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
 
     // 预览
     const overlay = document.getElementById('previewOverlay');
@@ -607,8 +696,11 @@
     const previewDownloadBtn = document.getElementById('previewDownloadBtn');
     const previewClose = document.getElementById('previewClose');
 
-    // 存储所有图片项 (用于搜索过滤)
-    let allImageItems = [];
+    // 状态
+    let allImageItems = [];            // 所有图片项 (原始)
+    let currentFiltered = [];          // 当前过滤后的结果
+    let activeAlpha = '';              // 当前选中的首字母
+    let activeFolder = '';            // 当前选中的文件夹路径
 
     // 辅助
     function isImageFile(fileName) {
@@ -631,13 +723,91 @@
       return `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${filePath}`;
     }
 
+    // 获取首字母 (数字 1-9 或 A-Z, 不区分大小写)
+    function getFirstChar(fileName) {
+      const first = fileName.charAt(0).toUpperCase();
+      if (/[1-9]/.test(first)) return '1-9';
+      if (/[A-Z]/.test(first)) return first;
+      return '#'; // 其他字符归为 #
+    }
+
+    // 生成首字母按钮 (1-9, A-Z)
+    function renderAlphaButtons() {
+      const chars = [];
+      chars.push('1-9');
+      for (let i = 65; i <= 90; i++) {
+        chars.push(String.fromCharCode(i));
+      }
+      alphaContainer.innerHTML = chars.map(ch => 
+        `<button class="filter-btn" data-alpha="${ch}">${ch}</button>`
+      ).join('');
+    }
+
+    // 收集所有文件夹 (去重)
+    function collectFolders(items) {
+      const folderSet = new Set();
+      for (const item of items) {
+        const { folderPath } = parseFilePath(item.path);
+        if (folderPath) folderSet.add(folderPath);
+      }
+      return Array.from(folderSet).sort();
+    }
+
+    // 更新文件夹下拉
+    function updateFolderOptions(items) {
+      const folders = collectFolders(items);
+      folderSelect.innerHTML = `<option value="">📁 全部文件夹</option>`;
+      for (const f of folders) {
+        // 显示为 /folder 格式
+        folderSelect.innerHTML += `<option value="${f}">/${f}</option>`;
+      }
+    }
+
+    // ----- 核心过滤逻辑 -----
+    function filterAndRender() {
+      let result = [...allImageItems];
+
+      // 1. 首字母过滤
+      if (activeAlpha) {
+        if (activeAlpha === '1-9') {
+          result = result.filter(item => {
+            const { fileName } = parseFilePath(item.path);
+            return /^[1-9]/.test(fileName);
+          });
+        } else {
+          result = result.filter(item => {
+            const { fileName } = parseFilePath(item.path);
+            return fileName.toUpperCase().startsWith(activeAlpha);
+          });
+        }
+      }
+
+      // 2. 文件夹过滤
+      if (activeFolder) {
+        result = result.filter(item => {
+          const { folderPath } = parseFilePath(item.path);
+          return folderPath === activeFolder;
+        });
+      }
+
+      // 3. 搜索过滤 (不区分大小写)
+      const searchVal = searchInput.value.trim();
+      if (searchVal) {
+        const lowerSearch = searchVal.toLowerCase();
+        result = result.filter(item => {
+          const { fileName, folderPath } = parseFilePath(item.path);
+          return fileName.toLowerCase().includes(lowerSearch) || 
+                 folderPath.toLowerCase().includes(lowerSearch);
+        });
+      }
+
+      currentFiltered = result;
+      renderSkins(result);
+    }
+
     // 渲染网格 (接受 items 数组)
     function renderSkins(items) {
-      // items 已经是过滤后的图片项 (包含 path, type 等)
-      const imageItems = items.filter(item => item.type === 'blob' && isImageFile(item.path));
-      allImageItems = imageItems; // 保存
-
-      const count = imageItems.length;
+      const count = items.length;
       countSpan.textContent = count;
 
       if (count === 0) {
@@ -645,17 +815,18 @@
           <div class="empty-state">
             <i class="fas fa-folder-open"></i>
             未找到匹配的图片文件
-            <br><small style="display:block; margin-top:8px;">尝试调整搜索词或刷新</small>
+            <br><small style="display:block; margin-top:8px;">尝试调整筛选条件或搜索词</small>
           </div>
         `;
         return;
       }
 
       let html = '';
-      for (const item of imageItems) {
+      for (const item of items) {
         const { fileName, folderPath } = parseFilePath(item.path);
         const rawUrl = buildRawUrl(item.path);
-        const folderDisplay = folderPath || '根目录';
+        // 显示文件夹：根目录为 / ，其他为 /folder
+        const folderDisplay = folderPath ? `/${folderPath}` : '/';
 
         html += `
           <div class="card" data-path="${item.path}" data-raw="${rawUrl}" data-filename="${fileName}" data-folder="${folderPath}">
@@ -679,21 +850,6 @@
       }
 
       grid.innerHTML = html;
-    }
-
-    // 搜索过滤 (基于 allImageItems)
-    function filterSkins(query) {
-      if (!query.trim()) {
-        renderSkins(allImageItems);
-        return;
-      }
-      const lowerQuery = query.trim().toLowerCase();
-      const filtered = allImageItems.filter(item => {
-        const { fileName, folderPath } = parseFilePath(item.path);
-        return fileName.toLowerCase().includes(lowerQuery) || folderPath.toLowerCase().includes(lowerQuery);
-      });
-      // 重新渲染过滤后的结果
-      renderSkins(filtered);
     }
 
     // 从 GitHub 获取
@@ -730,12 +886,23 @@
           throw new Error('返回数据格式异常');
         }
 
-        // 存储并渲染全部
+        // 提取图片
         const imageItems = data.tree.filter(item => item.type === 'blob' && isImageFile(item.path));
         allImageItems = imageItems;
-        renderSkins(imageItems);
-        // 清空搜索框
+
+        // 更新文件夹下拉
+        updateFolderOptions(allImageItems);
+
+        // 重置筛选状态
+        activeAlpha = '';
+        activeFolder = '';
         searchInput.value = '';
+        // 清除按钮高亮
+        document.querySelectorAll('.filter-btn[data-alpha]').forEach(b => b.classList.remove('active'));
+        folderSelect.value = '';
+
+        // 渲染全部
+        filterAndRender();
       } catch (err) {
         console.warn('获取失败:', err);
         grid.innerHTML = `
@@ -753,7 +920,7 @@
     function openPreview(rawUrl, fileName, folderPath) {
       previewImg.src = rawUrl;
       previewFileName.textContent = fileName;
-      const folderDisplay = folderPath || '根目录';
+      const folderDisplay = folderPath ? `/${folderPath}` : '/';
       previewFolderTag.innerHTML = `<i class="far fa-folder"></i> ${folderDisplay}`;
       previewDownloadBtn.href = rawUrl;
       previewDownloadBtn.download = fileName;
@@ -766,28 +933,45 @@
       document.body.style.overflow = '';
     }
 
-    // 事件: 卡片点击预览
-    grid.addEventListener('click', (e) => {
-      const card = e.target.closest('.card');
-      if (!card) return;
-      if (e.target.closest('.download-btn')) return;
-      const raw = card.dataset.raw;
-      const filename = card.dataset.filename;
-      const folder = card.dataset.folder || '';
-      if (raw) openPreview(raw, filename, folder);
+    // ----- 事件绑定 -----
+
+    // 首字母按钮点击
+    alphaContainer.addEventListener('click', (e) => {
+      const btn = e.target.closest('.filter-btn[data-alpha]');
+      if (!btn) return;
+      const alpha = btn.dataset.alpha;
+      // 切换激活状态
+      if (activeAlpha === alpha) {
+        activeAlpha = '';
+        btn.classList.remove('active');
+      } else {
+        // 移除其他高亮
+        document.querySelectorAll('.filter-btn[data-alpha]').forEach(b => b.classList.remove('active'));
+        activeAlpha = alpha;
+        btn.classList.add('active');
+      }
+      filterAndRender();
     });
 
-    previewClose.addEventListener('click', closePreview);
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) closePreview();
-    });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closePreview();
+    // 文件夹下拉
+    folderSelect.addEventListener('change', () => {
+      activeFolder = folderSelect.value;
+      filterAndRender();
     });
 
-    // 搜索事件
+    // 清除筛选
+    clearFiltersBtn.addEventListener('click', () => {
+      activeAlpha = '';
+      activeFolder = '';
+      searchInput.value = '';
+      document.querySelectorAll('.filter-btn[data-alpha]').forEach(b => b.classList.remove('active'));
+      folderSelect.value = '';
+      filterAndRender();
+    });
+
+    // 搜索
     function handleSearch() {
-      filterSkins(searchInput.value);
+      filterAndRender();
     }
     searchButton.addEventListener('click', handleSearch);
     searchInput.addEventListener('keydown', (e) => {
@@ -807,7 +991,27 @@
       });
     });
 
-    // 启动
+    // 卡片点击预览
+    grid.addEventListener('click', (e) => {
+      const card = e.target.closest('.card');
+      if (!card) return;
+      if (e.target.closest('.download-btn')) return;
+      const raw = card.dataset.raw;
+      const filename = card.dataset.filename;
+      const folder = card.dataset.folder || '';
+      if (raw) openPreview(raw, filename, folder);
+    });
+
+    previewClose.addEventListener('click', closePreview);
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closePreview();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closePreview();
+    });
+
+    // 初始化
+    renderAlphaButtons();
     fetchSkinFiles();
   })();
 </script>
