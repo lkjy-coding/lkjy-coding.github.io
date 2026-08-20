@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MineSkins 皮肤仓库</title>
+  <!-- Font Awesome 6 (免费图标库) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at 20% 30%, #f0f4fa, #d9e2ed);
+      min-height: 100vh;
+      padding: 2rem 1.5rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .app {
+      max-width: 1440px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.60);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 56px;
+      padding: 2.2rem 2.2rem 2.5rem;
+      box-shadow: 0 30px 50px -20px rgba(0, 20, 30, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.5);
+      transition: 0.2s;
+    }
+
+    /* 头部 */
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.8rem;
+      gap: 0.8rem 1.2rem;
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .logo-area h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(145deg, #1f2e3f, #2c4055);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .logo-area h1 i {
+      background: #1f2e3f;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 2.2rem;
+    }
+
+    .badge-nonprofit {
+      background: #eef3fa;
+      border-radius: 60px;
+      padding: 0.25rem 1.2rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #1a3144;
+      border: 1px solid #ccd8e8;
+      box-shadow: inset 0 1px 2px white;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      letter-spacing: 0.2px;
+    }
+
+    .repo-link {
+      background: #1e2b3c;
+      color: white;
+      padding: 0.4rem 1.4rem;
+      border-radius: 60px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #3e5266;
+      transition: 0.15s;
+    }
+
+    .repo-link:hover {
+      background: #2c4055;
+      transform: scale(1.02);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+    }
+
+    /* 免责声明 */
+    .disclaimer {
+      background: #eef3fa;
+      border-radius: 60px;
+      padding: 0.5rem 1.8rem;
+      margin-bottom: 2rem;
+      font-size: 0.9rem;
+      color: #1e374b;
+      border: 1px solid #d3deed;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem 1.2rem;
+      backdrop-filter: blur(2px);
+    }
+
+    .disclaimer i {
+      color: #b22234;
+      opacity: 0.7;
+    }
+
+    .disclaimer a {
+      color: #1d4e7c;
+      font-weight: 500;
+      text-decoration: none;
+      border-bottom: 1px dotted #1d4e7c;
+    }
+
+    .disclaimer a:hover {
+      border-bottom: 2px solid;
+    }
+
+    /* 工具栏 */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      gap: 0.8rem 1.2rem;
+    }
+
+    .counter {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(2px);
+      padding: 0.25rem 1.4rem;
+      border-radius: 40px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #1f3a4b;
+      border: 1px solid #cfdbe9;
+    }
+
+    .counter i {
+      margin-right: 6px;
+      color: #1f3a4b;
+    }
+
+    .action-group {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    /* 搜索栏 */
+    .search-wrapper {
+      display: flex;
+      align-items: center;
+      background: white;
+      border-radius: 60px;
+      padding: 0.1rem 0.1rem 0.1rem 1rem;
+      border: 1px solid #cbd6e4;
+      transition: 0.15s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .search-wrapper:focus-within {
+      border-color: #6f89a3;
+      box-shadow: 0 0 0 3px rgba(30, 43, 60, 0.08);
+    }
+    .search-wrapper input {
+      border: none;
+      outline: none;
+      background: transparent;
+      padding: 0.4rem 0.2rem;
+      font-size: 0.85rem;
+      width: 140px;
+      color: #1d2f40;
+    }
+    .search-wrapper input::placeholder {
+      color: #9aadc2;
+    }
+    .search-wrapper button {
+      background: #1e2b3c;
+      border: none;
+      border-radius: 60px;
+      padding: 0.3rem 1rem;
+      color: white;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid #3a4f64;
+    }
+    .search-wrapper button:hover {
+      background: #2c4055;
+      transform: scale(0.96);
+    }
+    .search-wrapper button i {
+      font-size: 0.7rem;
+    }
+
+    .btn {
+      background: white;
+      border: 1px solid #cbd6e4;
+      border-radius: 40px;
+      padding: 0.35rem 1.2rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #1d2f40;
+      cursor: pointer;
+      transition: 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .btn:hover {
+      background: #f2f6fc;
+      border-color: #8fa3bb;
+      transform: scale(0.97);
+    }
+
+    .btn i {
+      font-size: 0.9rem;
+    }
+
+    /* 网格 */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 1.8rem 1.4rem;
+      margin: 1.8rem 0 2rem;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(4px);
+      border-radius: 32px;
+      padding: 0.9rem 0.9rem 1rem;
+      box-shadow: 0 12px 24px -12px rgba(0, 20, 30, 0.12), 0 0 0 1px rgba(255,255,255,0.7);
+      transition: 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.5);
+      cursor: pointer;
+    }
+
+    .card:hover {
+      transform: translateY(-8px) scale(1.01);
+      box-shadow: 0 24px 36px -16px rgba(0, 20, 30, 0.25), 0 0 0 1px rgba(255,255,255,0.9);
+      background: rgba(255, 255, 255, 0.85);
+    }
+
+    .card-img-wrapper {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: #eef2f8;
+      border-radius: 24px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #e0e8f2;
+      transition: 0.2s;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-img-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: 0.2s;
+    }
+
+    .card-img-wrapper img:hover {
+      transform: scale(1.02);
+    }
+
+    .file-info {
+      width: 100%;
+      margin-top: 0.2rem;
+    }
+
+    .file-name {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #1e2f3f;
+      word-break: break-word;
+      line-height: 1.3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .file-name i {
+      color: #6d7f94;
+      font-size: 0.7rem;
+    }
+
+    .folder-tag {
+      font-size: 0.6rem;
+      background: #e4ebf5;
+      border-radius: 40px;
+      padding: 0.1rem 0.6rem;
+      color: #2a4057;
+      display: inline-block;
+      margin-top: 2px;
+      border: 1px solid #d0dbe9;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .download-btn {
+      background: #1e2b3c;
+      border: none;
+      border-radius: 60px;
+      padding: 0.3rem 1rem;
+      margin-top: 0.5rem;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: 0.15s;
+      cursor: pointer;
+      border: 1px solid #3a4f64;
+      text-decoration: none;
+      width: fit-content;
+      letter-spacing: 0.3px;
+    }
+
+    .download-btn:hover {
+      background: #2c4055;
+      transform: scale(0.96);
+      border-color: #6f89a3;
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 4rem 1rem;
+      color: #3a4f64;
+      background: rgba(235, 242, 250, 0.6);
+      border-radius: 60px;
+      font-size: 1.1rem;
+      backdrop-filter: blur(2px);
+    }
+
+    .empty-state i {
+      font-size: 2.8rem;
+      opacity: 0.4;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    /* 预览模态框 (大图) */
+    .preview-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(10, 18, 30, 0.75);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      padding: 2rem;
+      animation: fadeIn 0.25s;
+    }
+
+    .preview-overlay.active {
+      display: flex;
+    }
+
+    .preview-card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(6px);
+      border-radius: 48px;
+      max-width: 800px;
+      width: 100%;
+      padding: 1.8rem 1.8rem 2rem;
+      box-shadow: 0 40px 70px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .preview-close {
+      position: absolute;
+      top: 0.8rem;
+      right: 1.2rem;
+      font-size: 2rem;
+      background: transparent;
+      border: none;
+      color: #1f2e3f;
+      cursor: pointer;
+      transition: 0.15s;
+      line-height: 1;
+      padding: 0.2rem 0.6rem;
+      border-radius: 60px;
+    }
+
+    .preview-close:hover {
+      background: rgba(0,0,0,0.05);
+      transform: rotate(90deg);
+    }
+
+    .preview-img {
+      max-width: 100%;
+      max-height: 65vh;
+      border-radius: 32px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+      object-fit: contain;
+      background: #eef2f8;
+      width: auto;
+    }
+
+    .preview-meta {
+      margin-top: 1.2rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem 1.4rem;
+      width: 100%;
+    }
+
+    .preview-meta .file-name-lg {
+      font-weight: 600;
+      color: #1a2d3f;
+      font-size: 1.1rem;
+    }
+
+    .preview-meta .folder-tag-lg {
+      background: #dae3ef;
+      padding: 0.15rem 1rem;
+      border-radius: 40px;
+      font-size: 0.8rem;
+      color: #1d364b;
+    }
+
+    .preview-download {
+      background: #1e2b3c;
+      color: white;
+      border: none;
+      border-radius: 60px;
+      padding: 0.35rem 1.6rem;
+      font-weight: 500;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: 0.15s;
+    }
+
+    .preview-download:hover {
+      background: #2c4055;
+      transform: scale(0.96);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .footer-note {
+      margin-top: 2rem;
+      font-size: 0.8rem;
+      color: #4a617a;
+      border-top: 1px solid rgba(0,0,0,0.04);
+      padding-top: 1.4rem;
+      text-align: center;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.4rem 1.6rem;
+    }
+
+    @media (max-width: 640px) {
+      .app { padding: 1.2rem; }
+      .logo-area h1 { font-size: 1.9rem; }
+      .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; }
+      .preview-card { padding: 1.2rem; }
+      .search-wrapper input { width: 100px; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- 头部 -->
+  <div class="header">
+    <div class="logo-area">
+      <h1><i class="fas fa-cubes"></i> MineSkins</h1>
+      <span class="badge-nonprofit"><i class="fas fa-hand-holding-heart"></i> 非盈利 · 公开</span>
+    </div>
+    <a class="repo-link" href="https://github.com/lkjy-coding/MinecraftSkins" target="_blank" rel="noopener noreferrer">
+      <i class="fab fa-github"></i> lkjy-coding/MinecraftSkins
+    </a>
+  </div>
+
+  <!-- 免责 -->
+  <div class="disclaimer">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span>内容来自网络公开资源，若涉及侵权请与 <strong>lkjy-coding (lkjy)</strong> 联系。</span>
+    <i class="fas fa-envelope" style="opacity:0.6;"></i>
+  </div>
+
+  <!-- 工具栏 -->
+  <div class="toolbar">
+    <div class="counter" id="fileCounter">
+      <i class="fas fa-images"></i> <span id="countDisplay">0</span> 个皮肤
+    </div>
+    <div class="action-group">
+      <!-- 搜索栏 -->
+      <div class="search-wrapper">
+        <input type="text" id="searchInput" placeholder="搜索文件名..." aria-label="搜索皮肤">
+        <button id="searchButton"><i class="fas fa-search"></i> 搜索</button>
+      </div>
+      <button class="btn" id="refreshButton"><i class="fas fa-sync-alt"></i> 刷新</button>
+    </div>
+  </div>
+
+  <!-- 网格 -->
+  <div class="grid" id="skinGrid">
+    <div class="empty-state">
+      <i class="fas fa-cloud-download-alt"></i>
+      正在加载皮肤仓库...
+    </div>
+  </div>
+
+  <!-- 页脚 -->
+  <div class="footer-note">
+    <span><i class="far fa-copyright"></i> MineSkins · 非盈利项目</span>
+    <span><i class="fas fa-code-branch"></i> 数据来源于 GitHub 公开仓库</span>
+    <span><i class="fas fa-folder-tree"></i> 支持嵌套文件夹</span>
+  </div>
+</div>
+
+<!-- 预览模态框 -->
+<div class="preview-overlay" id="previewOverlay">
+  <div class="preview-card">
+    <button class="preview-close" id="previewClose"><i class="fas fa-times"></i></button>
+    <img class="preview-img" id="previewImg" src="" alt="预览大图">
+    <div class="preview-meta">
+      <span class="file-name-lg" id="previewFileName">文件名</span>
+      <span class="folder-tag-lg" id="previewFolderTag"><i class="far fa-folder"></i> 路径</span>
+      <a class="preview-download" id="previewDownloadBtn" href="#" download><i class="fas fa-download"></i> 下载</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    // ----- 配置 -----
+    const REPO_OWNER = 'lkjy-coding';
+    const REPO_NAME = 'MinecraftSkins';
+    const BRANCH = 'main';
+    const API_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/git/trees/${BRANCH}?recursive=1`;
+
+    const IMAGE_EXTS = new Set(['.jpg', '.jpeg', '.png']);
+
+    // DOM
+    const grid = document.getElementById('skinGrid');
+    const countSpan = document.getElementById('countDisplay');
+    const searchInput = document.getElementById('searchInput');
+    const searchButton = document.getElementById('searchButton');
+
+    // 预览
+    const overlay = document.getElementById('previewOverlay');
+    const previewImg = document.getElementById('previewImg');
+    const previewFileName = document.getElementById('previewFileName');
+    const previewFolderTag = document.getElementById('previewFolderTag');
+    const previewDownloadBtn = document.getElementById('previewDownloadBtn');
+    const previewClose = document.getElementById('previewClose');
+
+    // 存储所有图片项 (用于搜索过滤)
+    let allImageItems = [];
+
+    // 辅助
+    function isImageFile(fileName) {
+      if (!fileName) return false;
+      const lower = fileName.toLowerCase();
+      for (const ext of IMAGE_EXTS) {
+        if (lower.endsWith(ext)) return true;
+      }
+      return false;
+    }
+
+    function parseFilePath(path) {
+      const parts = path.split('/');
+      const fileName = parts.pop();
+      const folderPath = parts.join('/') || '';
+      return { fileName, folderPath };
+    }
+
+    function buildRawUrl(filePath) {
+      return `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${filePath}`;
+    }
+
+    // 渲染网格 (接受 items 数组)
+    function renderSkins(items) {
+      // items 已经是过滤后的图片项 (包含 path, type 等)
+      const imageItems = items.filter(item => item.type === 'blob' && isImageFile(item.path));
+      allImageItems = imageItems; // 保存
+
+      const count = imageItems.length;
+      countSpan.textContent = count;
+
+      if (count === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-folder-open"></i>
+            未找到匹配的图片文件
+            <br><small style="display:block; margin-top:8px;">尝试调整搜索词或刷新</small>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      for (const item of imageItems) {
+        const { fileName, folderPath } = parseFilePath(item.path);
+        const rawUrl = buildRawUrl(item.path);
+        const folderDisplay = folderPath || '根目录';
+
+        html += `
+          <div class="card" data-path="${item.path}" data-raw="${rawUrl}" data-filename="${fileName}" data-folder="${folderPath}">
+            <div class="card-img-wrapper">
+              <img src="${rawUrl}" alt="${fileName}" loading="lazy" 
+                   onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' viewBox=\'0 0 100 100\'%3E%3Crect fill=\'%23d5dce6\' width=\'100\' height=\'100\'/%3E%3Ctext x=\'50\' y=\'50\' font-family=\'sans-serif\' font-size=\'12\' fill=\'%236f7d91\' text-anchor=\'middle\' dy=\'0.3em\'%3E无法加载%3C/text%3E%3C/svg%3E'">
+            </div>
+            <div class="file-info">
+              <div class="file-name">
+                <i class="far fa-file-image"></i> ${fileName}
+              </div>
+              <div class="folder-tag" title="${folderDisplay}">
+                <i class="far fa-folder"></i> ${folderDisplay}
+              </div>
+            </div>
+            <a class="download-btn" href="${rawUrl}" download="${fileName}" target="_blank">
+              <i class="fas fa-download"></i> 下载
+            </a>
+          </div>
+        `;
+      }
+
+      grid.innerHTML = html;
+    }
+
+    // 搜索过滤 (基于 allImageItems)
+    function filterSkins(query) {
+      if (!query.trim()) {
+        renderSkins(allImageItems);
+        return;
+      }
+      const lowerQuery = query.trim().toLowerCase();
+      const filtered = allImageItems.filter(item => {
+        const { fileName, folderPath } = parseFilePath(item.path);
+        return fileName.toLowerCase().includes(lowerQuery) || folderPath.toLowerCase().includes(lowerQuery);
+      });
+      // 重新渲染过滤后的结果
+      renderSkins(filtered);
+    }
+
+    // 从 GitHub 获取
+    async function fetchSkinFiles() {
+      try {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-spinner fa-pulse"></i>
+            正在获取最新皮肤列表...
+          </div>
+        `;
+
+        const response = await fetch(API_URL, {
+          headers: { 'Accept': 'application/vnd.github.v3+json' }
+        });
+
+        if (!response.ok) {
+          let errorMsg = `GitHub API 异常 (${response.status})`;
+          if (response.status === 403) errorMsg = 'API 请求受限，请稍后重试';
+          else if (response.status === 404) errorMsg = '仓库或分支不存在，请确认 lkjy-coding/MinecraftSkins 及 main 分支';
+          grid.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-exclamation-circle"></i>
+              ${errorMsg}
+              <br><small style="display:block; margin-top:8px;">点击 “刷新” 重试</small>
+            </div>
+          `;
+          countSpan.textContent = '?';
+          return;
+        }
+
+        const data = await response.json();
+        if (!data.tree || !Array.isArray(data.tree)) {
+          throw new Error('返回数据格式异常');
+        }
+
+        // 存储并渲染全部
+        const imageItems = data.tree.filter(item => item.type === 'blob' && isImageFile(item.path));
+        allImageItems = imageItems;
+        renderSkins(imageItems);
+        // 清空搜索框
+        searchInput.value = '';
+      } catch (err) {
+        console.warn('获取失败:', err);
+        grid.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-times-circle"></i>
+            加载失败：${err.message || '未知错误'}
+            <br><small style="display:block; margin-top:8px;">点击 “刷新” 重试</small>
+          </div>
+        `;
+        countSpan.textContent = '!';
+      }
+    }
+
+    // ----- 预览 -----
+    function openPreview(rawUrl, fileName, folderPath) {
+      previewImg.src = rawUrl;
+      previewFileName.textContent = fileName;
+      const folderDisplay = folderPath || '根目录';
+      previewFolderTag.innerHTML = `<i class="far fa-folder"></i> ${folderDisplay}`;
+      previewDownloadBtn.href = rawUrl;
+      previewDownloadBtn.download = fileName;
+      overlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closePreview() {
+      overlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    // 事件: 卡片点击预览
+    grid.addEventListener('click', (e) => {
+      const card = e.target.closest('.card');
+      if (!card) return;
+      if (e.target.closest('.download-btn')) return;
+      const raw = card.dataset.raw;
+      const filename = card.dataset.filename;
+      const folder = card.dataset.folder || '';
+      if (raw) openPreview(raw, filename, folder);
+    });
+
+    previewClose.addEventListener('click', closePreview);
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closePreview();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closePreview();
+    });
+
+    // 搜索事件
+    function handleSearch() {
+      filterSkins(searchInput.value);
+    }
+    searchButton.addEventListener('click', handleSearch);
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleSearch();
+      }
+    });
+
+    // 刷新
+    document.getElementById('refreshButton').addEventListener('click', function(e) {
+      e.preventDefault();
+      const icon = this.querySelector('i');
+      icon.classList.add('fa-spin');
+      fetchSkinFiles().finally(() => {
+        setTimeout(() => icon.classList.remove('fa-spin'), 400);
+      });
+    });
+
+    // 启动
+    fetchSkinFiles();
+  })();
+</script>
+</body>
+</html>
