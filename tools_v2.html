@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>极客多功能工作台</title>
+    <style>
+        /* 全局样式与布局 */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 20px; }
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+        .card:hover { transform: translateY(-5px); }
+        .card h2 { margin-top: 0; color: #3498db; font-size: 1.2em; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        
+        /* 通用组件样式 */
+        button {
+            background-color: #3498db; color: white; border: none; padding: 8px 15px;
+            border-radius: 5px; cursor: pointer; margin-top: 10px; transition: 0.3s;
+        }
+        button:hover { background-color: #2980b9; }
+        input, textarea {
+            width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd;
+            border-radius: 5px; box-sizing: border-box;
+        }
+        ul { list-style-type: none; padding: 0; max-height: 150px; overflow-y: auto; }
+        li { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #eee; }
+        .delete-btn { background-color: #e74c3c; padding: 2px 8px; margin: 0; font-size: 0.8em; }
+
+        /* 特定模块样式 */
+        #clock { font-size: 2.5em; font-weight: bold; text-align: center; padding: 20px; color: #2c3e50; }
+        #pomodoro-timer { font-size: 3em; text-align: center; margin: 20px 0; color: #e67e22; }
+        iframe { width: 100%; height: 250px; border: none; border-radius: 8px; background: #eee; }
+        pre { background: #ecf0f1; padding: 10px; border-radius: 5px; font-size: 0.9em; overflow-x: auto; }
+        .quote-box { font-style: italic; color: #7f8c8d; text-align: center; margin-top: 10px; }
+        .nav-links a { display: inline-block; margin: 5px; padding: 5px 10px; background: #ecf0f1; border-radius: 15px; text-decoration: none; color: #333; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+
+<h1>️ 极客多功能工作台</h1>
+
+<div class="dashboard">
+    <!-- 1. 实时时钟 -->
+    <div class="card">
+        <h2>️ 实时时钟</h2>
+        <div id="clock">加载中...</div>
+    </div>
+
+    <!-- 2. 番茄钟 -->
+    <div class="card">
+        <h2> 专注番茄钟</h2>
+        <div id="pomodoro-timer">25:00</div>
+        <div style="text-align: center;">
+            <button onclick="startPomodoro()">开始</button>
+            <button onclick="resetPomodoro()" style="background:#e67e22;">重置</button>
+        </div>
+    </div>
+
+    <!-- 3. ToDo 待办事项 -->
+    <div class="card">
+        <h2> 待办事项 (ToDo)</h2>
+        <input type="text" id="todo-input" placeholder="添加新任务...">
+        <button onclick="addTodo()">添加</button>
+        <ul id="todo-list"></ul>
+    </div>
+
+    <!-- 4. 在线搜索 -->
+    <div class="card">
+        <h2> 在线搜索</h2>
+        <input type="text" id="search-input" placeholder="输入关键词并按回车...">
+        <iframe id="search-frame" src="https://www.bing.com"></iframe>
+    </div>
+
+    <!-- 5. 网速测试 -->
+    <div class="card">
+        <h2> 简易网速测试</h2>
+        <p>点击下方按钮，通过下载测试文件估算网速。</p>
+        <button onclick="testSpeed()">开始测速</button>
+        <p id="speed-result" style="font-weight:bold; margin-top:10px;"></p>
+    </div>
+
+    <!-- 6. 浏览器信息 -->
+    <div class="card">
+        <h2> 浏览器信息</h2>
+        <pre id="browser-info">正在获取...</pre>
+    </div>
+
+    <!-- 7. 计算器 -->
+    <div class="card">
+        <h2> 快捷计算器</h2>
+        <input type="text" id="calc-input" placeholder="输入表达式，如: (5+3)*2">
+        <button onclick="calculate()">计算</button>
+        <p id="calc-result" style="font-size:1.5em; font-weight:bold; margin-top:10px; text-align:center;"></p>
+    </div>
+
+    <!-- 8. [新增] 今日一言 -->
+    <div class="card">
+        <h2> 今日一言</h2>
+        <div id="quote" class="quote-box">正在获取名言...</div>
+        <button onclick="getQuote()" style="display:block; margin:10px auto 0;">换一句</button>
+    </div>
+
+    <!-- 9. [新增] 本地备忘录 -->
+    <div class="card">
+        <h2> 本地备忘录</h2>
+        <textarea id="memo-area" rows="5" placeholder="在这里写下你的灵感，关闭页面后内容仍会保留..."></textarea>
+        <p style="font-size:0.8em; color:#999;">* 内容自动保存在浏览器本地</p>
+    </div>
+
+    <!-- 10. [新增] 快捷导航 -->
+    <div class="card">
+        <h2> 快捷导航</h2>
+        <div class="nav-links">
+            <a href="https://github.com" target="_blank">GitHub</a>
+            <a href="https://stackoverflow.com" target="_blank">StackOverflow</a>
+            <a href="https://developer.mozilla.org" target="_blank">MDN</a>
+            <a href="https://www.bilibili.com" target="_blank">Bilibili</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. 实时时钟
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('clock').textContent = now.toLocaleTimeString('zh-CN', { hour12: false });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // 2. 番茄钟
+    let pomodoroInterval;
+    let timeLeft = 25 * 60;
+    function updatePomodoroDisplay() {
+        const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+        const s = (timeLeft % 60).toString().padStart(2, '0');
+        document.getElementById('pomodoro-timer').textContent = `${m}:${s}`;
+    }
+    function startPomodoro() {
+        clearInterval(pomodoroInterval);
+        pomodoroInterval = setInterval(() => {
+            if (timeLeft > 0) { timeLeft--; updatePomodoroDisplay(); }
+            else { clearInterval(pomodoroInterval); alert("番茄时间结束！休息一下吧 "); }
+        }, 1000);
+    }
+    function resetPomodoro() {
+        clearInterval(pomodoroInterval);
+        timeLeft = 25 * 60;
+        updatePomodoroDisplay();
+    }
+
+    // 3. ToDo
+    function addTodo() {
+        const input = document.getElementById('todo-input');
+        if (!input.value.trim()) return;
+        const li = document.createElement('li');
+        li.innerHTML = `<span>${input.value}</span><button class="delete-btn" onclick="this.parentElement.remove()">删除</button>`;
+        document.getElementById('todo-list').appendChild(li);
+        input.value = '';
+    }
+    document.getElementById('todo-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') addTodo();
+    });
+
+    // 4. 在线搜索
+    document.getElementById('search-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            const query = encodeURIComponent(this.value);
+            document.getElementById('search-frame').src = `https://www.bing.com/search?q=${query}`;
+        }
+    });
+
+    // 5. 网速测试
+    async function testSpeed() {
+        const resultEl = document.getElementById('speed-result');
+        resultEl.textContent = "正在测试...";
+        const testUrl = 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Fronalpstock_big.jpg/1280px-Fronalpstock_big.jpg?' + new Date().getTime();
+        try {
+            const start = Date.now();
+            const response = await fetch(testUrl);
+            const blob = await response.blob();
+            const end = Date.now();
+            const duration = (end - start) / 1000;
+            const bitsLoaded = blob.size * 8;
+            const speedMbps = (bitsLoaded / duration / 1000000).toFixed(2);
+            resultEl.textContent = `下载速度: ${speedMbps} Mbps`;
+        } catch (err) {
+            resultEl.textContent = "测试失败，请检查网络或跨域限制";
+        }
+    }
+
+    // 6. 浏览器信息
+    const info = {
+        "UserAgent": navigator.userAgent,
+        "Platform": navigator.platform,
+        "Language": navigator.language,
+        "ScreenResolution": `${screen.width}x${screen.height}`,
+        "WindowInnerSize": `${window.innerWidth}x${window.innerHeight}`,
+        "CookiesEnabled": navigator.cookieEnabled
+    };
+    document.getElementById('browser-info').textContent = JSON.stringify(info, null, 2);
+
+    // 7. 计算器
+    function calculate() {
+        const expr = document.getElementById('calc-input').value;
+        try {
+            if (!/^[\d+\-*/().%\s]+$/.test(expr)) throw new Error("非法字符");
+            const result = Function('"use strict"; return (' + expr + ')')();
+            document.getElementById('calc-result').textContent = result;
+        } catch (e) {
+            document.getElementById('calc-result').textContent = "表达式错误";
+        }
+    }
+
+    // 8. 今日一言
+    const quotes = [
+        "代码是写给人看的，顺便能在机器上运行。",
+        "不要害怕失败，要害怕平庸。",
+        "简单是可靠的先决条件。",
+        "先让它工作，再让它正确，最后让它快。",
+        "任何傻瓜都能写出计算机能理解的代码，优秀的程序员写出人类能理解的代码。"
+    ];
+    function getQuote() {
+        const random = quotes[Math.floor(Math.random() * quotes.length)];
+        document.getElementById('quote').textContent = `"${random}"`;
+    }
+    getQuote();
+
+    // 9. 本地备忘录
+    const memoArea = document.getElementById('memo-area');
+    memoArea.value = localStorage.getItem('geekMemo') || '';
+    memoArea.addEventListener('input', function() {
+        localStorage.setItem('geekMemo', this.value);
+    });
+</script>
+
+</body>
+</html>
+
