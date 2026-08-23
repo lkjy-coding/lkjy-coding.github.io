@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日一言</title>
+    <style>
+        /* 简洁美观的样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: "Georgia", "Microsoft YaHei", serif;
+            padding: 20px;
+        }
+        .card {
+            max-width: 700px;
+            width: 100%;
+            padding: 40px 35px;
+            background-color: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            border-radius: 32px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .sentence {
+            font-size: 1.8rem;
+            line-height: 1.6;
+            color: #2d3436;
+            margin-bottom: 20px;
+            min-height: 5rem;
+            word-break: break-word;
+        }
+        .sentence::before {
+            content: "“";
+            font-size: 2.5rem;
+            color: #6c5ce7;
+            opacity: 0.6;
+            margin-right: 6px;
+        }
+        .sentence::after {
+            content: "”";
+            font-size: 2.5rem;
+            color: #6c5ce7;
+            opacity: 0.6;
+            margin-left: 6px;
+        }
+        .date {
+            font-size: 1rem;
+            color: #636e72;
+            letter-spacing: 2px;
+            border-top: 1px solid #dfe6e9;
+            padding-top: 18px;
+            margin-top: 10px;
+        }
+        .status {
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: #b2bec3;
+        }
+        .error {
+            color: #d63031;
+            background: #ffeaa7;
+            padding: 8px 16px;
+            border-radius: 40px;
+            display: inline-block;
+        }
+        .loading {
+            color: #0984e3;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        /* 移动端优化 */
+        @media (max-width: 480px) {
+            .card { padding: 30px 20px; }
+            .sentence { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="card" role="main">
+        <div id="sentenceDisplay" class="sentence">✨ 今日一言</div>
+        <div id="dateDisplay" class="date">--</div>
+        <div id="statusDisplay" class="status">加载中...</div>
+    </div>
+
+    <script>
+        (function() {
+            "use strict";
+
+            const API_URL = 'https://raw.githubusercontent.com/lkjy-coding/lkjy-coding.github.io/refs/heads/main/DailySentences.txt';
+
+            // DOM 元素
+            const sentenceEl = document.getElementById('sentenceDisplay');
+            const dateEl = document.getElementById('dateDisplay');
+            const statusEl = document.getElementById('statusDisplay');
+
+            // 获取今日日期字符串 (YYYY-MM-DD)
+            function getTodayStr() {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+
+            // 从文本中随机选择一句（过滤空行）
+            function getRandomSentence(text) {
+                // 按换行分割，并过滤掉空行和仅包含空白字符的行
+                const lines = text.split('\n')
+                    .map(line => line.trim())
+                    .filter(line => line.length > 0);
+                
+                if (lines.length === 0) {
+                    return null; // 没有有效句子
+                }
+                
+                // 随机选择一个索引
+                const randomIndex = Math.floor(Math.random() * lines.length);
+                return lines[randomIndex];
+            }
+
+            // 核心：获取并显示句子
+            async function fetchAndDisplaySentence() {
+                const today = getTodayStr();
+                // 显示加载状态
+                statusEl.textContent = '⏳ 正在获取今日句子...';
+                statusEl.className = 'status loading';
+
+                try {
+                    const response = await fetch(API_URL, {
+                        cache: 'no-cache', // 确保每次获取最新内容
+                        headers: { 'Cache-Control': 'no-cache' }
+                    });
+
+                    // 检查响应状态
+                    if (!response.ok) {
+                        throw new Error(`网络请求失败，状态码: ${response.status}`);
+                    }
+
+                    const text = await response.text();
+                    // 随机选取一句
+                    const sentence = getRandomSentence(text);
+
+                    if (sentence === null) {
+                        throw new Error('文件中没有找到有效的句子');
+                    }
+
+                    // 更新页面
+                    sentenceEl.textContent = sentence;
+                    dateEl.textContent = `📅 ${today}`;
+                    statusEl.textContent = '✅ 今日已更新';
+                    statusEl.className = 'status';
+
+                    // 保存到 localStorage 以便跨日判断
+                    localStorage.setItem('dailySentence', sentence);
+                    localStorage.setItem('dailyDate', today);
+
+                } catch (error) {
+                    console.error('获取句子失败:', error);
+                    // 显示错误信息，并尝试使用缓存
+                    const cachedSentence = localStorage.getItem('dailySentence');
+                    const cachedDate = localStorage.getItem('dailyDate');
+
+                    if (cachedSentence && cachedDate === today) {
+                        // 如果缓存有效（今天的），则使用缓存
+                        sentenceEl.textContent = cachedSentence;
+                        dateEl.textContent = `📅 ${today} (来自缓存)`;
+                        statusEl.textContent = '⚠️ 使用本地缓存，网络可能异常';
+                        statusEl.className = 'status error';
+                    } else {
+                        // 无有效缓存或缓存已过期
+                        sentenceEl.textContent = '🌱 今日句子暂时无法获取';
+                        dateEl.textContent = `📅 ${today}`;
+                        statusEl.textContent = `❌ 加载失败: ${error.message || '未知错误'}`;
+                        statusEl.className = 'status error';
+                    }
+                }
+            }
+
+            // 初始化：判断是否需要刷新
+            function init() {
+                const today = getTodayStr();
+                const storedDate = localStorage.getItem('dailyDate');
+
+                // 如果 localStorage 中存储的日期不是今天，或者没有存储，则重新获取
+                if (storedDate !== today) {
+                    fetchAndDisplaySentence();
+                } else {
+                    // 同日内，直接使用缓存显示
+                    const cachedSentence = localStorage.getItem('dailySentence');
+                    if (cachedSentence) {
+                        sentenceEl.textContent = cachedSentence;
+                        dateEl.textContent = `📅 ${today}`;
+                        statusEl.textContent = '✅ 今日已加载 (来自本地)';
+                        statusEl.className = 'status';
+                    } else {
+                        // 理论上不会发生，但以防万一
+                        fetchAndDisplaySentence();
+                    }
+                }
+            }
+
+            // 启动
+            init();
+
+            // 可选：每隔一段时间（例如 60 分钟）检查一次日期是否变更，用于长时间打开的页面
+            setInterval(() => {
+                const today = getTodayStr();
+                const storedDate = localStorage.getItem('dailyDate');
+                if (storedDate !== today) {
+                    fetchAndDisplaySentence();
+                }
+            }, 60 * 60 * 1000); // 60分钟
+
+        })();
+    </script>
+</body>
+</html>
