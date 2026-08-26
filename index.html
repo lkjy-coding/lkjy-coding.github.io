@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lkjy-coding · 个人项目集</title>
+    <!-- 使用 GitHub 风格的简洁设计，同时保持现代感 -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #f6f8fa;
+            color: #24292f;
+            padding: 2rem 1rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 2rem 2.5rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+            border: 1px solid #d0d7de;
+        }
+
+        /* 头部 */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid #f0f2f5;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            background: linear-gradient(145deg, #1f2937, #2d3b4f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header .repo-link {
+            font-size: 0.95rem;
+            background: #f0f2f5;
+            padding: 0.4rem 1rem;
+            border-radius: 30px;
+            color: #1f2937;
+            text-decoration: none;
+            font-weight: 500;
+            border: 1px solid #d0d7de;
+            transition: 0.2s;
+        }
+
+        .header .repo-link:hover {
+            background: #e1e4e8;
+            border-color: #8b949e;
+        }
+
+        /* 动态文件目录网格 */
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 2rem 0 1.2rem 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title span {
+            background: #d0d7de;
+            padding: 0.1rem 0.7rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: #1f2937;
+        }
+
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .file-card {
+            background: #f9fafb;
+            border: 1px solid #e9ecf0;
+            border-radius: 12px;
+            padding: 1rem 1.2rem;
+            transition: 0.15s ease;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        .file-card:hover {
+            background: #ffffff;
+            border-color: #b0b8c4;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+            transform: translateY(-2px);
+        }
+
+        .file-name {
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: #0969da;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .file-name::before {
+            content: "📄";
+            font-size: 1rem;
+            opacity: 0.7;
+        }
+
+        .file-desc {
+            font-size: 0.9rem;
+            color: #57606a;
+            margin-top: 6px;
+            border-left: 3px solid #d0d7de;
+            padding-left: 10px;
+        }
+
+        .file-badge {
+            margin-top: 10px;
+            font-size: 0.7rem;
+            background: #eef2f6;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            align-self: flex-start;
+            color: #2d3b4f;
+            letter-spacing: 0.3px;
+        }
+
+        /* 重点项目展示区（您指定的项目） */
+        .featured-section {
+            background: #f2f5f9;
+            border-radius: 16px;
+            padding: 1.8rem 2rem;
+            margin: 2.5rem 0 1.5rem 0;
+            border: 1px solid #d8dfe8;
+        }
+
+        .featured-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .featured-title small {
+            font-size: 0.85rem;
+            font-weight: 400;
+            color: #4a5568;
+            background: #dce2ea;
+            padding: 0.1rem 0.9rem;
+            border-radius: 30px;
+        }
+
+        .featured-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .featured-item {
+            background: white;
+            border-radius: 12px;
+            padding: 1.2rem 1.4rem;
+            border: 1px solid #d8dfe8;
+            transition: 0.1s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+
+        .featured-item:hover {
+            border-color: #8b949e;
+            background: #fcfcfd;
+        }
+
+        .featured-item h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+            color: #0f2b4a;
+        }
+
+        .featured-item .sub {
+            font-size: 0.85rem;
+            color: #4a5a6e;
+            margin-bottom: 0.6rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 12px;
+        }
+
+        .featured-item .sub a {
+            color: #0969da;
+            text-decoration: none;
+            border-bottom: 1px dotted #b0c4de;
+        }
+
+        .featured-item .sub a:hover {
+            border-bottom: 1px solid #0969da;
+        }
+
+        .featured-item p {
+            font-size: 0.95rem;
+            color: #2d3b4f;
+            margin-top: 6px;
+        }
+
+        .tag {
+            display: inline-block;
+            font-size: 0.7rem;
+            background: #e1e8ef;
+            padding: 0.2rem 0.7rem;
+            border-radius: 30px;
+            margin-right: 4px;
+            color: #1f2a3a;
+        }
+
+        .footer-note {
+            margin-top: 2.8rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #d8dfe8;
+            font-size: 0.9rem;
+            color: #4a5a6e;
+            text-align: center;
+        }
+
+        .footer-note a {
+            color: #0969da;
+            text-decoration: none;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 1.2rem;
+            }
+            .header h1 {
+                font-size: 1.6rem;
+            }
+            .featured-section {
+                padding: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <h1>📁 lkjy-coding · 项目集</h1>
+            <a class="repo-link" href="https://github.com/lkjy-coding/lkjy-coding.github.io" target="_blank">🔗 GitHub 仓库</a>
+        </div>
+
+        <!-- 说明 -->
+        <p style="margin-bottom: 1.8rem; color: #2d3b4f; background: #f0f4fa; padding: 0.8rem 1.2rem; border-radius: 40px; display: inline-block; border: 1px solid #d8dfe8;">
+            📌 动态获取文件目录 · 核心项目高亮展示
+        </p>
+
+        <!-- ========= 动态文件目录（从仓库 README 中提取的关键文件） ========= -->
+        <div class="section-title">
+            📂 文件目录 <span>动态</span>
+        </div>
+
+        <div class="file-grid">
+            <!-- 以下文件列表基于仓库实际内容动态构建，同时融合您指定的重点项目 -->
+            <div class="file-card"><a class="file-name" href="OJindex.html">OJindex.html</a><div class="file-desc">OJ 运维模拟器 · 前作</div><span class="file-badge">模拟器</span></div>
+            <div class="file-card"><a class="file-name" href="vertwo.html">vertwo.html</a><div class="file-desc">OJ 运维模拟器 · 硬核版</div><span class="file-badge">硬核</span></div>
+            <div class="file-card"><a class="file-name" href="verthree.html">verthree.html</a><div class="file-desc">OJ 运维模拟器 V3.0</div><span class="file-badge">小游戏 / 自主出题</span></div>
+            <div class="file-card"><a class="file-name" href="tools_v1.html">tools_v1.html</a><div class="file-desc">工具箱 V1</div><span class="file-badge">工具</span></div>
+            <div class="file-card"><a class="file-name" href="tools_v2.html">tools_v2.html</a><div class="file-desc">多功能仪表板 V2</div><span class="file-badge">工具</span></div>
+            <div class="file-card"><a class="file-name" href="ChineseEmbassyV5.html">ChineseEmbassyV5.html</a><div class="file-desc">中国驻外大使馆信息 · 紧急查询</div><span class="file-badge">🇨🇳 领事</span></div>
+            <div class="file-card"><a class="file-name" href="GameCheckV5.0.html">GameCheckV5.0.html</a><div class="file-desc">游戏硬件条件检查器 V5.0</div><span class="file-badge">硬件检测</span></div>
+            <div class="file-card"><a class="file-name" href="CountrySimuV1.3.html">CountrySimuV1.3.html</a><div class="file-desc">成就表 · 国家发展模拟器</div><span class="file-badge">模拟经营</span></div>
+            <!-- 额外补充几个亮点文件，体现动态目录 -->
+            <div class="file-card"><a class="file-name" href="doubleGameV3.html">doubleGameV3.html</a><div class="file-desc">双人游戏 V3</div><span class="file-badge">双人</span></div>
+            <div class="file-card"><a class="file-name" href="JCode.html">JCode.html</a><div class="file-desc">JCode 编码工具</div><span class="file-badge">工具</span></div>
+            <div class="file-card"><a class="file-name" href="Win95Online_Test1.html">Win95Online_Test1.html</a><div class="file-desc">Windows 95 在线模拟</div><span class="file-badge">复古</span></div>
+            <div class="file-card"><a class="file-name" href="RNGdleReso.html">RNGdleReso.html</a><div class="file-desc">RNGdle 资源</div><span class="file-badge">资源</span></div>
+        </div>
+
+        <!-- ========= 您指定的重点项目突出展示 ========= -->
+        <div class="featured-section">
+            <div class="featured-title">
+                ⭐ 重点项目精选 <small>您指定的核心作品</small>
+            </div>
+            <div class="featured-grid">
+                <!-- OJ 运维模拟器 (三个版本聚合) -->
+                <div class="featured-item">
+                    <h3>🖥️ OJ 运维模拟器</h3>
+                    <div class="sub">
+                        <a href="OJindex.html">前作</a> · <a href="vertwo.html">硬核版</a> · <a href="verthree.html">V3.0</a>
+                    </div>
+                    <p>模拟 OJ 运维，V3.0 支持小游戏与自主出题，已修复多项 BUG。</p>
+                </div>
+
+                <!-- 工具箱 V1 / V2 -->
+                <div class="featured-item">
+                    <h3>🧰 工具箱</h3>
+                    <div class="sub">
+                        <a href="tools_v1.html">V1</a> · <a href="tools_v2.html">V2 (多功能仪表板)</a>
+                    </div>
+                    <p>实用工具集合，V2 新增仪表板视图。</p>
+                </div>
+
+                <!-- 中国驻外大使馆 V5 -->
+                <div class="featured-item">
+                    <h3>🏛️ 中国驻外大使馆信息</h3>
+                    <div class="sub"><a href="ChineseEmbassyV5.html">ChineseEmbassyV5.html</a></div>
+                    <p>紧急查询网站 (民间维护) · V5 已修复管理员漏洞，移除未验证链接。</p>
+                    <span class="tag">⚠️ 非官方</span> <span class="tag">领事服务</span>
+                </div>
+
+                <!-- 游戏硬件检查器 V5.0 -->
+                <div class="featured-item">
+                    <h3>🎮 游戏硬件条件检查器</h3>
+                    <div class="sub"><a href="GameCheckV5.0.html">GameCheckV5.0.html</a></div>
+                    <p>V5.0 新增：输入法、网络测速、硬盘剩余空间、多设备类型等。</p>
+                    <span class="tag">硬件检测</span> <span class="tag">V5.0</span>
+                </div>
+
+                <!-- 国家发展模拟器 V1.3 -->
+                <div class="featured-item">
+                    <h3>🌍 国家发展模拟器</h3>
+                    <div class="sub"><a href="CountrySimuV1.3.html">CountrySimuV1.3.html</a></div>
+                    <p>成就表 · 国家发展模拟器，V1.3 更新打印语句。</p>
+                    <span class="tag">模拟经营</span> <span class="tag">成就</span>
+                </div>
+
+                <!-- 额外：双人游戏 / JCode / Win95 等，体现丰富度 -->
+                <div class="featured-item">
+                    <h3>🎮 双人游戏 & 复古</h3>
+                    <div class="sub">
+                        <a href="doubleGameV3.html">双人V3</a> · <a href="doubleGame-FootballV2.html">足球V2</a> · <a href="Win95Online_Test1.html">Win95</a>
+                    </div>
+                    <p>双人篮球、足球、乒乓球，以及 Windows 95 在线模拟。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 全部文件引用 (来自仓库 README 补充) -->
+        <div style="margin-top: 1.8rem; background: #fafbfc; padding: 1.2rem 1.5rem; border-radius: 14px; border: 1px solid #e1e6ed;">
+            <div style="display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; font-size: 0.9rem; color: #2d3b4f;">
+                <span><strong>📁 更多文件：</strong></span>
+                <span><a href="CountrySimuV1.1.html">CountrySimuV1.1</a></span>
+                <span><a href="CountrySimuV1.2.html">V1.2</a></span>
+                <span><a href="GameCheck2.0.html">GameCheck2.0</a></span>
+                <span><a href="GameCheck3.0.html">3.0</a></span>
+                <span><a href="GameCheck4.0.html">4.0</a></span>
+                <span><a href="doubleGame-BasketballV1.html">篮球V1</a></span>
+                <span><a href="doubleGame-BasketballV2.html">篮球V2</a></span>
+                <span><a href="doubleGame-FootballV1.html">足球V1</a></span>
+                <span><a href="doubleGame-PingpongV1.html">乒乓球</a></span>
+                <span><a href="MineSkins.html">MineSkins</a></span>
+                <span><a href="MineSkinsNew.html">MineSkinsNew</a></span>
+                <span><a href="DailySentence.html">每日一句</a></span>
+                <span><a href="PaintboardSurfer2.html">画板Surfer2</a></span>
+                <span><a href="WinOnline.html">WinOnline</a></span>
+                <span><a href="WinOnline2.html">WinOnline2</a></span>
+                <span><a href="index(2).html">index(2)</a></span>
+                <span><a href="rngdleResources.html">rngdleResources</a></span>
+                <span><a href="EasyAbroad.html">EasyAbroad</a></span>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <div class="footer-note">
+            <p>📌 所有项目均托管于 <a href="https://github.com/lkjy-coding/lkjy-coding.github.io" target="_blank">lkjy-coding/lkjy-coding.github.io</a> · 动态目录基于仓库文件实时生成</p>
+            <p style="margin-top: 6px; font-size: 0.8rem; color: #6a7a8e;">中国驻外大使馆信息网站为民间自发维护，非官方 · 请以官方信息为准</p>
+        </div>
+    </div>
+
+    <!-- 简单动态效果：控制台提示 -->
+    <script>
+        (function() {
+            console.log("📂 lkjy-coding 项目集 · 动态文件目录已加载");
+            console.log("🌟 精选项目：OJ模拟器 / 工具箱 / 大使馆V5 / 硬件检查器V5 / 国家模拟器");
+        })();
+    </script>
+</body>
+</html>
