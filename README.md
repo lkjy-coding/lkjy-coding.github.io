@@ -7,7 +7,7 @@
 
 ## 已修复 BUG
 
-### 前作`index.html`
+### 前作`OJindex.html`
 
 - 打开后显示全乱码的问题
 
