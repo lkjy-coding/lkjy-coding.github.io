@@ -1,0 +1,22 @@
+{
+  "generatedAt": "2026-10-05T11:26:01.744Z",
+  "total": 2,
+  "files": [
+    {
+      "path": "index.md",
+      "name": "index.md",
+      "ext": ".md",
+      "type": "other",
+      "desc": "",
+      "tag": ""
+    },
+    {
+      "path": "LICENSE",
+      "name": "LICENSE",
+      "ext": "",
+      "type": "other",
+      "desc": "",
+      "tag": ""
+    }
+  ]
+}
