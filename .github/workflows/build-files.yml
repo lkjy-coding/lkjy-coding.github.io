@@ -1,0 +1,65 @@
+name: Build files.json
+
+# ============ 触发条件 ============
+on:
+  # 1. 定时触发（每天一次，同步独立仓库的最新内容）
+  schedule:
+    - cron: '0 4 * * *'   # 每天 04:00 UTC，即北京时间 12:00
+  # 2. 手动触发（可在 Actions 页面点击运行）
+  workflow_dispatch:
+  # 3. 站点仓库自身 push 时触发
+  push:
+    branches:
+      - main
+    paths:
+      - 'AcWingPopular.html'
+      - 'build-files.js'
+      - '.github/workflows/build-files.yml'
+      - '!AcWingPopular/files.json'
+
+# ============ 权限配置 ============
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 检出站点仓库（lkjy-coding.github.io）
+      - name: Checkout site repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 2. 检出内容仓库（lkjy-coding/AcWingPopular）
+      #    使用独立目录 AcWingPopular-source 存放
+      - name: Checkout AcWingPopular repository
+        uses: actions/checkout@v4
+        with:
+          repository: lkjy-coding/AcWingPopular
+          path: AcWingPopular-source
+          fetch-depth: 1
+
+      # 3. 设置 Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 4. 运行构建脚本
+      - name: Generate files.json
+        run: node build-files.js
+
+      # 5. 提交并推送（仅在文件变化时）
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add AcWingPopular/files.json
+          if git diff --cached --quiet; then
+            echo "没有变化，跳过提交。"
+          else
+            git commit -m "chore: 自动更新 files.json [skip ci]"
+            git push
+          fi
