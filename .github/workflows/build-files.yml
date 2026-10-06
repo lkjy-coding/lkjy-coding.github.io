@@ -51,7 +51,7 @@ jobs:
       - name: Generate files.json
         run: node build-files.js
 
-      # 5. 提交并推送（仅在文件变化时）
+      # 5. 提交并推送（仅在文件变化时） 
       - name: Commit and push if changed
         run: |
           git config user.name "github-actions[bot]"
