@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-06T12:47:56.239Z",
-  "total": 6,
+  "generatedAt": "2026-10-06T13:25:03.234Z",
+  "total": 7,
   "files": [
     {
       "path": "#现在都没人打天梯了嘛.md",
@@ -42,6 +42,15 @@
       "path": "乱套公式，0分.md",
       "name": "乱套公式，0分.md",
       "title": "乱套公式，0分",
+      "ext": ".md",
+      "type": "md",
+      "desc": "",
+      "tag": ""
+    },
+    {
+      "path": "公告板.md",
+      "name": "公告板.md",
+      "title": "公告板",
       "ext": ".md",
       "type": "md",
       "desc": "",
