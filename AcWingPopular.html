@@ -58,7 +58,6 @@
 </div>
 
 <script>
-// XSS 转义
 function escapeHtml(str) {
   if (str === null || str === undefined) return '';
   return String(str)
@@ -68,6 +67,9 @@ function escapeHtml(str) {
 }
 
 const GROUP_NAMES = { html: '页面', image: '图片', other: '其他文件' };
+
+// 注意文件夹名是 AcWingsPopular（多个 s）
+const FILES_URL = 'https://lkjy-coding.github.io/AcWingsPopular/files.json';
 
 function render(data) {
   const app = document.getElementById('app');
@@ -97,7 +99,6 @@ function render(data) {
       const safeName = escapeHtml(f.name);
       const safeDesc = escapeHtml(f.desc);
       const safeTag = escapeHtml(f.tag);
-      // 链接指向独立仓库的 GitHub Pages 地址
       const href = 'https://lkjy-coding.github.io/AcWingPopular/' + encodeURI(f.path);
       html += `<li>`;
       html += `<a href="${href}">${safeName}</a>`;
@@ -115,17 +116,28 @@ function render(data) {
 function showError(msg) {
   document.getElementById('meta').textContent = '';
   document.getElementById('app').innerHTML =
-    `<div class="error-box">加载失败：${escapeHtml(msg)}<br>` +
-    `请确认 files.json 是否已由 GitHub Actions 生成。</div>`;
+    `<div class="error-box">加载失败：<pre style="white-space:pre-wrap;margin-top:0.5rem;">${escapeHtml(msg)}</pre></div>`;
 }
 
-fetch('AcWingPopular/files.json')
+fetch(FILES_URL)
   .then(res => {
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    console.log('[files.json] status:', res.status);
+    console.log('[files.json] url:', res.url);
+    if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.url}`);
     return res.json();
   })
-  .then(render)
-  .catch(err => showError(err.message));
+  .then(data => {
+    console.log('[files.json] 加载成功，共', data.total, '个文件');
+    render(data);
+  })
+  .catch(err => {
+    console.error('[files.json] 加载失败:', err);
+    showError(
+      err.message +
+      '\n请求地址：' + FILES_URL +
+      '\n请检查：1) files.json 是否可访问 2) 路径大小写 3) 浏览器控制台完整日志'
+    );
+  });
 </script>
 </body>
 </html>
