@@ -50,7 +50,6 @@ jobs:
             echo "没有变化，跳过提交。"
           else
             git commit -m "chore: 自动更新 files.json [skip ci]"
-            # 先同步远程最新，避免 push 被拒导致 exit 128
             git pull --rebase origin main
             git push
           fi
