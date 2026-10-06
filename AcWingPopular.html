@@ -22,39 +22,102 @@
     line-height: 1.6;
   }
 
-  /* 顶部导航 */
+  /* ===== 顶部导航 ===== */
   .topbar {
     display: flex;
     align-items: center;
     height: 60px;
-    padding: 0 2rem;
+    padding: 0 1rem;
     border-bottom: 1px solid var(--border);
     position: sticky;
     top: 0;
     background: #fff;
     z-index: 100;
+    gap: 0.75rem;
+  }
+  .menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: var(--text);
+    padding: 0.25rem 0.5rem;
   }
   .topbar-logo {
     font-weight: 700;
     font-size: 1.05rem;
     color: var(--text);
-    margin-right: 2rem;
+    white-space: nowrap;
+  }
+  .search-wrap {
+    margin-left: auto;
+    position: relative;
+    width: 260px;
   }
   .topbar-search {
-    margin-left: auto;
-    padding: 0.4rem 0.8rem;
+    width: 100%;
+    padding: 0.45rem 0.8rem;
     border: 1px solid var(--border);
     border-radius: 6px;
     font-size: 0.85rem;
-    width: 220px;
+    outline: none;
+  }
+  .topbar-search:focus { border-color: var(--primary); }
+  .search-results {
+    display: none;
+    position: absolute;
+    top: 110%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    max-height: 320px;
+    overflow-y: auto;
+    z-index: 200;
+  }
+  .search-results.show { display: block; }
+  .search-result-item {
+    display: block;
+    padding: 0.5rem 0.8rem;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #f0f3f6;
+  }
+  .search-result-item:last-child { border-bottom: none; }
+  .search-result-item:hover { background: #f0f3f6; }
+  .search-result-item .path {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+  .search-empty {
+    padding: 0.8rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-align: center;
   }
 
-  /* 三栏布局 */
+  /* ===== 布局 ===== */
   .layout {
     display: flex;
     max-width: 1400px;
     margin: 0 auto;
   }
+
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 150;
+  }
+  .overlay.show { display: block; }
+
+  /* ===== 侧边栏 ===== */
   .sidebar {
     width: 260px;
     flex-shrink: 0;
@@ -64,6 +127,7 @@
     top: 60px;
     height: calc(100vh - 60px);
     overflow-y: auto;
+    background: #fff;
   }
   .sidebar-item {
     display: block;
@@ -73,6 +137,9 @@
     border-radius: 6px;
     font-size: 0.9rem;
     margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .sidebar-item:hover { background: #f0f3f6; color: var(--text); }
   .sidebar-item.active { background: var(--sidebar-active); color: var(--primary); font-weight: 600; }
@@ -84,7 +151,24 @@
     cursor: pointer;
   }
   .sidebar-children { padding-left: 0.75rem; }
+  .sidebar-error {
+    padding: 1rem;
+    font-size: 0.85rem;
+    color: #a40e26;
+  }
+  .retry-btn {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.3rem 0.8rem;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
 
+  /* ===== 主内容 ===== */
   .main {
     flex: 1;
     min-width: 0;
@@ -98,6 +182,7 @@
   }
   .breadcrumb a { color: var(--primary); text-decoration: none; }
 
+  /* ===== 右侧目录 ===== */
   .toc {
     width: 200px;
     flex-shrink: 0;
@@ -115,10 +200,9 @@
     text-decoration: none;
   }
   .toc a:hover { color: var(--primary); }
-  .toc a.active { color: var(--primary); font-weight: 600; }
 
-  /* 文章正文 */
-  .article h1 { font-size: 2rem; margin: 0 0 1.5rem; border: none; }
+  /* ===== 文章正文 ===== */
+  .article h1 { font-size: 2rem; margin: 0 0 1.5rem; }
   .article h2 { font-size: 1.5rem; margin: 2rem 0 1rem; }
   .article h3 { font-size: 1.15rem; margin: 1.5rem 0 0.75rem; }
   .article p { margin-bottom: 1rem; }
@@ -132,8 +216,9 @@
     overflow-x: auto; margin-bottom: 1rem;
   }
   .article pre code { background: none; padding: 0; }
+  .article ul, .article ol { margin: 0 0 1rem 1.5rem; }
 
-  /* 自定义框 */
+  /* ===== 自定义框 ===== */
   .box { padding: 0.75rem 1rem; border-radius: 6px; margin: 1rem 0; border-left: 4px solid; }
   .box-title { font-weight: 700; display: block; margin-bottom: 0.25rem; }
   .box-error { background: #fff0f0; border-color: #d1242f; color: #a40e26; }
@@ -145,38 +230,93 @@
   .box-repre { background: #fff8e5; border-color: #d4a72c; color: #7d5b00; }
   .box-contribution { background: #e8f4ff; border-color: #54aeff; color: #0969da; }
 
-  /* 行内标注 */
+  /* ===== 行内标注 ===== */
   .mark-nedfix { color: #bc4c00; font-size: 0.75em; vertical-align: super; }
   .mark-num {
     background: #eaeef2; color: var(--text); font-size: 0.75em;
     padding: 0.05rem 0.3rem; border-radius: 3px; vertical-align: super;
   }
 
-  .error-page { text-align: center; padding: 4rem 0; color: var(--text-secondary); }
-  .error-page h2 { color: #d1242f; margin-bottom: 1rem; }
+  /* ===== 错误/重试 ===== */
+  .error-page { text-align: center; padding: 3rem 0; color: var(--text-secondary); }
+  .error-page h2 { color: #d1242f; margin-bottom: 1rem; font-size: 1.2rem; }
+  .error-page ol {
+    text-align: left;
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding-left: 1.5rem;
+  }
+  .error-page ol li { margin-bottom: 0.3rem; }
 
+  /* ===== 响应式：手机端 ===== */
   @media (max-width: 1000px) {
     .toc { display: none; }
-    .sidebar { display: none; }
-    .main { padding: 1.5rem; }
+    .menu-btn { display: block; }
+    .search-wrap { width: 100%; max-width: none; }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 80%;
+      max-width: 320px;
+      height: 100vh;
+      z-index: 200;
+      transform: translateX(-100%);
+      transition: transform 0.25s ease;
+      box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+      padding-top: 1.5rem;
+    }
+    .sidebar.open { transform: translateX(0); }
+
+    .main {
+      padding: 1.5rem 1rem;
+      max-width: 100%;
+    }
+
+    .sidebar-close {
+      display: block;
+      text-align: right;
+      font-size: 1.4rem;
+      padding: 0 0.5rem 1rem;
+      cursor: pointer;
+      color: var(--text-secondary);
+    }
+  }
+
+  @media (min-width: 1001px) {
+    .sidebar-close { display: none; }
   }
 </style>
 </head>
 <body>
 
 <div class="topbar">
+  <button class="menu-btn" id="menuBtn" aria-label="打开菜单">☰</button>
   <div class="topbar-logo">AcWing 热门内容</div>
-  <input type="text" class="topbar-search" id="searchBox" placeholder="搜索条目...">
+  <div class="search-wrap">
+    <input type="text" class="topbar-search" id="searchBox" placeholder="搜索条目..." autocomplete="off">
+    <div class="search-results" id="searchResults"></div>
+  </div>
 </div>
 
+<div class="overlay" id="overlay"></div>
+
 <div class="layout">
-  <aside class="sidebar" id="sidebar"></aside>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-close" id="sidebarClose">✕</div>
+    <div id="sidebarContent">
+      <div class="sidebar-error">正在加载...</div>
+    </div>
+  </aside>
+
   <main class="main">
     <div class="breadcrumb" id="breadcrumb"></div>
     <article class="article" id="content">
       <div class="error-page">正在加载...</div>
     </article>
   </main>
+
   <aside class="toc" id="toc"></aside>
 </div>
 
@@ -185,7 +325,7 @@
 // ============ 配置 ============
 const SITE_BASE = 'https://lkjy-coding.github.io/AcWingsPopular/';
 const FILES_URL = SITE_BASE + 'files.json';
-const RAW_BASE = 'https://raw.githubusercontent.com/lkjy-coding/AcWingPopular/main/';
+const RAW_BASE = 'https://cdn.jsdelivr.net/gh/lkjy-coding/AcWingPopular@main/';
 const DEFAULT_PAGE = 'index.md';
 
 let allFiles = [];
@@ -199,25 +339,30 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
-// ============ 加载文件列表 ============
-fetch(FILES_URL)
-  .then(res => {
-    if (!res.ok) throw new Error(`HTTP ${res.status} - ${FILES_URL}`);
-    return res.json();
-  })
-  .then(data => {
-    allFiles = data.files || [];
-    buildSidebar();
-    route();
-    window.addEventListener('hashchange', route);
-    document.getElementById('searchBox').addEventListener('input', handleSearch);
-  })
-  .catch(err => {
-    document.getElementById('content').innerHTML =
-      `<div class="box box-error"><span class="box-title">加载失败</span>${escapeHtml(err.message)}<br>请确认 files.json 已生成。</div>`;
-  });
+// ============ 加载 files.json ============
+function loadFiles() {
+  const box = document.getElementById('sidebarContent');
+  box.innerHTML = '<div class="sidebar-error">正在加载目录...</div>';
 
-// ============ 构建侧边栏（动态目录树）============
+  fetch(FILES_URL)
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    })
+    .then(data => {
+      allFiles = data.files || [];
+      buildSidebar();
+      route();
+      window.addEventListener('hashchange', route);
+    })
+    .catch(err => {
+      box.innerHTML =
+        `<div class="sidebar-error">目录加载失败：${escapeHtml(err.message)}` +
+        `<br><button class="retry-btn" onclick="loadFiles()">重试</button></div>`;
+    });
+}
+
+// ============ 构建侧边栏 ============
 function buildSidebar() {
   const tree = {};
   allFiles.forEach(f => {
@@ -233,20 +378,18 @@ function buildSidebar() {
     });
   });
 
-  const container = document.getElementById('sidebar');
+  const container = document.getElementById('sidebarContent');
   container.innerHTML = '';
   renderTree(tree, container);
 }
 
 function renderTree(node, container) {
-  // 先渲染文件夹
   Object.keys(node).filter(k => !k.startsWith('__file__')).forEach(key => {
     const folder = document.createElement('div');
     const title = document.createElement('div');
     title.className = 'sidebar-folder';
     title.textContent = '▸ ' + key;
     folder.appendChild(title);
-
     const children = document.createElement('div');
     children.className = 'sidebar-children';
     renderTree(node[key], children);
@@ -254,77 +397,109 @@ function renderTree(node, container) {
     container.appendChild(folder);
   });
 
-  // 再渲染文件
   Object.keys(node).filter(k => k.startsWith('__file__')).forEach(key => {
     const f = node[key];
     const a = document.createElement('a');
     a.className = 'sidebar-item';
-    a.textContent = f.title;              // 已去掉 .md 后缀，原样显示
+    a.textContent = f.title;
     a.href = '#' + encodeURIComponent(f.path);
     a.dataset.path = f.path;
+    a.onclick = closeDrawer;
     container.appendChild(a);
   });
 }
 
-// ============ 搜索过滤 ============
-function handleSearch(e) {
-  const kw = e.target.value.toLowerCase();
-  document.querySelectorAll('.sidebar-item').forEach(a => {
-    const match = a.textContent.toLowerCase().includes(kw);
-    a.style.display = match ? '' : 'none';
-  });
-}
+// ============ 搜索（下拉弹窗）============
+const searchBox = document.getElementById('searchBox');
+const searchResults = document.getElementById('searchResults');
+
+searchBox.addEventListener('input', () => {
+  const kw = searchBox.value.trim().toLowerCase();
+  if (!kw) {
+    searchResults.classList.remove('show');
+    searchResults.innerHTML = '';
+    return;
+  }
+  const matches = allFiles.filter(f =>
+    f.title.toLowerCase().includes(kw) || f.path.toLowerCase().includes(kw)
+  );
+  if (!matches.length) {
+    searchResults.innerHTML = '<div class="search-empty">没有匹配的条目</div>';
+  } else {
+    searchResults.innerHTML = matches.map(f =>
+      `<a class="search-result-item" href="#${encodeURIComponent(f.path)}" onclick="closeDrawer()">
+        ${escapeHtml(f.title)}
+        <span class="path">${escapeHtml(f.path)}</span>
+      </a>`
+    ).join('');
+  }
+  searchResults.classList.add('show');
+});
+
+searchResults.addEventListener('click', () => {
+  searchResults.classList.remove('show');
+  searchBox.value = '';
+});
+
+document.addEventListener('click', (e) => {
+  if (!searchBox.contains(e.target) && !searchResults.contains(e.target)) {
+    searchResults.classList.remove('show');
+  }
+});
 
 // ============ 路由 ============
 function route() {
   const hash = decodeURIComponent(location.hash.slice(1));
-  const target = hash || DEFAULT_PAGE;
-  loadPage(target);
+  loadPage(hash || DEFAULT_PAGE);
 }
 
-// ============ 加载并渲染页面 ============
+// ============ 加载页面 ============
 async function loadPage(path) {
-  // 高亮侧边栏
   document.querySelectorAll('.sidebar-item').forEach(a => {
     a.classList.toggle('active', a.dataset.path === path);
   });
 
-  // 面包屑
   const fileEntry = allFiles.find(f => f.path === path);
   document.getElementById('breadcrumb').innerHTML =
     `<a href="#index.md">首页</a>` + (fileEntry ? ` &gt; ${escapeHtml(fileEntry.title)}` : '');
 
   const contentEl = document.getElementById('content');
+  contentEl.innerHTML = '<div class="error-page">正在加载...</div>';
 
   try {
     const res = await fetch(RAW_BASE + path);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     let raw = await res.text();
-
-    // 处理自定义语法
     raw = processCustomBlocks(raw);
-
-    // Markdown 渲染
     let html = marked.parse(raw);
-
-    // 处理行内标注
     html = processInlineMarks(html);
-
     contentEl.innerHTML = html;
     buildTOC();
   } catch (err) {
-    // 加载失败 → 显示 error.md
+    // 尝试加载 error.md
     try {
       const errRes = await fetch(RAW_BASE + 'error.md');
       const errText = await errRes.text();
       contentEl.innerHTML = marked.parse(processCustomBlocks(errText));
     } catch (e2) {
-      contentEl.innerHTML = `<div class="error-page"><h2>页面不存在</h2><p>找不到条目：${escapeHtml(path)}</p></div>`;
+      // 连 error.md 都没有 → 用内置引导页
+      contentEl.innerHTML =
+        `<div class="error-page">` +
+        `<h2>页面不存在</h2>` +
+        `<p>找不到条目：${escapeHtml(path)}</p>` +
+        `<p style="margin-top:1.5rem;">请尝试：</p>` +
+        `<ol>` +
+        `<li>刷新一下</li>` +
+        `<li>检查是否有错字漏字</li>` +
+        `<li>前往 AcWing 向 lkjy 反馈问题</li>` +
+        `</ol>` +
+        `<div style="margin-top:1rem;"><button class="retry-btn" onclick="route()">重试</button></div>` +
+        `</div>`;
     }
   }
 }
 
-// ============ 自定义块处理 ============
+// ============ 自定义块 ============
 function processCustomBlocks(text) {
   const blockTypes = {
     error: 'box-error', warning: 'box-warning', correct: 'box-correct',
@@ -332,14 +507,12 @@ function processCustomBlocks(text) {
     repre: 'box-repre', contribution: 'box-contribution'
   };
 
-  // 带名称的块 ::::type[名称]
   Object.keys(blockTypes).forEach(type => {
     const re = new RegExp(`::::${type}\\[([^\\]]*)\\]([\\s\\S]*?)::::`, 'g');
     text = text.replace(re, (m, name, body) =>
       `<div class="box ${blockTypes[type]}"><span class="box-title">${escapeHtml(name)}</span>${marked.parseInline(body.trim())}</div>`);
   });
 
-  // 无参块 ::::type()
   const noArgDefaults = {
     needfix: ['此条目仍需完善', '此条目部分内容仍需完善，你可以将你搜集到的内容提交给lkjy。'],
     predelete: ['此条目将被删除。', '此条目因为一些严重问题将会被删除。'],
@@ -351,41 +524,36 @@ function processCustomBlocks(text) {
       `<div class="box ${blockTypes[type]}"><span class="box-title">${noArgDefaults[type][0]}</span>${noArgDefaults[type][1]}</div>`);
   });
 
-  // 贡献者块
   text = text.replace(/::::contribution([\s\S]*?)::::/g, (m, ids) =>
     `<div class="box box-contribution"><span class="box-title">贡献者</span>感谢以下用户对此条目的贡献：${escapeHtml(ids.trim())}</div>`);
 
   return text;
 }
 
-// ============ 行内标注处理 ============
+// ============ 行内标注 ============
 function processInlineMarks(html) {
-  // ^[NedFi] → 橙色待补充标注，自动编号
   let nedfixCount = 0;
   html = html.replace(/\^\[NedFi\]/g, () => {
     nedfixCount++;
     return `<sup class="mark-nedfix">[待补充${nedfixCount}]</sup>`;
   });
 
-  // ^[数字] → 浅灰注释
   html = html.replace(/\^\[(\d+)\]/g, (m, n) =>
     `<sup class="mark-num">${n}</sup>`);
 
-  // ^[d数字] → 注释内容（显示在文本最后）
   const notes = [];
   html = html.replace(/\^\[d(\d+)\]([^\s<]*)/g, (m, n, txt) => {
     notes.push({ n: n, txt: txt });
     return '';
   });
   if (notes.length) {
-    html += '<hr><div class="notes"><strong>注释</strong><ul>' +
+    html += '<hr><div><strong>注释</strong><ul>' +
       notes.map(o => `<li>[${o.n}] ${escapeHtml(o.txt)}</li>`).join('') + '</ul></div>';
   }
-
   return html;
 }
 
-// ============ 生成右侧目录 ============
+// ============ 右侧目录 ============
 function buildTOC() {
   const toc = document.getElementById('toc');
   toc.innerHTML = '';
@@ -394,13 +562,28 @@ function buildTOC() {
     const a = document.createElement('a');
     a.textContent = h.textContent;
     a.href = '#' + h.id;
-    a.onclick = (e) => {
-      e.preventDefault();
-      h.scrollIntoView({ behavior: 'smooth' });
-    };
+    a.onclick = (e) => { e.preventDefault(); h.scrollIntoView({ behavior: 'smooth' }); };
     toc.appendChild(a);
   });
 }
+
+// ============ 手机端抽屉 ============
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+
+document.getElementById('menuBtn').addEventListener('click', () => {
+  sidebar.classList.add('open');
+  overlay.classList.add('show');
+});
+function closeDrawer() {
+  sidebar.classList.remove('open');
+  overlay.classList.remove('show');
+}
+overlay.addEventListener('click', closeDrawer);
+document.getElementById('sidebarClose').addEventListener('click', closeDrawer);
+
+// ============ 启动 ============
+loadFiles();
 </script>
 </body>
 </html>
