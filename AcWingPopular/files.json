@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-06T01:29:16.524Z",
-  "total": 4,
+  "generatedAt": "2026-10-06T01:44:47.964Z",
+  "total": 5,
   "files": [
     {
       "path": "#现在都没人打天梯了嘛.md",
@@ -30,6 +30,14 @@
       "path": "LICENSE",
       "name": "LICENSE",
       "ext": "",
+      "type": "other",
+      "desc": "",
+      "tag": ""
+    },
+    {
+      "path": "更新日志.md",
+      "name": "更新日志.md",
+      "ext": ".md",
       "type": "other",
       "desc": "",
       "tag": ""
