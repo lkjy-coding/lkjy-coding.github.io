@@ -1,44 +1,40 @@
 {
-  "generatedAt": "2026-10-06T09:13:36.998Z",
-  "total": 5,
+  "generatedAt": "2026-10-06T09:34:29.799Z",
+  "total": 4,
   "files": [
     {
       "path": "#现在都没人打天梯了嘛.md",
       "name": "#现在都没人打天梯了嘛.md",
+      "title": "#现在都没人打天梯了嘛",
       "ext": ".md",
-      "type": "other",
+      "type": "md",
       "desc": "",
       "tag": ""
     },
     {
       "path": "Florr.md",
       "name": "Florr.md",
+      "title": "Florr",
       "ext": ".md",
-      "type": "other",
+      "type": "md",
       "desc": "",
       "tag": ""
     },
     {
       "path": "index.md",
       "name": "index.md",
+      "title": "index",
       "ext": ".md",
-      "type": "other",
-      "desc": "",
-      "tag": ""
-    },
-    {
-      "path": "LICENSE",
-      "name": "LICENSE",
-      "ext": "",
-      "type": "other",
+      "type": "md",
       "desc": "",
       "tag": ""
     },
     {
       "path": "更新日志.md",
       "name": "更新日志.md",
+      "title": "更新日志",
       "ext": ".md",
-      "type": "other",
+      "type": "md",
       "desc": "",
       "tag": ""
     }
