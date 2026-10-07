@@ -245,7 +245,14 @@
   .box-contribution { background: #e8f4ff; border-color: #54aeff; color: #0969da; }
 
   /* ===== 行内标注 ===== */
-  .mark-nedfix { color: #bc4c00; font-size: 0.75em; vertical-align: super; }
+  .mark-nedfix {
+  background: #fff4e5;
+  color: #bc4c00;
+  font-size: 0.75em;
+  padding: 0.05rem 0.3rem;
+  border-radius: 3px;
+  vertical-align: super;
+  }
   .mark-num {
     background: #eaeef2; color: var(--text); font-size: 0.75em;
     padding: 0.05rem 0.3rem; border-radius: 3px; vertical-align: super;
@@ -525,19 +532,19 @@ function processCustomBlocks(text) {
     repre: 'box-repre', contribution: 'box-contribution'
   };
 
-  // ① 先处理无参块 ::::type()
+  // ① 自闭合无参块：单独成行，出现即渲染
   const noArgDefaults = {
     needfix: ['此条目仍需完善', '此条目部分内容仍需完善，你可以将你搜集到的内容提交给lkjy。'],
     predelete: ['此条目将被删除。', '此条目因为一些严重问题将会被删除。'],
     repre: ['此条目将要重写。', '此条目中的部分内容将要被重写。']
   };
   Object.keys(noArgDefaults).forEach(type => {
-    const re = new RegExp(`::::${type}\\(\\)[\\s\\S]*?::::`, 'g');
+    const re = new RegExp(`^::::${type}\\(\\)\\s*$`, 'gm');
     text = text.replace(re, () =>
       `<div class="box ${blockTypes[type]}"><span class="box-title">${noArgDefaults[type][0]}</span>${noArgDefaults[type][1]}</div>`);
   });
 
-  // ② 再处理带名称块 ::::type[名称]（跳过无参类型，避免误伤）
+  // ② 带名称块：::::type[名称]……::::
   Object.keys(blockTypes).forEach(type => {
     if (noArgDefaults[type]) return;
     const re = new RegExp(`::::${type}\\[([^\\]]*)\\]([\\s\\S]*?)::::`, 'g');
