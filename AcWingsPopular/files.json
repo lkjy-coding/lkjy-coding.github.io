@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-07T08:45:30.168Z",
+  "generatedAt": "2026-10-07T08:45:51.477Z",
   "total": 10,
   "files": [
     {
@@ -21,6 +21,16 @@
       "desc": "",
       "tag": "",
       "content": "# Florr\n\n##### Web 游戏\n\n::::needfix()\n\nFlorr 是一款风靡 AcWing 的网页端游戏，由 M28 Games 开发，主要玩法是收集“花瓣”，对抗敌人。域名为<https://florr.io/>。\n\n目前能追查到在AcWing上最早的关于Florr的帖子是[2025-02-24 21:29:53 Air_45发布的帖子](https://www.acwing.com/file_system/file/content/whole/index/content/13052282/)，而最早的直接提及游戏内容的帖子是[2025-05-05 12:35:28 LiamZou发布的帖子](https://www.acwing.com/file_system/file/content/whole/index/content/13430052/)。\n"
+    },
+    {
+      "path": "Rules/反馈规则.md",
+      "name": "反馈规则.md",
+      "title": "反馈规则",
+      "ext": ".md",
+      "type": "md",
+      "desc": "",
+      "tag": "",
+      "content": "# 反馈规则\n\n##### 平台规则\n\n::::warning[请认真阅读规则再反馈]\n\n请先将此规则仔细阅读，确认无误后再反馈。如您违反规则反馈，很有可能导致：\n\n- 反馈不受理\n- 被加入黑名单\n- 被举报\n- 被警告\n- 被公示\n- 其他可能的后果\n\n::::\n\n::::warning[请选择正确的平台]\n\n目前**仅接受来自 AcWing 的反馈**，其他渠道反馈有极大概率不受理。\n\n::::\n\n::::pro[自查]\n\n如果你的反馈没有被受理，请检查：\n\n1. 是否选错了平台？\n2. 反馈是否合规？\n3. 问题是否仍然存在？\n4. 描述是否恰当全面？\n5. 是否向错误的用户进行了反馈？\n6. **是否被 lkjy 拉黑？**\n7. 是否已绑定手机号？\n8. 账号是否可以正常使用？\n9. 是否才反馈不久，或时间点是否过早/过晚？\n10. 是否正在被处理？\n11. lkjy 此时是否有空处理？**（这个是 lkjy 自己的事情，放在这里只是提示一下）**\n\n::::\n\n在反馈时，请给 [lkjy](https://www.acwing.com/user/myspace/record/504862/) 提交你的反馈、资料。\n\n## 反馈类型\n\n你可以提交以下反馈：\n\n1. 对“待补充”内容的考证/补充\n2. 对条目中出错处的纠正/报告\n3. 对注释内容/资料的补充/勘误\n4. 对平台BUG的反馈\n5. 对新功能的想法/建议\n6. 对条目的补充（新增条目）\n\n你**不应**提交以下反馈：\n\n::::warning[请勿违规]\n\n提交以下反馈可能构成违规，依据本规则进行处理。\n\n::::\n\n1. 对 AcWing 账号的操作\n2. GitHub OAuth/AcWing 账号登录等\n3. 评论等社交功能\n4. GitHub Issues **（极可能不予受理）**\n5. 对反馈的催促\n6. 在其他平台 *（如洛谷、博客园、CSDN等）*（的）反馈\n7. GitHub Actions\n8. 其他无关的、不当的反馈\n\n## 反馈渠道\n\n目前**仅接受以下渠道**：\n\n1. AC Chat（[不支持直链，仅分享个人中心](https://www.acwing.com/user/myspace/record/504862/)）\n2. AcWing 评论区（[帖子](https://www.acwing.com/file_system/file/content/whole/index/content/14385238/)）\n\n因此，**你至少需要一个已绑定手机号且能正常使用的 AcWing 账号以反馈。**\n\n## 反馈须知\n\n1. 你应当在反馈时友善待人，而非恶语相向。\n2. 不应过分催促，修 BUG 也是要时间的。\n3. 如果你被拉黑了，你可以委托别人帮忙提交，**或者根本不去提交。**\n4. 不要找 lkjy 给你的 AcWing 账号绑定手机号、解封什么的，lkjy 没有权限。\n5. 优先去找 [yxc](https://www.acwing.com/user/myspace/record/1/) 解决你在 AcWing 的问题。\n6. 先看看是不是你的环境、网络、平台出了问题，lkjy 一般不给特定的适配版本。\n7. 如果可以，**最好配上 F12（开发者模式）的报告。**\n8. **如果发生了崩溃类问题，一定要尽可能的提供日志！没有日志很难定位到问题！**\n9. 如果你是 HTML/JavaScript 大佬，你也可以去 lkjy-coding.github.io **仓库**中，找到以下文件：\n    - `build-files.js`\n    - `build-files.yml`\n    - `AcWingPopular.html`\n   这些是本站的依赖文件，你可以自行捉虫。\n   *当然，日后也会在 AcWingPopular **仓库**里加上一些 workflow 以提升加载速度的。*\n10. 你可以去仓库的 **Actions** 标签页看看是不是有灰色的叹号（Cancelled）和红色的叉号（Error）。\n11. *“今天 GitHub 是不是又崩溃了？？？！！！”*\n    ↑试着访问 GitHub 看看还健在吗\n12. lkjy 对此规则拥有最终解释权，以及实时修订的权利。有新版本发布后，自动依据新版本执行。\n"
     },
     {
       "path": "system/index.md",
@@ -71,16 +81,6 @@
       "desc": "",
       "tag": "",
       "content": "# 乱套公式，0分\n\n##### 社区固定节目\n\n**关连梗：“y总什么时候出XX基础课”**\n\n对“y总什么时候出XX基础课”的固定回复。\n\n## 衍生梗\n\n**乱0**：此梗变体。\n\n**有技巧地套公式，3分**：此梗变体。\n"
-    },
-    {
-      "path": "反馈规则.md",
-      "name": "反馈规则.md",
-      "title": "反馈规则",
-      "ext": ".md",
-      "type": "md",
-      "desc": "",
-      "tag": "",
-      "content": "# 反馈规则\n\n##### 平台规则\n\n::::warning[请认真阅读规则再反馈]\n\n请先将此规则仔细阅读，确认无误后再反馈。如您违反规则反馈，很有可能导致：\n\n- 反馈不受理\n- 被加入黑名单\n- 被举报\n- 被警告\n- 被公示\n- 其他可能的后果\n\n::::\n\n::::warning[请选择正确的平台]\n\n目前**仅接受来自 AcWing 的反馈**，其他渠道反馈有极大概率不受理。\n\n::::\n\n::::pro[自查]\n\n如果你的反馈没有被受理，请检查：\n\n1. 是否选错了平台？\n2. 反馈是否合规？\n3. 问题是否仍然存在？\n4. 描述是否恰当全面？\n5. 是否向错误的用户进行了反馈？\n6. **是否被 lkjy 拉黑？**\n7. 是否已绑定手机号？\n8. 账号是否可以正常使用？\n9. 是否才反馈不久，或时间点是否过早/过晚？\n10. 是否正在被处理？\n11. lkjy 此时是否有空处理？**（这个是 lkjy 自己的事情，放在这里只是提示一下）**\n\n::::\n\n在反馈时，请给 [lkjy](https://www.acwing.com/user/myspace/record/504862/) 提交你的反馈、资料。\n\n## 反馈类型\n\n你可以提交以下反馈：\n\n1. 对“待补充”内容的考证/补充\n2. 对条目中出错处的纠正/报告\n3. 对注释内容/资料的补充/勘误\n4. 对平台BUG的反馈\n5. 对新功能的想法/建议\n6. 对条目的补充（新增条目）\n\n你**不应**提交以下反馈：\n\n::::warning[请勿违规]\n\n提交以下反馈可能构成违规，依据本规则进行处理。\n\n::::\n\n1. 对 AcWing 账号的操作\n2. GitHub OAuth/AcWing 账号登录等\n3. 评论等社交功能\n4. GitHub Issues **（极可能不予受理）**\n5. 对反馈的催促\n6. 在其他平台 *（如洛谷、博客园、CSDN等）*（的）反馈\n7. GitHub Actions\n8. 其他无关的、不当的反馈\n\n## 反馈渠道\n\n目前**仅接受以下渠道**：\n\n1. AC Chat（[不支持直链，仅分享个人中心](https://www.acwing.com/user/myspace/record/504862/)）\n2. AcWing 评论区（[帖子](https://www.acwing.com/file_system/file/content/whole/index/content/14385238/)）\n\n因此，**你至少需要一个已绑定手机号且能正常使用的 AcWing 账号以反馈。**\n\n## 反馈须知\n\n1. 你应当在反馈时友善待人，而非恶语相向。\n2. 不应过分催促，修 BUG 也是要时间的。\n3. 如果你被拉黑了，你可以委托别人帮忙提交，**或者根本不去提交。**\n4. 不要找 lkjy 给你的 AcWing 账号绑定手机号、解封什么的，lkjy 没有权限。\n5. 优先去找 [yxc](https://www.acwing.com/user/myspace/record/1/) 解决你在 AcWing 的问题。\n6. 先看看是不是你的环境、网络、平台出了问题，lkjy 一般不给特定的适配版本。\n7. 如果可以，**最好配上 F12（开发者模式）的报告。**\n8. **如果发生了崩溃类问题，一定要尽可能的提供日志！没有日志很难定位到问题！**\n9. 如果你是 HTML/JavaScript 大佬，你也可以去 lkjy-coding.github.io **仓库**中，找到以下文件：\n    - `build-files.js`\n    - `build-files.yml`\n    - `AcWingPopular.html`\n   这些是本站的依赖文件，你可以自行捉虫。\n   *当然，日后也会在 AcWingPopular **仓库**里加上一些 workflow 以提升加载速度的。*\n10. 你可以去仓库的 **Actions** 标签页看看是不是有灰色的叹号（Cancelled）和红色的叉号（Error）。\n11. *“今天 GitHub 是不是又崩溃了？？？！！！”*\n    ↑试着访问 GitHub 看看还健在吗\n12. lkjy 对此规则拥有最终解释权，以及实时修订的权利。有新版本发布后，自动依据新版本执行。\n"
     },
     {
       "path": "更新日志.md",
