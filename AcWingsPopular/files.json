@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-07T12:01:28.845Z",
+  "generatedAt": "2026-10-07T12:08:45.109Z",
   "total": 11,
   "files": [
     {
@@ -30,7 +30,7 @@
       "type": "md",
       "desc": "",
       "tag": "",
-      "content": "# OLD INDEX\n\n##### page.type==[\"system\"]\n\n**Please visit [new index](https://lkjy-coding.github.io/AcWingPopular.html#system%2Findex.md).**\n\n::::warning[Reminder]\n\nThis page is only used to handle the old index vulnerability that has not been fixed. Please visit the new index page according to the instructions.\n\n::::\n"
+      "content": "# OLD INDEX\n\n##### page.type==[\"system\"]\n\n**Please visit [new index](https://lkjy-coding.github.io/AcWingPopular.html#system%2Findex.md).**\n\n::::warning[Reminder]\n\nThis page is only used to handle the old index vulnerability that has ~~not~~ been fixed. Please visit the new index page according to the instructions.\n\n::::\n"
     },
     {
       "path": "Rules/反馈规则.md",
