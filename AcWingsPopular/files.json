@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-07T10:26:12.261Z",
+  "generatedAt": "2026-10-07T10:27:22.268Z",
   "total": 10,
   "files": [
     {
@@ -50,7 +50,7 @@
       "type": "md",
       "desc": "",
       "tag": "",
-      "content": "# 公告板\n\n##### 系统信息\n\n::::warning[技术受限]\n\n由于技术限制，当前版本站点加载费时较长，且可能同步不及时，敬请谅解。\n\n::::\n\n::::warning[连接不稳定]\n\n受限于 GitHub 连接不稳定，可能更新不及时。\n\n~~受限于 jsdelivr 缓存，可能同步不及时。~~\n::::\n\n::::correct[样式参考]\n\n样式设计上，参考了[洛谷帮助中心](https://help.luogu.com.cn/)的设计。\n\n::::\n\n::::contribution\n\nlkjy\n\n::::\n"
+      "content": "# 公告板\n\n##### 系统信息\n\n::::warning[技术受限]\n\n由于技术限制，当前版本站点加载费时较长，且可能同步不及时，敬请谅解。\n\n::::\n\n::::warning[连接不稳定]\n\n受限于 GitHub 连接不稳定，可能更新不及时。\n\n~~受限于 jsdelivr 缓存，可能同步不及时。~~\n::::\n\n::::correct[样式参考]\n\n样式设计上，参考了[洛谷帮助中心](https://help.luogu.com.cn/)的设计。\n\n::::\n\n::::contribution\n\nlkjy\n\n::::\n\n::::correct[如何做出贡献？]\n\n想提供意见、资料？前往[ lkjy 的个人主页](https://www.acwing.com/user/myspace/index/504862/)！\n\n::::\n\n::::warning[删除、调整须知]\n\n如果您的合法权益被侵害、条目涉及不实信息、不希望条目中的内容被公开，请联系 lkjy 以删除、调整。\n\nlkjy 并非24小时在线，因此有时可能不处理，敬请见谅。\n\n::::\n\n::::warning[必要声明]\n\n**本站点与 AcWing 及其开发者无关，且无任何隶属关系。**\n\n::::\n\n::::warning[LICENSE]\n\n本站所有文档采用 CC BY 4.0 License 进行许可。\n\n::::\n"
     },
     {
       "path": "system/更新日志.md",
