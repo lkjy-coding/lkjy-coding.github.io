@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-07T04:40:48.114Z",
+  "generatedAt": "2026-10-07T04:42:18.980Z",
   "total": 10,
   "files": [
     {
@@ -70,7 +70,7 @@
       "type": "md",
       "desc": "",
       "tag": "",
-      "content": "# 公告板\n\n##### 系统信息\n\n::::warning[技术受限]\n\n由于技术限制，当前版本站点加载费时较长，且可能同步不及时，敬请谅解。\n\n::::\n\n::::correct[样式参考]\n\n样式设计上，参考了[洛谷帮助中心](https://help.luogu.com.cn/)的设计。\n\n::::\n"
+      "content": "# 公告板\n\n##### 系统信息\n\n::::warning[技术受限]\n\n由于技术限制，当前版本站点加载费时较长，且可能同步不及时，敬请谅解。\n\n::::\n\n::::correct[样式参考]\n\n样式设计上，参考了[洛谷帮助中心](https://help.luogu.com.cn/)的设计。\n\n::::\n\n::::contribution\n\nlkjy\n\n::::\n"
     },
     {
       "path": "反馈规则.md",
