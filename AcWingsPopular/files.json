@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-07T10:27:22.268Z",
+  "generatedAt": "2026-10-07T10:33:12.754Z",
   "total": 10,
   "files": [
     {
@@ -40,7 +40,7 @@
       "type": "md",
       "desc": "",
       "tag": "",
-      "content": "# 首页\n\n**欢迎来到由 lkjy 开发的 AcWing 社区热门内容集合站！**\n\n想提供意见、资料？前往[ lkjy 的个人主页](https://www.acwing.com/user/myspace/index/504862/)！\n\n::::warning[删除、调整须知]\n\n如果您的合法权益被侵害、条目涉及不实信息、不希望条目中的内容被公开，请联系 lkjy 以删除、调整。\n\nlkjy 并非24小时在线，因此有时可能不处理，敬请见谅。\n\n::::\n\n::::warning[必要声明]\n\n**本站点与 AcWing 及其开发者无关，且无任何隶属关系。**\n\n::::\n\n::::warning[LICENSE]\n\n本站所有文档采用 CC BY 4.0 License 进行许可。\n\n::::\n"
+      "content": "# 首页\n\n**欢迎来到由 lkjy 开发的 AcWing 社区热门内容集合站！**\n\n想提供意见、资料？前往[ lkjy 的个人主页](https://www.acwing.com/user/myspace/index/504862/)！\n\n::::warning[删除、调整须知]\n\n如果您的合法权益被侵害、条目涉及不实信息、不希望条目中的内容被公开，请联系 lkjy 以删除、调整。\n\nlkjy 并非24小时在线，因此有时可能不处理，敬请见谅。\n\n::::\n\n::::warning[必要声明]\n\n**本站点与 AcWing 及其开发者无关，且无任何隶属关系。**\n\n::::\n\n::::pro[LICENSE]\n\n本站所有文档采用 CC BY 4.0 License 进行许可。\n\n::::\n\n**推荐阅读：**[公告板](https://lkjy-coding.github.io/AcWingPopular.html#system%2F%E5%85%AC%E5%91%8A%E6%9D%BF.md)、[反馈规则](https://lkjy-coding.github.io/AcWingPopular.html#Rules%2F%E5%8F%8D%E9%A6%88%E8%A7%84%E5%88%99.md)。\n"
     },
     {
       "path": "system/公告板.md",
