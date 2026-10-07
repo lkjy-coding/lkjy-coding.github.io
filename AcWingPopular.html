@@ -338,9 +338,7 @@
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
 // ============ 配置 ============
-// 站点仓库里的 files.json（含所有 md 正文），走同域，无外部缓存
 const FILES_URL = 'https://lkjy-coding.github.io/AcWingsPopular/files.json';
-// 独立仓库的 Pages 地址，用于加载图片等资源
 const ASSET_BASE = 'https://lkjy-coding.github.io/AcWingPopular/';
 const DEFAULT_PAGE = 'index.md';
 
@@ -356,7 +354,6 @@ function escapeHtml(str) {
 }
 
 // ============ 加载 files.json ============
-// force=true 时绕过浏览器缓存
 function loadFiles(force) {
   const box = document.getElementById('sidebarContent');
   box.innerHTML = '<div class="sidebar-error">正在加载目录...</div>';
@@ -428,7 +425,7 @@ function renderTree(node, container) {
   });
 }
 
-// ============ 搜索（下拉弹窗）============
+// ============ 搜索 ============
 const searchBox = document.getElementById('searchBox');
 const searchResults = document.getElementById('searchResults');
 
@@ -473,7 +470,7 @@ function route() {
   loadPage(hash || DEFAULT_PAGE);
 }
 
-// ============ 加载页面（从本地 files.json 取内容，不再 fetch 外部）============
+// ============ 加载页面 ============
 function loadPage(path) {
   document.querySelectorAll('.sidebar-item').forEach(a => {
     a.classList.toggle('active', a.dataset.path === path);
@@ -494,15 +491,13 @@ function loadPage(path) {
   raw = processCustomBlocks(raw);
   let html = marked.parse(raw);
   html = processInlineMarks(html);
-  // 处理图片路径：把相对路径改成独立仓库 Pages 地址
   html = fixAssetPaths(html);
   contentEl.innerHTML = html;
   buildTOC();
 }
 
-// ============ 图片等资源路径修正 ============
+// ============ 资源路径修正 ============
 function fixAssetPaths(html) {
-  // 把 <img src="相对路径"> 改成独立仓库 Pages 绝对地址
   return html.replace(/(<img[^>]+src=["'])(?!https?:\/\/|\/\/|data:)([^"']+)(["'])/g,
     (m, pre, src, post) => pre + ASSET_BASE + src.replace(/^\.\//, '') + post);
 }
@@ -530,14 +525,7 @@ function processCustomBlocks(text) {
     repre: 'box-repre', contribution: 'box-contribution'
   };
 
-  // 带名称的块 ::::type[名称]
-  Object.keys(blockTypes).forEach(type => {
-    const re = new RegExp(`::::${type}\\[([^\\]]*)\\]([\\s\\S]*?)::::`, 'g');
-    text = text.replace(re, (m, name, body) =>
-      `<div class="box ${blockTypes[type]}"><span class="box-title">${escapeHtml(name)}</span>${marked.parseInline(body.trim())}</div>`);
-  });
-
-  // 无参块 ::::type()
+  // ① 先处理无参块 ::::type()
   const noArgDefaults = {
     needfix: ['此条目仍需完善', '此条目部分内容仍需完善，你可以将你搜集到的内容提交给lkjy。'],
     predelete: ['此条目将被删除。', '此条目因为一些严重问题将会被删除。'],
@@ -549,7 +537,15 @@ function processCustomBlocks(text) {
       `<div class="box ${blockTypes[type]}"><span class="box-title">${noArgDefaults[type][0]}</span>${noArgDefaults[type][1]}</div>`);
   });
 
-  // 贡献者块
+  // ② 再处理带名称块 ::::type[名称]（跳过无参类型，避免误伤）
+  Object.keys(blockTypes).forEach(type => {
+    if (noArgDefaults[type]) return;
+    const re = new RegExp(`::::${type}\\[([^\\]]*)\\]([\\s\\S]*?)::::`, 'g');
+    text = text.replace(re, (m, name, body) =>
+      `<div class="box ${blockTypes[type]}"><span class="box-title">${escapeHtml(name)}</span>${marked.parseInline(body.trim())}</div>`);
+  });
+
+  // ③ 贡献者块
   text = text.replace(/::::contribution([\s\S]*?)::::/g, (m, ids) =>
     `<div class="box box-contribution"><span class="box-title">贡献者</span>感谢以下用户对此条目的贡献：${escapeHtml(ids.trim())}</div>`);
 
@@ -558,20 +554,25 @@ function processCustomBlocks(text) {
 
 // ============ 行内标注 ============
 function processInlineMarks(html) {
+  // ① ^[NedFi] 待补充
   let nedfixCount = 0;
   html = html.replace(/\^\[NedFi\]/g, () => {
     nedfixCount++;
     return `<sup class="mark-nedfix">[待补充${nedfixCount}]</sup>`;
   });
 
+  // ② ^[dN] 附注内容（先于 ③ 处理，防止被截胡）
+  const notes = [];
+  html = html.replace(/\^\[d(\d+)\]([^\n]*)/g, (m, n, txt) => {
+    notes.push({ n: n, txt: txt.trim() });
+    return `<sup class="mark-num" title="见文末注释">${n}</sup>`;
+  });
+
+  // ③ ^[N] 普通注释编号
   html = html.replace(/\^\[(\d+)\]/g, (m, n) =>
     `<sup class="mark-num">${n}</sup>`);
 
-  const notes = [];
-  html = html.replace(/\^\[d(\d+)\]([^\s<]*)/g, (m, n, txt) => {
-    notes.push({ n: n, txt: txt });
-    return '';
-  });
+  // ④ 注释内容汇总到文末
   if (notes.length) {
     html += '<hr><div><strong>注释</strong><ul>' +
       notes.map(o => `<li>[${o.n}] ${escapeHtml(o.txt)}</li>`).join('') + '</ul></div>';
@@ -608,10 +609,9 @@ function closeDrawer() {
 overlay.addEventListener('click', closeDrawer);
 document.getElementById('sidebarClose').addEventListener('click', closeDrawer);
 
-// ============ 强制刷新按钮 ============
+// ============ 强制刷新 ============
 document.getElementById('refreshBtn').addEventListener('click', function() {
   this.classList.add('spinning');
-  // 重新拉取 files.json（绕过缓存），再重载当前页
   const self = this;
   const url = FILES_URL + '?t=' + Date.now();
   fetch(url, { cache: 'no-store' })
