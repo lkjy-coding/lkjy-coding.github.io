@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-06T15:20:28.291Z",
+  "generatedAt": "2026-10-07T01:30:14.307Z",
   "total": 9,
   "files": [
     {
@@ -9,7 +9,8 @@
       "ext": ".md",
       "type": "md",
       "desc": "",
-      "tag": ""
+      "tag": "",
+      "content": "# #现在都没人打天梯了嘛\n\n##### AcWing 话题\n\n::::needfix()\n\n此话题用来说明现在 AcWing 中已经没有多少用户愿意打[天梯（AC Saber 天梯模式）](https://www.acwing.com/file_system/file/content/whole/index/content/118289/)。\n\n最早可追溯至[No.12467714](https://www.acwing.com/file_system/file/content/whole/index/content/12467714/)。\n"
     },
     {
       "path": "Florr.md",
@@ -18,7 +19,8 @@
       "ext": ".md",
       "type": "md",
       "desc": "",
-      "tag": ""
+      "tag": "",
+      "content": "# Florr\n\n##### Web 游戏\n\n::::needfix()\n\nFlorr 是一款风靡 AcWing 的网页端游戏，由 M28 Games 开发，主要玩法是收集“花瓣”，对抗敌人。域名为<https://florr.io/>。\n\n目前能追查到在AcWing上最早的关于Florr的帖子是[2025-02-24 21:29:53 Air_45发布的帖子](https://www.acwing.com/file_system/file/content/whole/index/content/13052282/)，而最早的直接提及游戏内容的帖子是[2025-05-05 12:35:28 LiamZou发布的帖子](https://www.acwing.com/file_system/file/content/whole/index/content/13430052/)。\n"
     },
     {
       "path": "index.md",
@@ -27,7 +29,8 @@
       "ext": ".md",
       "type": "md",
       "desc": "",
-      "tag": ""
+      "tag": "",
+      "content": "# 首页\n\n**欢迎来到由 lkjy 开发的 AcWing 社区热门内容集合站！**\n\n想提供意见、资料？前往[ lkjy 的个人主页](https://www.acwing.com/user/myspace/index/504862/)！\n\n::::warning[删除、调整须知]\n\n如果您的合法利益被侵害、条目涉及不实信息、不希望条目中的内容被公开，请联系 lkjy 以删除、调整。\n\nlkjy 并非24小时在线，因此有时可能不处理，敬请见谅。\n\n::::\n\n::::warning[必要声明]\n\n**本站点与 AcWing 及其开发者无关，且无任何隶属关系。**\n\n::::\n"
     },
     {
       "path": "XX祭.md",
@@ -36,7 +39,8 @@
       "ext": ".md",
       "type": "md",
       "desc": "",
-      "tag": ""
+      "tag": "",
+      "content": "# XX祭\n\n##### 社区固定节目\n\n::::warning[消歧义]\n\n请不要将此梗与网络梗**队友祭天法力无边**，及*某些活动*混淆。\n\n::::\n\n**XX祭**是 AcWing 社区中的「固定节目」，一般在以下情况中被使用：\n\n- 阅读量达到一定数值\n- 粉丝数达到一定数值\n- 点赞数达到一定数值\n\n## 常见用法\n\n**阅读量XXX祭**、**粉丝数XXX祭**、**点赞数XXX祭** *（不常用）*，其中“XXX”为具体数字。\n\n## 梗的来源\n\n::::needfix()\n\n暂不可考。\n"
     },
     {
       "path": "y总什么时候出XX基础课.md",
@@ -45,7 +49,8 @@
       "ext": ".md",
       "type": "md",
       "desc": "",
-      "tag": ""
+      "tag": "",
+      "content": "# y总什么时候出XX基础课\n\n##### 社区固定节目\n\n::::needfix()\n\n在 y 总（@yxc）发布一条 AcWing 帖子后，会有许多 AcWing 用户前往发布评论：“y总什么时候出XX基础课”。\n\n最早用梗时间暂不可考^[NedFi]。\n\n## 梗的来源\n\ny 总（yxc）为 AcWing 创始人，其旗下有算法**基础课**、语法**基础课**、Python**基础课**、Linux**基础课**、Java语法**基础课**众多基础课（后续可能有上新）。\n\n## 玩梗形式\n\n**“y总什么时候出XX基础课”**，其中“XX”与帖文内容有关。\n\n## 衍生梗\n\n**y，课，懂？**：此梗变体。\n\n**乱套公式，0分**、**乱0**及其变体：对此梗的常用回复。\n"
     },
     {
       "path": "乱套公式，0分.md",
@@ -54,7 +59,8 @@
       "ext": ".md",
       "type": "md",
       "desc": "",
-      "tag": ""
+      "tag": "",
+      "content": "# 乱套公式，0分\n\n##### 社区固定节目\n\n**关连梗：“y总什么时候出XX基础课”**\n\n对“y总什么时候出XX基础课”的固定回复。\n\n## 衍生梗\n\n**乱0**：此梗变体。\n\n**有技巧地套公式，3分**：此梗变体。\n"
     },
     {
       "path": "公告板.md",
@@ -63,7 +69,8 @@
       "ext": ".md",
       "type": "md",
       "desc": "",
-      "tag": ""
+      "tag": "",
+      "content": "# 公告板\n\n##### 系统信息\n\n::::warning[技术受限]\n\n由于技术限制，当前版本站点加载费时较长，且可能同步不及时，敬请谅解。\n\n::::\n"
     },
     {
       "path": "更新日志.md",
@@ -72,7 +79,8 @@
       "ext": ".md",
       "type": "md",
       "desc": "",
-      "tag": ""
+      "tag": "",
+      "content": "# 更新日志\n\n##### 日志\n\n#### 2026年10月6日\n\n- 修复了因为 workflows 出错导致返回错误代码 `HTTP 404` 的问题\n"
     },
     {
       "path": "那么强.md",
@@ -81,7 +89,8 @@
       "ext": ".md",
       "type": "md",
       "desc": "",
-      "tag": ""
+      "tag": "",
+      "content": "# 那么强\n\n##### 社区梗\n\n::::warning[已过时]\n\n**此梗可能已经过时。**\n\n::::\n\n::::error[用户已退出]\n\n此梗的创建者已经退出社区，**请不要对其进行骚扰，尊重其个人选择。**\n\n::::\n\n**那么强**是由用户 MoCaRabbit（现用名@Triben9，**已退出社区**^[1]）创建的梗，传播范围相较于其他梗较小，且影响较小。\n\nMoCaRabbit 曾透漏自己因为在评论区刷屏而被系统封禁^[2]。\n\n### 注释资料\n\n^[d1]来自[此帖](https://www.acwing.com/file_system/file/content/whole/index/content/14239454/)。\n\n^[d2]来自[此帖](https://www.acwing.com/file_system/file/content/whole/index/content/14009643/)。\n"
     }
   ]
 }
