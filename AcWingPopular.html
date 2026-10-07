@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AcWing 热门内容集合站</title> 
+<title>AcWing 热门内容集合站</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
@@ -50,6 +50,19 @@
     color: var(--text);
     white-space: nowrap;
   }
+  .refresh-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0.3rem 0.6rem;
+    color: var(--text-secondary);
+  }
+  .refresh-btn:hover { background: #f0f3f6; color: var(--primary); }
+  .refresh-btn.spinning { animation: spin 0.8s linear infinite; }
+  @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+
   .search-wrap {
     margin-left: auto;
     position: relative;
@@ -101,7 +114,7 @@
     text-align: center;
   }
 
-  /* ===== 布局 ===== */ 
+  /* ===== 布局 ===== */
   .layout {
     display: flex;
     max-width: 1400px;
@@ -217,6 +230,7 @@
   }
   .article pre code { background: none; padding: 0; }
   .article ul, .article ol { margin: 0 0 1rem 1.5rem; }
+  .article img { max-width: 100%; border-radius: 6px; margin: 0.5rem 0; }
 
   /* ===== 自定义框 ===== */
   .box { padding: 0.75rem 1rem; border-radius: 6px; margin: 1rem 0; border-left: 4px solid; }
@@ -294,6 +308,7 @@
 <div class="topbar">
   <button class="menu-btn" id="menuBtn" aria-label="打开菜单">☰</button>
   <div class="topbar-logo">AcWing 热门内容</div>
+  <button class="refresh-btn" id="refreshBtn" title="强制刷新">⟳</button>
   <div class="search-wrap">
     <input type="text" class="topbar-search" id="searchBox" placeholder="搜索条目..." autocomplete="off">
     <div class="search-results" id="searchResults"></div>
@@ -323,9 +338,10 @@
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
 // ============ 配置 ============
-const SITE_BASE = 'https://lkjy-coding.github.io/AcWingsPopular/';
-const FILES_URL = SITE_BASE + 'files.json';
-const RAW_BASE = 'https://cdn.jsdelivr.net/gh/lkjy-coding/AcWingPopular@main/';
+// 站点仓库里的 files.json（含所有 md 正文），走同域，无外部缓存
+const FILES_URL = 'https://lkjy-coding.github.io/AcWingsPopular/files.json';
+// 独立仓库的 Pages 地址，用于加载图片等资源
+const ASSET_BASE = 'https://lkjy-coding.github.io/AcWingPopular/';
 const DEFAULT_PAGE = 'index.md';
 
 let allFiles = [];
@@ -340,11 +356,14 @@ function escapeHtml(str) {
 }
 
 // ============ 加载 files.json ============
-function loadFiles() {
+// force=true 时绕过浏览器缓存
+function loadFiles(force) {
   const box = document.getElementById('sidebarContent');
   box.innerHTML = '<div class="sidebar-error">正在加载目录...</div>';
 
-  fetch(FILES_URL)
+  const url = force ? (FILES_URL + '?t=' + Date.now()) : FILES_URL;
+
+  fetch(url, { cache: force ? 'no-store' : 'default' })
     .then(res => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return res.json();
@@ -358,14 +377,14 @@ function loadFiles() {
     .catch(err => {
       box.innerHTML =
         `<div class="sidebar-error">目录加载失败：${escapeHtml(err.message)}` +
-        `<br><button class="retry-btn" onclick="loadFiles()">重试</button></div>`;
+        `<br><button class="retry-btn" onclick="loadFiles(true)">重试</button></div>`;
     });
 }
 
 // ============ 构建侧边栏 ============
 function buildSidebar() {
   const tree = {};
-  allFiles.forEach(f => {
+  allFiles.filter(f => f.type === 'md' || f.type === 'html').forEach(f => {
     const parts = f.path.split('/');
     let node = tree;
     parts.forEach((part, i) => {
@@ -421,7 +440,8 @@ searchBox.addEventListener('input', () => {
     return;
   }
   const matches = allFiles.filter(f =>
-    f.title.toLowerCase().includes(kw) || f.path.toLowerCase().includes(kw)
+    (f.title && f.title.toLowerCase().includes(kw)) ||
+    (f.path && f.path.toLowerCase().includes(kw))
   );
   if (!matches.length) {
     searchResults.innerHTML = '<div class="search-empty">没有匹配的条目</div>';
@@ -453,8 +473,8 @@ function route() {
   loadPage(hash || DEFAULT_PAGE);
 }
 
-// ============ 加载页面 ============
-async function loadPage(path) {
+// ============ 加载页面（从本地 files.json 取内容，不再 fetch 外部）============
+function loadPage(path) {
   document.querySelectorAll('.sidebar-item').forEach(a => {
     a.classList.toggle('active', a.dataset.path === path);
   });
@@ -464,39 +484,42 @@ async function loadPage(path) {
     `<a href="#index.md">首页</a>` + (fileEntry ? ` &gt; ${escapeHtml(fileEntry.title)}` : '');
 
   const contentEl = document.getElementById('content');
-  contentEl.innerHTML = '<div class="error-page">正在加载...</div>';
 
-  try {
-    const res = await fetch(RAW_BASE + path);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    let raw = await res.text();
-    raw = processCustomBlocks(raw);
-    let html = marked.parse(raw);
-    html = processInlineMarks(html);
-    contentEl.innerHTML = html;
-    buildTOC();
-  } catch (err) {
-    // 尝试加载 error.md
-    try {
-      const errRes = await fetch(RAW_BASE + 'error.md');
-      const errText = await errRes.text();
-      contentEl.innerHTML = marked.parse(processCustomBlocks(errText));
-    } catch (e2) {
-      // 连 error.md 都没有 → 用内置引导页
-      contentEl.innerHTML =
-        `<div class="error-page">` +
-        `<h2>页面不存在</h2>` +
-        `<p>找不到条目：${escapeHtml(path)}</p>` +
-        `<p style="margin-top:1.5rem;">请尝试：</p>` +
-        `<ol>` +
-        `<li>刷新一下</li>` +
-        `<li>检查是否有错字漏字</li>` +
-        `<li>前往 AcWing 向 lkjy 反馈问题</li>` +
-        `</ol>` +
-        `<div style="margin-top:1rem;"><button class="retry-btn" onclick="route()">重试</button></div>` +
-        `</div>`;
-    }
+  if (!fileEntry || !fileEntry.content) {
+    contentEl.innerHTML = renderErrorPage(path);
+    return;
   }
+
+  let raw = fileEntry.content;
+  raw = processCustomBlocks(raw);
+  let html = marked.parse(raw);
+  html = processInlineMarks(html);
+  // 处理图片路径：把相对路径改成独立仓库 Pages 地址
+  html = fixAssetPaths(html);
+  contentEl.innerHTML = html;
+  buildTOC();
+}
+
+// ============ 图片等资源路径修正 ============
+function fixAssetPaths(html) {
+  // 把 <img src="相对路径"> 改成独立仓库 Pages 绝对地址
+  return html.replace(/(<img[^>]+src=["'])(?!https?:\/\/|\/\/|data:)([^"']+)(["'])/g,
+    (m, pre, src, post) => pre + ASSET_BASE + src.replace(/^\.\//, '') + post);
+}
+
+// ============ 错误页 ============
+function renderErrorPage(path) {
+  return `<div class="error-page">` +
+    `<h2>页面不存在</h2>` +
+    `<p>找不到条目：${escapeHtml(path)}</p>` +
+    `<p style="margin-top:1.5rem;">请尝试：</p>` +
+    `<ol>` +
+    `<li>刷新一下</li>` +
+    `<li>检查是否有错字漏字</li>` +
+    `<li>前往 AcWing 向 lkjy 反馈问题</li>` +
+    `</ol>` +
+    `<div style="margin-top:1rem;"><button class="retry-btn" onclick="route()">重试</button></div>` +
+    `</div>`;
 }
 
 // ============ 自定义块 ============
@@ -507,12 +530,14 @@ function processCustomBlocks(text) {
     repre: 'box-repre', contribution: 'box-contribution'
   };
 
+  // 带名称的块 ::::type[名称]
   Object.keys(blockTypes).forEach(type => {
     const re = new RegExp(`::::${type}\\[([^\\]]*)\\]([\\s\\S]*?)::::`, 'g');
     text = text.replace(re, (m, name, body) =>
       `<div class="box ${blockTypes[type]}"><span class="box-title">${escapeHtml(name)}</span>${marked.parseInline(body.trim())}</div>`);
   });
 
+  // 无参块 ::::type()
   const noArgDefaults = {
     needfix: ['此条目仍需完善', '此条目部分内容仍需完善，你可以将你搜集到的内容提交给lkjy。'],
     predelete: ['此条目将被删除。', '此条目因为一些严重问题将会被删除。'],
@@ -524,6 +549,7 @@ function processCustomBlocks(text) {
       `<div class="box ${blockTypes[type]}"><span class="box-title">${noArgDefaults[type][0]}</span>${noArgDefaults[type][1]}</div>`);
   });
 
+  // 贡献者块
   text = text.replace(/::::contribution([\s\S]*?)::::/g, (m, ids) =>
     `<div class="box box-contribution"><span class="box-title">贡献者</span>感谢以下用户对此条目的贡献：${escapeHtml(ids.trim())}</div>`);
 
@@ -582,8 +608,28 @@ function closeDrawer() {
 overlay.addEventListener('click', closeDrawer);
 document.getElementById('sidebarClose').addEventListener('click', closeDrawer);
 
+// ============ 强制刷新按钮 ============
+document.getElementById('refreshBtn').addEventListener('click', function() {
+  this.classList.add('spinning');
+  // 重新拉取 files.json（绕过缓存），再重载当前页
+  const self = this;
+  const url = FILES_URL + '?t=' + Date.now();
+  fetch(url, { cache: 'no-store' })
+    .then(res => res.json())
+    .then(data => {
+      allFiles = data.files || [];
+      buildSidebar();
+      route();
+      self.classList.remove('spinning');
+    })
+    .catch(err => {
+      alert('刷新失败：' + err.message);
+      self.classList.remove('spinning');
+    });
+});
+
 // ============ 启动 ============
-loadFiles();
+loadFiles(false);
 </script>
 </body>
 </html>
