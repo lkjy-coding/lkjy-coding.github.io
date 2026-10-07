@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-07T11:51:43.577Z",
-  "total": 10,
+  "generatedAt": "2026-10-07T12:01:28.845Z",
+  "total": 11,
   "files": [
     {
       "path": "#现在都没人打天梯了嘛.md",
@@ -21,6 +21,16 @@
       "desc": "",
       "tag": "",
       "content": "# Florr\n\n##### Web 游戏\n\n::::needfix()\n\nFlorr 是一款风靡 AcWing 的网页端游戏，由 M28 Games 开发，主要玩法是收集“花瓣”，对抗敌人。域名为<https://florr.io/>。\n\n目前能追查到在AcWing上最早的关于Florr的帖子是[2025-02-24 21:29:53 Air_45发布的帖子](https://www.acwing.com/file_system/file/content/whole/index/content/13052282/)，而最早的直接提及游戏内容的帖子是[2025-05-05 12:35:28 LiamZou发布的帖子](https://www.acwing.com/file_system/file/content/whole/index/content/13430052/)。\n"
+    },
+    {
+      "path": "index.md",
+      "name": "index.md",
+      "title": "index",
+      "ext": ".md",
+      "type": "md",
+      "desc": "",
+      "tag": "",
+      "content": "# OLD INDEX\n\n##### page.type==[\"system\"]\n\n**Please visit [new index](https://lkjy-coding.github.io/AcWingPopular.html#system%2Findex.md).**\n\n::::warning[Reminder]\n\nThis page is only used to handle the old index vulnerability that has not been fixed. Please visit the new index page according to the instructions.\n\n::::\n"
     },
     {
       "path": "Rules/反馈规则.md",
