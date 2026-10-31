@@ -60,16 +60,17 @@
     color: var(--text-secondary);
   }
   .refresh-btn:hover { background: #f0f3f6; color: var(--primary); }
-  .refresh-btn.spinning { animation: spin 0.8s linear infinite; }
-  @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
 
   .search-wrap {
     margin-left: auto;
     position: relative;
-    width: 260px;
+    width: 300px;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
   }
   .topbar-search {
-    width: 100%;
+    flex: 1;
     padding: 0.45rem 0.8rem;
     border: 1px solid var(--border);
     border-radius: 6px;
@@ -77,6 +78,15 @@
     outline: none;
   }
   .topbar-search:focus { border-color: var(--primary); }
+  .search-confirm {
+    padding: 0.45rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  .search-confirm:hover { background: #f0f3f6; }
   .search-results {
     display: none;
     position: absolute;
@@ -246,12 +256,12 @@
 
   /* ===== 行内标注 ===== */
   .mark-nedfix {
-  background: #fff4e5;
-  color: #bc4c00;
-  font-size: 0.75em;
-  padding: 0.05rem 0.3rem;
-  border-radius: 3px;
-  vertical-align: super;
+    background: #fff4e5;
+    color: #bc4c00;
+    font-size: 0.75em;
+    padding: 0.05rem 0.3rem;
+    border-radius: 3px;
+    vertical-align: super;
   }
   .mark-num {
     background: #eaeef2; color: var(--text); font-size: 0.75em;
@@ -318,6 +328,7 @@
   <button class="refresh-btn" id="refreshBtn" title="强制刷新">⟳</button>
   <div class="search-wrap">
     <input type="text" class="topbar-search" id="searchBox" placeholder="搜索条目..." autocomplete="off">
+    <button class="search-confirm" id="searchConfirm" title="确认搜索">🔍</button>
     <div class="search-results" id="searchResults"></div>
   </div>
 </div>
@@ -347,9 +358,10 @@
 // ============ 配置 ============
 const FILES_URL = 'https://lkjy-coding.github.io/AcWingsPopular/files.json';
 const ASSET_BASE = 'https://lkjy-coding.github.io/AcWingPopular/';
-const DEFAULT_PAGE = 'system/index.md';
+const DEFAULT_PAGE = 'index.md';
 
 let allFiles = [];
+let collectedNotes = [];
 
 // ============ 工具 ============
 function escapeHtml(str) {
@@ -432,10 +444,11 @@ function renderTree(node, container) {
   });
 }
 
-// ============ 搜索 ============
+// ============ 搜索逻辑 ============
 const searchBox = document.getElementById('searchBox');
 const searchResults = document.getElementById('searchResults');
 
+// 输入时：实时预览
 searchBox.addEventListener('input', () => {
   const kw = searchBox.value.trim().toLowerCase();
   if (!kw) {
@@ -448,7 +461,7 @@ searchBox.addEventListener('input', () => {
     (f.path && f.path.toLowerCase().includes(kw))
   );
   if (!matches.length) {
-    searchResults.innerHTML = '<div class="search-empty">没有匹配的条目</div>';
+    searchResults.innerHTML = '<div class="search-empty">找不到页面</div>';
   } else {
     searchResults.innerHTML = matches.map(f =>
       `<a class="search-result-item" href="#${encodeURIComponent(f.path)}" onclick="closeDrawer()">
@@ -460,16 +473,101 @@ searchBox.addEventListener('input', () => {
   searchResults.classList.add('show');
 });
 
+// 确认搜索
+function doFinalSearch() {
+  const kw = searchBox.value.trim().toLowerCase();
+  if (!kw) return;
+
+  // 彩蛋优先
+  const egg = checkEasterEgg(kw);
+  if (egg === 'redirect') return;
+  if (egg === 'special-result') {
+    renderSpecialResult(kw);
+    return;
+  }
+
+  const matches = allFiles.filter(f =>
+    (f.title && f.title.toLowerCase().includes(kw)) ||
+    (f.path && f.path.toLowerCase().includes(kw))
+  );
+
+  if (!matches.length) {
+    searchResults.innerHTML = '<div class="search-empty">找不到页面</div>';
+  } else {
+    searchResults.innerHTML = matches.map(f =>
+      `<a class="search-result-item" href="#${encodeURIComponent(f.path)}" onclick="closeDrawer()">
+        ${escapeHtml(f.title)}
+        <span class="path">${escapeHtml(f.path)}</span>
+      </a>`
+    ).join('');
+  }
+  searchResults.classList.add('show');
+}
+
+searchBox.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') doFinalSearch();
+});
+document.getElementById('searchConfirm').addEventListener('click', doFinalSearch);
+
+// 点击结果后收起弹窗
 searchResults.addEventListener('click', () => {
   searchResults.classList.remove('show');
   searchBox.value = '';
 });
 
 document.addEventListener('click', (e) => {
-  if (!searchBox.contains(e.target) && !searchResults.contains(e.target)) {
+  if (!searchBox.contains(e.target) && !searchResults.contains(e.target) && !e.target.closest('.search-confirm')) {
     searchResults.classList.remove('show');
   }
 });
+
+// ============ 彩蛋系统 ============
+function checkEasterEgg(kw) {
+  const q = kw.toLowerCase().replace(/\s+/g, '');
+
+  if (['nevergonnagiveyouup', '永远不会放弃你', '永远不会抛弃你'].includes(q)) {
+    window.location.href = 'https://www.bilibili.com/video/BV1GJ411x7h7/';
+    return 'redirect';
+  }
+  if (q === '我永远无法原谅星穹铁道') {
+    window.location.href = 'https://www.bilibili.com/video/BV1xxfYBDEoG/';
+    return 'redirect';
+  }
+  if (q === '颜值主播yxc') {
+    return 'special-result';
+  }
+  if (q === '金坷垃') {
+    window.location.href = 'https://www.bilibili.com/video/BV1Rs411R7Hi/';
+    return 'redirect';
+  }
+  if (q === '十七张牌你能秒我') {
+    window.location.href = 'https://www.bilibili.com/video/BV1Xx411p74G/';
+    return 'redirect';
+  }
+  if (q === '滚木' || q === '棍母') {
+    return 'special-result';
+  }
+
+  return null;
+}
+
+function renderSpecialResult(kw) {
+  const q = kw.toLowerCase().trim();
+  if (q === '颜值主播yxc') {
+    searchResults.innerHTML = `
+      <a class="search-result-item" href="https://www.acwing.com/file_system/search_engine/web_all/result/index/?search_type=web_entry_all&search_content=cxy%E9%A2%9C%E5%80%BC%E4%B8%BB%E6%92%AD&source_file_id=0&source_person_id=0" target="_blank">
+        颜值主播yxc
+        <span class="path">我们的颜值主播yxc！</span>
+      </a>`;
+  } else if (q === '滚木' || q === '棍母') {
+    searchResults.innerHTML = `
+      <a class="search-result-item" href="#nonexistent-zwj">
+        &#8205;
+        <span class="path"></span>
+      </a>`;
+  }
+  searchResults.classList.add('show');
+}
 
 // ============ 路由 ============
 function route() {
@@ -496,8 +594,10 @@ function loadPage(path) {
 
   let raw = fileEntry.content;
   raw = processCustomBlocks(raw);
+  raw = extractNotes(raw);          // 提取注释
   let html = marked.parse(raw);
   html = processInlineMarks(html);
+  html = restoreNotes(html);        // 恢复注释
   html = fixAssetPaths(html);
   contentEl.innerHTML = html;
   buildTOC();
@@ -532,9 +632,9 @@ function processCustomBlocks(text) {
     repre: 'box-repre', contribution: 'box-contribution'
   };
 
-  // ① 自闭合无参块：单独成行，出现即渲染
+  // ① 自闭合无参块
   const noArgDefaults = {
-    needfix: ['此条目仍需完善', '此条目部分内容仍需完善，你可以将你搜集到的内容提交给lkjy。'],
+    needfix: ['此条目仍需完善', '此条目部分内容仍需完善，你可以将你搜集到的内容提交给 lkjy。'],
     predelete: ['此条目将被删除。', '此条目因为一些严重问题将会被删除。'],
     repre: ['此条目将要重写。', '此条目中的部分内容将要被重写。']
   };
@@ -544,7 +644,7 @@ function processCustomBlocks(text) {
       `<div class="box ${blockTypes[type]}"><span class="box-title">${noArgDefaults[type][0]}</span>${noArgDefaults[type][1]}</div>`);
   });
 
-  // ② 带名称块：::::type[名称]……::::
+  // ② 带名称块
   Object.keys(blockTypes).forEach(type => {
     if (noArgDefaults[type]) return;
     const re = new RegExp(`::::${type}\\[([^\\]]*)\\]([\\s\\S]*?)::::`, 'g');
@@ -559,31 +659,39 @@ function processCustomBlocks(text) {
   return text;
 }
 
+// ============ 注释提取与恢复 ============
+function extractNotes(raw) {
+  collectedNotes = [];
+  return raw.replace(/\^\[d(\d+)\]([^\n]*)/g, (m, n, txt) => {
+    collectedNotes.push({ n: n, txt: txt.trim() });
+    return `[[NOTE_${n}]]`;
+  });
+}
+
+function restoreNotes(html) {
+  html = html.replace(/\[\[NOTE_(\d+)\]\]/g, (m, n) =>
+    `<sup class="mark-num">${n}</sup>`);
+
+  if (collectedNotes.length) {
+    html += '<hr><div><strong>注释资料</strong><ol>' +
+      collectedNotes.map(o =>
+        `<li id="note-${o.n}">${marked.parseInline(o.txt)}</li>`
+      ).join('') + '</ol></div>';
+  }
+  return html;
+}
+
 // ============ 行内标注 ============
 function processInlineMarks(html) {
-  // ① ^[NedFi] 待补充
   let nedfixCount = 0;
   html = html.replace(/\^\[NedFi\]/g, () => {
     nedfixCount++;
     return `<sup class="mark-nedfix">[待补充${nedfixCount}]</sup>`;
   });
 
-  // ② ^[dN] 附注内容（先于 ③ 处理，防止被截胡）
-  const notes = [];
-  html = html.replace(/\^\[d(\d+)\]([^\n]*)/g, (m, n, txt) => {
-    notes.push({ n: n, txt: txt.trim() });
-    return `<sup class="mark-num" title="见文末注释">${n}</sup>`;
-  });
-
-  // ③ ^[N] 普通注释编号
   html = html.replace(/\^\[(\d+)\]/g, (m, n) =>
     `<sup class="mark-num">${n}</sup>`);
 
-  // ④ 注释内容汇总到文末
-  if (notes.length) {
-    html += '<hr><div><strong>注释</strong><ul>' +
-      notes.map(o => `<li>[${o.n}] ${escapeHtml(o.txt)}</li>`).join('') + '</ul></div>';
-  }
   return html;
 }
 
@@ -618,8 +726,6 @@ document.getElementById('sidebarClose').addEventListener('click', closeDrawer);
 
 // ============ 强制刷新 ============
 document.getElementById('refreshBtn').addEventListener('click', function() {
-  this.classList.add('spinning');
-  const self = this;
   const url = FILES_URL + '?t=' + Date.now();
   fetch(url, { cache: 'no-store' })
     .then(res => res.json())
@@ -627,11 +733,9 @@ document.getElementById('refreshBtn').addEventListener('click', function() {
       allFiles = data.files || [];
       buildSidebar();
       route();
-      self.classList.remove('spinning');
     })
     .catch(err => {
       alert('刷新失败：' + err.message);
-      self.classList.remove('spinning');
     });
 });
 
