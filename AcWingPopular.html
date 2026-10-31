@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AcWing 热门内容集合站</title>
 <style>
+  /* ================= 基础重置与变量 ================= */
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
     --primary: #0969da;
@@ -22,7 +23,7 @@
     line-height: 1.6;
   }
 
-  /* ===== 顶部导航 ===== */
+  /* ================= 顶部导航 ================= */
   .topbar {
     display: flex;
     align-items: center;
@@ -35,214 +36,67 @@
     z-index: 100;
     gap: 0.75rem;
   }
-  .menu-btn {
-    display: none;
-    background: none;
-    border: none;
-    font-size: 1.4rem;
-    cursor: pointer;
-    color: var(--text);
-    padding: 0.25rem 0.5rem;
-  }
-  .topbar-logo {
-    font-weight: 700;
-    font-size: 1.05rem;
-    color: var(--text);
-    white-space: nowrap;
-  }
-  .refresh-btn {
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    font-size: 1rem;
-    cursor: pointer;
-    padding: 0.3rem 0.6rem;
-    color: var(--text-secondary);
-  }
+  .menu-btn { display: none; background: none; border: none; font-size: 1.4rem; cursor: pointer; padding: 0.25rem 0.5rem; color: var(--text); }
+  .topbar-logo { font-weight: 700; font-size: 1.05rem; white-space: nowrap; color: var(--text); }
+  .refresh-btn { background: none; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem; cursor: pointer; padding: 0.3rem 0.6rem; color: var(--text-secondary); }
   .refresh-btn:hover { background: #f0f3f6; color: var(--primary); }
 
-  .search-wrap {
-    margin-left: auto;
-    position: relative;
-    width: 300px;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-  }
-  .topbar-search {
-    flex: 1;
-    padding: 0.45rem 0.8rem;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    font-size: 0.85rem;
-    outline: none;
-  }
+  .search-wrap { margin-left: auto; position: relative; width: 300px; display: flex; align-items: center; gap: 0.25rem; }
+  .topbar-search { flex: 1; padding: 0.45rem 0.8rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; outline: none; }
   .topbar-search:focus { border-color: var(--primary); }
-  .search-confirm {
-    padding: 0.45rem 0.6rem;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background: #fff;
-    cursor: pointer;
-    font-size: 0.9rem;
-  }
+  .search-confirm { padding: 0.45rem 0.6rem; border: 1px solid var(--border); border-radius: 6px; background: #fff; cursor: pointer; font-size: 0.9rem; color: var(--text); }
   .search-confirm:hover { background: #f0f3f6; }
+  
   .search-results {
-    display: none;
-    position: absolute;
-    top: 110%;
-    left: 0;
-    right: 0;
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-    max-height: 320px;
-    overflow-y: auto;
-    z-index: 200;
+    display: none; position: absolute; top: 110%; left: 0; right: 0; background: #fff;
+    border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); max-height: 320px; overflow-y: auto; z-index: 200;
   }
   .search-results.show { display: block; }
-  .search-result-item {
-    display: block;
-    padding: 0.5rem 0.8rem;
-    color: var(--text);
-    text-decoration: none;
-    font-size: 0.9rem;
-    border-bottom: 1px solid #f0f3f6;
-  }
+  .search-result-item { display: block; padding: 0.5rem 0.8rem; color: var(--text); text-decoration: none; font-size: 0.9rem; border-bottom: 1px solid #f0f3f6; }
   .search-result-item:last-child { border-bottom: none; }
   .search-result-item:hover { background: #f0f3f6; }
-  .search-result-item .path {
-    display: block;
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-  }
-  .search-empty {
-    padding: 0.8rem;
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    text-align: center;
-  }
+  .search-result-item .path { display: block; font-size: 0.75rem; color: var(--text-secondary); }
+  .search-empty { padding: 0.8rem; font-size: 0.85rem; color: var(--text-secondary); text-align: center; }
 
-  /* ===== 布局 ===== */
-  .layout {
-    display: flex;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-
-  .overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.4);
-    z-index: 150;
-  }
+  /* ================= 布局框架 ================= */
+  .layout { display: flex; max-width: 1400px; margin: 0 auto; }
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 150; }
   .overlay.show { display: block; }
 
-  /* ===== 侧边栏 ===== */
-  .sidebar {
-    width: 260px;
-    flex-shrink: 0;
-    padding: 1.5rem 1rem;
-    border-right: 1px solid #eaeef2;
-    position: sticky;
-    top: 60px;
-    height: calc(100vh - 60px);
-    overflow-y: auto;
-    background: #fff;
-  }
-  .sidebar-item {
-    display: block;
-    padding: 0.4rem 0.75rem;
-    color: var(--text-secondary);
-    text-decoration: none;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    margin-bottom: 2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+  /* ================= 左侧侧边栏 ================= */
+  .sidebar { width: 260px; flex-shrink: 0; padding: 1.5rem 1rem; border-right: 1px solid #eaeef2; position: sticky; top: 60px; height: calc(100vh - 60px); overflow-y: auto; background: #fff; }
+  .sidebar-item { display: block; padding: 0.4rem 0.75rem; color: var(--text-secondary); text-decoration: none; border-radius: 6px; font-size: 0.9rem; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .sidebar-item:hover { background: #f0f3f6; color: var(--text); }
   .sidebar-item.active { background: var(--sidebar-active); color: var(--primary); font-weight: 600; }
-  .sidebar-folder {
-    font-weight: 600;
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    padding: 0.4rem 0.75rem;
-    cursor: pointer;
-  }
+  .sidebar-folder { font-weight: 600; font-size: 0.85rem; color: var(--text-secondary); padding: 0.4rem 0.75rem; cursor: pointer; }
   .sidebar-children { padding-left: 0.75rem; }
-  .sidebar-error {
-    padding: 1rem;
-    font-size: 0.85rem;
-    color: #a40e26;
-  }
-  .retry-btn {
-    display: inline-block;
-    margin-top: 0.5rem;
-    padding: 0.3rem 0.8rem;
-    background: var(--primary);
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.85rem;
-  }
+  .sidebar-error { padding: 1rem; font-size: 0.85rem; color: #a40e26; }
+  .retry-btn { margin-top: 0.5rem; padding: 0.3rem 0.8rem; background: var(--primary); color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
 
-  /* ===== 主内容 ===== */
-  .main {
-    flex: 1;
-    min-width: 0;
-    padding: 2rem 3rem;
-    max-width: 760px;
-  }
-  .breadcrumb {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    margin-bottom: 1.5rem;
-  }
+  /* ================= 主内容区 ================= */
+  .main { flex: 1; min-width: 0; padding: 2rem 3rem; max-width: 760px; }
+  .breadcrumb { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem; }
   .breadcrumb a { color: var(--primary); text-decoration: none; }
 
-  /* ===== 右侧目录 ===== */
-  .toc {
-    width: 200px;
-    flex-shrink: 0;
-    padding: 2rem 1rem;
-    position: sticky;
-    top: 60px;
-    height: calc(100vh - 60px);
-    overflow-y: auto;
-    font-size: 0.85rem;
-  }
-  .toc a {
-    display: block;
-    padding: 0.2rem 0;
-    color: var(--text-secondary);
-    text-decoration: none;
-  }
+  /* ================= 右侧目录 ================= */
+  .toc { width: 200px; flex-shrink: 0; padding: 2rem 1rem; position: sticky; top: 60px; height: calc(100vh - 60px); overflow-y: auto; font-size: 0.85rem; }
+  .toc a { display: block; padding: 0.2rem 0; color: var(--text-secondary); text-decoration: none; }
   .toc a:hover { color: var(--primary); }
 
-  /* ===== 文章正文 ===== */
-  .article h1 { font-size: 2rem; margin: 0 0 1.5rem; }
+  /* ================= 文章正文排版 ================= */
+  .article h1 { font-size: 2rem; margin: 0 0 1.5rem; border-bottom: 1px solid #eaeef2; padding-bottom: 0.5rem; }
   .article h2 { font-size: 1.5rem; margin: 2rem 0 1rem; }
   .article h3 { font-size: 1.15rem; margin: 1.5rem 0 0.75rem; }
   .article p { margin-bottom: 1rem; }
-  .article a { color: var(--primary); }
-  .article code {
-    background: #f6f8fa; padding: 0.15rem 0.4rem;
-    border-radius: 4px; font-size: 0.9em;
-  }
-  .article pre {
-    background: #f6f8fa; padding: 1rem; border-radius: 6px;
-    overflow-x: auto; margin-bottom: 1rem;
-  }
+  .article a { color: var(--primary); text-decoration: none; }
+  .article a:hover { text-decoration: underline; }
+  .article code { background: #f6f8fa; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9em; font-family: monospace; }
+  .article pre { background: #f6f8fa; padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1rem; }
   .article pre code { background: none; padding: 0; }
   .article ul, .article ol { margin: 0 0 1rem 1.5rem; }
   .article img { max-width: 100%; border-radius: 6px; margin: 0.5rem 0; }
 
-  /* ===== 自定义框 ===== */
+  /* ================= 自定义语法框 ================= */
   .box { padding: 0.75rem 1rem; border-radius: 6px; margin: 1rem 0; border-left: 4px solid; }
   .box-title { font-weight: 700; display: block; margin-bottom: 0.25rem; }
   .box-error { background: #fff0f0; border-color: #d1242f; color: #a40e26; }
@@ -254,117 +108,98 @@
   .box-repre { background: #fff8e5; border-color: #d4a72c; color: #7d5b00; }
   .box-contribution { background: #e8f4ff; border-color: #54aeff; color: #0969da; }
 
-  /* ===== 行内标注 ===== */
-  .mark-nedfix {
-    background: #fff4e5;
-    color: #bc4c00;
-    font-size: 0.75em;
-    padding: 0.05rem 0.3rem;
-    border-radius: 3px;
-    vertical-align: super;
-  }
-  .mark-num {
-    background: #eaeef2; color: var(--text); font-size: 0.75em;
-    padding: 0.05rem 0.3rem; border-radius: 3px; vertical-align: super;
-  }
+  /* ================= 行内标注 ================= */
+  .mark-nedfix { background: #fff4e5; color: #bc4c00; font-size: 0.75em; padding: 0.05rem 0.3rem; border-radius: 3px; vertical-align: super; }
+  .mark-num { background: #eaeef2; color: var(--text); font-size: 0.75em; padding: 0.05rem 0.3rem; border-radius: 3px; vertical-align: super; }
 
-  /* ===== 错误/重试 ===== */
+  /* ================= 错误页 ================= */
   .error-page { text-align: center; padding: 3rem 0; color: var(--text-secondary); }
   .error-page h2 { color: #d1242f; margin-bottom: 1rem; font-size: 1.2rem; }
-  .error-page ol {
-    text-align: left;
-    display: inline-block;
-    margin-top: 0.5rem;
-    padding-left: 1.5rem;
-  }
-  .error-page ol li { margin-bottom: 0.3rem; }
+  .error-page ol { text-align: left; display: inline-block; margin-top: 0.5rem; padding-left: 1.5rem; }
 
-  /* ===== 响应式：手机端 ===== */
+  /* ================= 响应式：手机端 ================= */
   @media (max-width: 1000px) {
     .toc { display: none; }
     .menu-btn { display: block; }
     .search-wrap { width: 100%; max-width: none; }
-
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 80%;
-      max-width: 320px;
-      height: 100vh;
-      z-index: 200;
-      transform: translateX(-100%);
-      transition: transform 0.25s ease;
-      box-shadow: 2px 0 12px rgba(0,0,0,0.15);
-      padding-top: 1.5rem;
-    }
+    .sidebar { position: fixed; top: 0; left: 0; width: 80%; max-width: 320px; height: 100vh; z-index: 200; transform: translateX(-100%); transition: transform 0.25s ease; box-shadow: 2px 0 12px rgba(0,0,0,0.15); padding-top: 1.5rem; }
     .sidebar.open { transform: translateX(0); }
-
-    .main {
-      padding: 1.5rem 1rem;
-      max-width: 100%;
-    }
-
-    .sidebar-close {
-      display: block;
-      text-align: right;
-      font-size: 1.4rem;
-      padding: 0 0.5rem 1rem;
-      cursor: pointer;
-      color: var(--text-secondary);
-    }
+    .main { padding: 1.5rem 1rem; max-width: 100%; }
+    .sidebar-close { display: block; text-align: right; font-size: 1.4rem; padding: 0 0.5rem 1rem; cursor: pointer; color: var(--text-secondary); }
   }
-
-  @media (min-width: 1001px) {
-    .sidebar-close { display: none; }
-  }
+  @media (min-width: 1001px) { .sidebar-close { display: none; } }
 </style>
 </head>
 <body>
 
+<!-- 顶部导航栏 -->
 <div class="topbar">
-  <button class="menu-btn" id="menuBtn" aria-label="打开菜单">☰</button>
+  <button class="menu-btn" id="menuBtn">☰</button>
   <div class="topbar-logo">AcWing 热门内容</div>
   <button class="refresh-btn" id="refreshBtn" title="强制刷新">⟳</button>
   <div class="search-wrap">
     <input type="text" class="topbar-search" id="searchBox" placeholder="搜索条目..." autocomplete="off">
-    <button class="search-confirm" id="searchConfirm" title="确认搜索">🔍</button>
+    <button class="search-confirm" id="searchConfirm">🔍</button>
     <div class="search-results" id="searchResults"></div>
   </div>
 </div>
 
+<!-- 手机端遮罩层 -->
 <div class="overlay" id="overlay"></div>
 
+<!-- 页面三栏布局 -->
 <div class="layout">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-close" id="sidebarClose">✕</div>
-    <div id="sidebarContent">
-      <div class="sidebar-error">正在加载...</div>
-    </div>
+    <div id="sidebarContent"><div class="sidebar-error">正在加载目录...</div></div>
   </aside>
 
   <main class="main">
     <div class="breadcrumb" id="breadcrumb"></div>
-    <article class="article" id="content">
-      <div class="error-page">正在加载...</div>
-    </article>
+    <article class="article" id="content"><div class="error-page">正在加载正文...</div></article>
   </main>
 
   <aside class="toc" id="toc"></aside>
 </div>
 
-<!-- 换用更稳定、无问题的 markdown-it -->
-<script src="https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"></script>
 <script>
-// ============ 初始化 Markdown 解析器 ============
-const md = window.markdownit({ 
-  html: true, 
-  linkify: true, 
-  breaks: true,
-  typographer: true 
-});
+// ================= 内置超轻量 Markdown 解析器 =================
+// 彻底摒弃外部 CDN，防止 marked is not defined
+const NativeMD = (function() {
+  function esc(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function inline(text) {
+    return text
+      .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*([^*]+)\*/g, '<em>$1</em>');
+  }
+  return {
+    render: function(text) {
+      let html = esc(text);
+      html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+      html = html.replace(/^###### (.*$)/gm, '<h6>$1</h6>')
+                 .replace(/^##### (.*$)/gm, '<h5>$1</h5>')
+                 .replace(/^#### (.*$)/gm, '<h4>$1</h4>')
+                 .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+                 .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+                 .replace(/^# (.*$)/gm, '<h1>$1</h1>');
+      html = html.replace(/^\s*-\s+(.*$)/gm, '<li>$1</li>');
+      html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+      html = html.split(/\n{2,}/).map(p => {
+        if (p.trim().startsWith('<') || p.trim() === '') return p;
+        return `<p>${inline(p.trim())}</p>`;
+      }).join('\n');
+      return html;
+    },
+    renderInline: inline
+  };
+})();
 
-// ============ 配置 ============
+// ================= 配置区 =================
 const FILES_URL = 'https://lkjy-coding.github.io/AcWingsPopular/files.json';
 const ASSET_BASE = 'https://lkjy-coding.github.io/AcWingPopular/';
 const DEFAULT_PAGE = 'index.md';
@@ -372,27 +207,20 @@ const DEFAULT_PAGE = 'index.md';
 let allFiles = [];
 let collectedNotes = [];
 
-// ============ 工具 ============
+// ================= 工具函数 =================
 function escapeHtml(str) {
   if (str == null) return '';
-  return String(str)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-// ============ 加载 files.json ============
+// ================= 加载目录数据 =================
 function loadFiles(force) {
   const box = document.getElementById('sidebarContent');
   box.innerHTML = '<div class="sidebar-error">正在加载目录...</div>';
-
   const url = force ? (FILES_URL + '?t=' + Date.now()) : FILES_URL;
 
   fetch(url, { cache: force ? 'no-store' : 'default' })
-    .then(res => {
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return res.json();
-    })
+    .then(res => { if (!res.ok) throw new Error(`HTTP ${res.status}`); return res.json(); })
     .then(data => {
       allFiles = data.files || [];
       buildSidebar();
@@ -400,28 +228,21 @@ function loadFiles(force) {
       window.addEventListener('hashchange', route);
     })
     .catch(err => {
-      box.innerHTML =
-        `<div class="sidebar-error">目录加载失败：${escapeHtml(err.message)}` +
-        `<br><button class="retry-btn" onclick="loadFiles(true)">重试</button></div>`;
+      box.innerHTML = `<div class="sidebar-error">目录加载失败：${escapeHtml(err.message)}<br><button class="retry-btn" onclick="loadFiles(true)">重试</button></div>`;
     });
 }
 
-// ============ 构建侧边栏 ============
+// ================= 构建左侧导航栏 =================
 function buildSidebar() {
   const tree = {};
   allFiles.filter(f => f.type === 'md' || f.type === 'html').forEach(f => {
     const parts = f.path.split('/');
     let node = tree;
     parts.forEach((part, i) => {
-      if (i === parts.length - 1) {
-        node['__file__' + part] = f;
-      } else {
-        if (!node[part]) node[part] = {};
-        node = node[part];
-      }
+      if (i === parts.length - 1) node['__file__' + part] = f;
+      else { if (!node[part]) node[part] = {}; node = node[part]; }
     });
   });
-
   const container = document.getElementById('sidebarContent');
   container.innerHTML = '';
   renderTree(tree, container);
@@ -440,7 +261,6 @@ function renderTree(node, container) {
     folder.appendChild(children);
     container.appendChild(folder);
   });
-
   Object.keys(node).filter(k => k.startsWith('__file__')).forEach(key => {
     const f = node[key];
     const a = document.createElement('a');
@@ -453,147 +273,68 @@ function renderTree(node, container) {
   });
 }
 
-// ============ 搜索逻辑 ============
+// ================= 搜索与彩蛋逻辑 =================
 const searchBox = document.getElementById('searchBox');
 const searchResults = document.getElementById('searchResults');
 
-// 输入时：实时预览
 searchBox.addEventListener('input', () => {
   const kw = searchBox.value.trim().toLowerCase();
-  if (!kw) {
-    searchResults.classList.remove('show');
-    searchResults.innerHTML = '';
-    return;
-  }
-  const matches = allFiles.filter(f =>
-    (f.title && f.title.toLowerCase().includes(kw)) ||
-    (f.path && f.path.toLowerCase().includes(kw))
-  );
-  if (!matches.length) {
-    searchResults.innerHTML = '<div class="search-empty">找不到页面</div>';
-  } else {
-    searchResults.innerHTML = matches.map(f =>
-      `<a class="search-result-item" href="#${encodeURIComponent(f.path)}" onclick="closeDrawer()">
-        ${escapeHtml(f.title)}
-        <span class="path">${escapeHtml(f.path)}</span>
-      </a>`
-    ).join('');
-  }
+  if (!kw) { searchResults.classList.remove('show'); searchResults.innerHTML = ''; return; }
+  const matches = allFiles.filter(f => (f.title && f.title.toLowerCase().includes(kw)) || (f.path && f.path.toLowerCase().includes(kw)));
+  searchResults.innerHTML = matches.length ? matches.map(f => `<a class="search-result-item" href="#${encodeURIComponent(f.path)}" onclick="closeDrawer()">${escapeHtml(f.title)}<span class="path">${escapeHtml(f.path)}</span></a>`).join('') : '<div class="search-empty">找不到页面</div>';
   searchResults.classList.add('show');
 });
 
-// 确认搜索
 function doFinalSearch() {
   const kw = searchBox.value.trim().toLowerCase();
   if (!kw) return;
-
-  // 彩蛋优先
   const egg = checkEasterEgg(kw);
   if (egg === 'redirect') return;
-  if (egg === 'special-result') {
-    renderSpecialResult(kw);
-    return;
-  }
-
-  const matches = allFiles.filter(f =>
-    (f.title && f.title.toLowerCase().includes(kw)) ||
-    (f.path && f.path.toLowerCase().includes(kw))
-  );
-
-  if (!matches.length) {
-    searchResults.innerHTML = '<div class="search-empty">找不到页面</div>';
-  } else {
-    searchResults.innerHTML = matches.map(f =>
-      `<a class="search-result-item" href="#${encodeURIComponent(f.path)}" onclick="closeDrawer()">
-        ${escapeHtml(f.title)}
-        <span class="path">${escapeHtml(f.path)}</span>
-      </a>`
-    ).join('');
-  }
+  if (egg === 'special-result') { renderSpecialResult(kw); return; }
+  
+  const matches = allFiles.filter(f => (f.title && f.title.toLowerCase().includes(kw)) || (f.path && f.path.toLowerCase().includes(kw)));
+  searchResults.innerHTML = matches.length ? matches.map(f => `<a class="search-result-item" href="#${encodeURIComponent(f.path)}" onclick="closeDrawer()">${escapeHtml(f.title)}<span class="path">${escapeHtml(f.path)}</span></a>`).join('') : '<div class="search-empty">找不到页面</div>';
   searchResults.classList.add('show');
 }
 
-searchBox.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') doFinalSearch();
-});
+searchBox.addEventListener('keydown', (e) => { if (e.key === 'Enter') doFinalSearch(); });
 document.getElementById('searchConfirm').addEventListener('click', doFinalSearch);
+searchResults.addEventListener('click', () => { searchResults.classList.remove('show'); searchBox.value = ''; });
+document.addEventListener('click', (e) => { if (!searchBox.contains(e.target) && !searchResults.contains(e.target) && !e.target.closest('.search-confirm')) searchResults.classList.remove('show'); });
 
-// 点击结果后收起弹窗
-searchResults.addEventListener('click', () => {
-  searchResults.classList.remove('show');
-  searchBox.value = '';
-});
-
-document.addEventListener('click', (e) => {
-  if (!searchBox.contains(e.target) && !searchResults.contains(e.target) && !e.target.closest('.search-confirm')) {
-    searchResults.classList.remove('show');
-  }
-});
-
-// ============ 彩蛋系统 ============
+// 彩蛋判定
 function checkEasterEgg(kw) {
   const q = kw.toLowerCase().replace(/\s+/g, '');
-
-  if (['nevergonnagiveyouup', '永远不会放弃你', '永远不会抛弃你'].includes(q)) {
-    window.location.href = 'https://www.bilibili.com/video/BV1GJ411x7h7/';
-    return 'redirect';
-  }
-  if (q === '我永远无法原谅星穹铁道') {
-    window.location.href = 'https://www.bilibili.com/video/BV1xxfYBDEoG/';
-    return 'redirect';
-  }
-  if (q === '颜值主播yxc') {
-    return 'special-result';
-  }
-  if (q === '金坷垃') {
-    window.location.href = 'https://www.bilibili.com/video/BV1Rs411R7Hi/';
-    return 'redirect';
-  }
-  if (q === '十七张牌你能秒我') {
-    window.location.href = 'https://www.bilibili.com/video/BV1Xx411p74G/';
-    return 'redirect';
-  }
-  if (q === '滚木' || q === '棍母') {
-    return 'special-result';
-  }
-
+  if (['nevergonnagiveyouup', '永远不会放弃你', '永远不会抛弃你'].includes(q)) { window.location.href = 'https://www.bilibili.com/video/BV1GJ411x7h7/'; return 'redirect'; }
+  if (q === '我永远无法原谅星穹铁道') { window.location.href = 'https://www.bilibili.com/video/BV1xxfYBDEoG/'; return 'redirect'; }
+  if (q === '颜值主播yxc') return 'special-result';
+  if (q === '金坷垃') { window.location.href = 'https://www.bilibili.com/video/BV1Rs411R7Hi/'; return 'redirect'; }
+  if (q === '十七张牌你能秒我') { window.location.href = 'https://www.bilibili.com/video/BV1Xx411p74G/'; return 'redirect'; }
+  if (q === '滚木' || q === '棍母') return 'special-result';
   return null;
 }
 
 function renderSpecialResult(kw) {
   const q = kw.toLowerCase().trim();
   if (q === '颜值主播yxc') {
-    searchResults.innerHTML = `
-      <a class="search-result-item" href="https://www.acwing.com/file_system/search_engine/web_all/result/index/?search_type=web_entry_all&search_content=cxy%E9%A2%9C%E5%80%BC%E4%B8%BB%E6%92%AD&source_file_id=0&source_person_id=0" target="_blank">
-        颜值主播yxc
-        <span class="path">我们的颜值主播yxc！</span>
-      </a>`;
+    searchResults.innerHTML = `<a class="search-result-item" href="https://www.acwing.com/file_system/search_engine/web_all/result/index/?search_type=web_entry_all&search_content=cxy%E9%A2%9C%E5%80%BC%E4%B8%BB%E6%92%AD&source_file_id=0&source_person_id=0" target="_blank">颜值主播yxc<span class="path">我们的颜值主播yxc！</span></a>`;
   } else if (q === '滚木' || q === '棍母') {
-    searchResults.innerHTML = `
-      <a class="search-result-item" href="#nonexistent-zwj">
-        &#8205;
-        <span class="path"></span>
-      </a>`;
+    searchResults.innerHTML = `<a class="search-result-item" href="#nonexistent-zwj">&#8205;<span class="path"></span></a>`;
   }
   searchResults.classList.add('show');
 }
 
-// ============ 路由 ============
+// ================= 页面路由与渲染 =================
 function route() {
   const hash = decodeURIComponent(location.hash.slice(1));
   loadPage(hash || DEFAULT_PAGE);
 }
 
-// ============ 加载页面 ============
 function loadPage(path) {
-  document.querySelectorAll('.sidebar-item').forEach(a => {
-    a.classList.toggle('active', a.dataset.path === path);
-  });
-
+  document.querySelectorAll('.sidebar-item').forEach(a => a.classList.toggle('active', a.dataset.path === path));
   const fileEntry = allFiles.find(f => f.path === path);
-  document.getElementById('breadcrumb').innerHTML =
-    `<a href="#index.md">首页</a>` + (fileEntry ? ` &gt; ${escapeHtml(fileEntry.title)}` : '');
-
+  document.getElementById('breadcrumb').innerHTML = `<a href="#index.md">首页</a>` + (fileEntry ? ` &gt; ${escapeHtml(fileEntry.title)}` : '');
+  
   const contentEl = document.getElementById('content');
 
   if (!fileEntry || !fileEntry.content) {
@@ -604,10 +345,10 @@ function loadPage(path) {
   try {
     let raw = fileEntry.content;
     raw = processCustomBlocks(raw);
-    raw = extractNotes(raw);          // 提取注释
-    let html = md.render(raw);
+    raw = extractNotes(raw);
+    let html = NativeMD.render(raw);
     html = processInlineMarks(html);
-    html = restoreNotes(html);        // 恢复注释
+    html = restoreNotes(html);
     html = fixAssetPaths(html);
     contentEl.innerHTML = html;
     buildTOC();
@@ -616,96 +357,61 @@ function loadPage(path) {
   }
 }
 
-// ============ 资源路径修正 ============
 function fixAssetPaths(html) {
-  return html.replace(/(<img[^>]+src=["'])(?!https?:\/\/|\/\/|data:)([^"']+)(["'])/g,
-    (m, pre, src, post) => pre + ASSET_BASE + src.replace(/^\.\//, '') + post);
+  return html.replace(/(<img[^>]+src=["'])(?!https?:\/\/|\/\/|data:)([^"']+)(["'])/g, (m, pre, src, post) => pre + ASSET_BASE + src.replace(/^\.\//, '') + post);
 }
 
-// ============ 错误页 ============
 function renderErrorPage(path) {
-  return `<div class="error-page">` +
-    `<h2>页面不存在</h2>` +
-    `<p>找不到条目：${escapeHtml(path)}</p>` +
-    `<p style="margin-top:1.5rem;">请尝试：</p>` +
-    `<ol>` +
-    `<li>刷新一下</li>` +
-    `<li>检查是否有错字漏字</li>` +
-    `<li>前往 AcWing 向 lkjy 反馈问题</li>` +
-    `</ol>` +
-    `<div style="margin-top:1rem;"><button class="retry-btn" onclick="route()">重试</button></div>` +
-    `</div>`;
+  return `<div class="error-page"><h2>页面不存在</h2><p>找不到条目：${escapeHtml(path)}</p><p style="margin-top:1.5rem;">请尝试：</p><ol><li>刷新一下</li><li>检查是否有错字漏字</li><li>前往 AcWing 向 lkjy 反馈问题</li></ol><div style="margin-top:1rem;"><button class="retry-btn" onclick="route()">重试</button></div></div>`;
 }
 
-// ============ 自定义块 ============
+// ================= 核心语法解析 =================
 function processCustomBlocks(text) {
-  const blockTypes = {
-    error: 'box-error', warning: 'box-warning', correct: 'box-correct',
-    pro: 'box-pro', needfix: 'box-needfix', predelete: 'box-predelete',
-    repre: 'box-repre', contribution: 'box-contribution'
-  };
-
-  // ① 自闭合无参块
+  const blockTypes = { error: 'box-error', warning: 'box-warning', correct: 'box-correct', pro: 'box-pro', needfix: 'box-needfix', predelete: 'box-predelete', repre: 'box-repre', contribution: 'box-contribution' };
   const noArgDefaults = {
     needfix: ['此条目仍需完善', '此条目部分内容仍需完善，你可以将你搜集到的内容提交给 lkjy。'],
     predelete: ['此条目将被删除。', '此条目因为一些严重问题将会被删除。'],
     repre: ['此条目将要重写。', '此条目中的部分内容将要被重写。']
   };
+
   Object.keys(noArgDefaults).forEach(type => {
     const re = new RegExp(`^::::${type}\\(\\)\\s*$`, 'gm');
-    text = text.replace(re, () =>
-      `<div class="box ${blockTypes[type]}"><span class="box-title">${noArgDefaults[type][0]}</span>${noArgDefaults[type][1]}</div>`);
+    text = text.replace(re, () => `<div class="box ${blockTypes[type]}"><span class="box-title">${noArgDefaults[type][0]}</span>${noArgDefaults[type][1]}</div>`);
   });
 
-  // ② 带名称块
   Object.keys(blockTypes).forEach(type => {
     if (noArgDefaults[type]) return;
     const re = new RegExp(`::::${type}\\[([^\\]]*)\\]([\\s\\S]*?)::::`, 'g');
-    text = text.replace(re, (m, name, body) =>
-      `<div class="box ${blockTypes[type]}"><span class="box-title">${escapeHtml(name)}</span>${md.renderInline(body.trim())}</div>`);
+    text = text.replace(re, (m, name, body) => `<div class="box ${blockTypes[type]}"><span class="box-title">${escapeHtml(name)}</span>${NativeMD.renderInline(body.trim())}</div>`);
   });
 
-  // ③ 贡献者块
-  text = text.replace(/::::contribution([\s\S]*?)::::/g, (m, ids) =>
-    `<div class="box box-contribution"><span class="box-title">贡献者</span>感谢以下用户对此条目的贡献：${escapeHtml(ids.trim())}</div>`);
-
+  text = text.replace(/::::contribution([\s\S]*?)::::/g, (m, ids) => `<div class="box box-contribution"><span class="box-title">贡献者</span>感谢以下用户对此条目的贡献：${escapeHtml(ids.trim())}</div>`);
   return text;
 }
 
-// ============ 注释提取与恢复 ============
 function extractNotes(raw) {
   collectedNotes = [];
   return raw.replace(/\^\[d(\d+)\]([^\n]*)/g, (m, n, txt) => {
     collectedNotes.push({ n: n, txt: txt.trim() });
-    return `<sup class="mark-num">${n}</sup>`; // 直接生成上标，避免占位符被 md 吃掉
+    return `<sup class="mark-num">${n}</sup>`;
   });
 }
 
 function restoreNotes(html) {
   if (collectedNotes.length) {
-    html += '<hr><div><strong>注释资料</strong><ol>' +
-      collectedNotes.map(o =>
-        `<li id="note-${o.n}">${md.renderInline(o.txt)}</li>`
-      ).join('') + '</ol></div>';
+    html += '<hr><div><strong>注释资料</strong><ol>' + collectedNotes.map(o => `<li id="note-${o.n}">${NativeMD.renderInline(o.txt)}</li>`).join('') + '</ol></div>';
   }
   return html;
 }
 
-// ============ 行内标注 ============
 function processInlineMarks(html) {
   let nedfixCount = 0;
-  html = html.replace(/\^\[NedFi\]/g, () => {
-    nedfixCount++;
-    return `<sup class="mark-nedfix">[待补充${nedfixCount}]</sup>`;
-  });
-
-  html = html.replace(/\^\[(\d+)\]/g, (m, n) =>
-    `<sup class="mark-num">${n}</sup>`);
-
+  html = html.replace(/\^\[NedFi\]/g, () => { nedfixCount++; return `<sup class="mark-nedfix">[待补充${nedfixCount}]</sup>`; });
+  html = html.replace(/\^\[(\d+)\]/g, (m, n) => `<sup class="mark-num">${n}</sup>`);
   return html;
 }
 
-// ============ 右侧目录 ============
+// ================= 目录锚点与 UI 辅助 =================
 function buildTOC() {
   const toc = document.getElementById('toc');
   toc.innerHTML = '';
@@ -719,37 +425,20 @@ function buildTOC() {
   });
 }
 
-// ============ 手机端抽屉 ============
 const sidebar = document.getElementById('sidebar');
 const overlay = document.getElementById('overlay');
-
-document.getElementById('menuBtn').addEventListener('click', () => {
-  sidebar.classList.add('open');
-  overlay.classList.add('show');
-});
-function closeDrawer() {
-  sidebar.classList.remove('open');
-  overlay.classList.remove('show');
-}
+document.getElementById('menuBtn').addEventListener('click', () => { sidebar.classList.add('open'); overlay.classList.add('show'); });
+function closeDrawer() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
 overlay.addEventListener('click', closeDrawer);
 document.getElementById('sidebarClose').addEventListener('click', closeDrawer);
 
-// ============ 强制刷新 ============
 document.getElementById('refreshBtn').addEventListener('click', function() {
-  const url = FILES_URL + '?t=' + Date.now();
-  fetch(url, { cache: 'no-store' })
-    .then(res => res.json())
-    .then(data => {
-      allFiles = data.files || [];
-      buildSidebar();
-      route();
-    })
-    .catch(err => {
-      alert('刷新失败：' + err.message);
-    });
+  fetch(FILES_URL + '?t=' + Date.now(), { cache: 'no-store' })
+    .then(res => res.json()).then(data => { allFiles = data.files || []; buildSidebar(); route(); })
+    .catch(err => alert('刷新失败：' + err.message));
 });
 
-// ============ 启动 ============
+// ================= 启动！ =================
 loadFiles(false);
 </script>
 </body>
