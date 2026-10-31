@@ -16,26 +16,10 @@
     --bg: #fff;
     --sidebar-active: #ddf4ff;
   }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-    color: var(--text);
-    background: var(--bg);
-    line-height: 1.6;
-  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; color: var(--text); background: var(--bg); line-height: 1.6; }
 
-  /* ================= 顶部导航 ================= */
-  .topbar {
-    display: flex;
-    align-items: center;
-    height: 60px;
-    padding: 0 1rem;
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    background: #fff;
-    z-index: 100;
-    gap: 0.75rem;
-  }
+  /* 顶部导航 */
+  .topbar { display: flex; align-items: center; height: 60px; padding: 0 1rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: #fff; z-index: 100; gap: 0.75rem; }
   .menu-btn { display: none; background: none; border: none; font-size: 1.4rem; cursor: pointer; padding: 0.25rem 0.5rem; color: var(--text); }
   .topbar-logo { font-weight: 700; font-size: 1.05rem; white-space: nowrap; color: var(--text); }
   .refresh-btn { background: none; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem; cursor: pointer; padding: 0.3rem 0.6rem; color: var(--text-secondary); }
@@ -47,10 +31,7 @@
   .search-confirm { padding: 0.45rem 0.6rem; border: 1px solid var(--border); border-radius: 6px; background: #fff; cursor: pointer; font-size: 0.9rem; color: var(--text); }
   .search-confirm:hover { background: #f0f3f6; }
   
-  .search-results {
-    display: none; position: absolute; top: 110%; left: 0; right: 0; background: #fff;
-    border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); max-height: 320px; overflow-y: auto; z-index: 200;
-  }
+  .search-results { display: none; position: absolute; top: 110%; left: 0; right: 0; background: #fff; border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); max-height: 320px; overflow-y: auto; z-index: 200; }
   .search-results.show { display: block; }
   .search-result-item { display: block; padding: 0.5rem 0.8rem; color: var(--text); text-decoration: none; font-size: 0.9rem; border-bottom: 1px solid #f0f3f6; }
   .search-result-item:last-child { border-bottom: none; }
@@ -58,12 +39,12 @@
   .search-result-item .path { display: block; font-size: 0.75rem; color: var(--text-secondary); }
   .search-empty { padding: 0.8rem; font-size: 0.85rem; color: var(--text-secondary); text-align: center; }
 
-  /* ================= 布局框架 ================= */
+  /* 布局框架 */
   .layout { display: flex; max-width: 1400px; margin: 0 auto; }
   .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 150; }
   .overlay.show { display: block; }
 
-  /* ================= 左侧侧边栏 ================= */
+  /* 左侧侧边栏 */
   .sidebar { width: 260px; flex-shrink: 0; padding: 1.5rem 1rem; border-right: 1px solid #eaeef2; position: sticky; top: 60px; height: calc(100vh - 60px); overflow-y: auto; background: #fff; }
   .sidebar-item { display: block; padding: 0.4rem 0.75rem; color: var(--text-secondary); text-decoration: none; border-radius: 6px; font-size: 0.9rem; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .sidebar-item:hover { background: #f0f3f6; color: var(--text); }
@@ -73,17 +54,17 @@
   .sidebar-error { padding: 1rem; font-size: 0.85rem; color: #a40e26; }
   .retry-btn { margin-top: 0.5rem; padding: 0.3rem 0.8rem; background: var(--primary); color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
 
-  /* ================= 主内容区 ================= */
+  /* 主内容区 */
   .main { flex: 1; min-width: 0; padding: 2rem 3rem; max-width: 760px; }
   .breadcrumb { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem; }
   .breadcrumb a { color: var(--primary); text-decoration: none; }
 
-  /* ================= 右侧目录 ================= */
+  /* 右侧目录 */
   .toc { width: 200px; flex-shrink: 0; padding: 2rem 1rem; position: sticky; top: 60px; height: calc(100vh - 60px); overflow-y: auto; font-size: 0.85rem; }
   .toc a { display: block; padding: 0.2rem 0; color: var(--text-secondary); text-decoration: none; }
   .toc a:hover { color: var(--primary); }
 
-  /* ================= 文章正文排版 ================= */
+  /* 文章正文排版 */
   .article h1 { font-size: 2rem; margin: 0 0 1.5rem; border-bottom: 1px solid #eaeef2; padding-bottom: 0.5rem; }
   .article h2 { font-size: 1.5rem; margin: 2rem 0 1rem; }
   .article h3 { font-size: 1.15rem; margin: 1.5rem 0 0.75rem; }
@@ -96,7 +77,7 @@
   .article ul, .article ol { margin: 0 0 1rem 1.5rem; }
   .article img { max-width: 100%; border-radius: 6px; margin: 0.5rem 0; }
 
-  /* ================= 自定义语法框 ================= */
+  /* 自定义语法框 */
   .box { padding: 0.75rem 1rem; border-radius: 6px; margin: 1rem 0; border-left: 4px solid; }
   .box-title { font-weight: 700; display: block; margin-bottom: 0.25rem; }
   .box-error { background: #fff0f0; border-color: #d1242f; color: #a40e26; }
@@ -108,16 +89,16 @@
   .box-repre { background: #fff8e5; border-color: #d4a72c; color: #7d5b00; }
   .box-contribution { background: #e8f4ff; border-color: #54aeff; color: #0969da; }
 
-  /* ================= 行内标注 ================= */
+  /* 行内标注 */
   .mark-nedfix { background: #fff4e5; color: #bc4c00; font-size: 0.75em; padding: 0.05rem 0.3rem; border-radius: 3px; vertical-align: super; }
   .mark-num { background: #eaeef2; color: var(--text); font-size: 0.75em; padding: 0.05rem 0.3rem; border-radius: 3px; vertical-align: super; }
 
-  /* ================= 错误页 ================= */
+  /* 错误页 */
   .error-page { text-align: center; padding: 3rem 0; color: var(--text-secondary); }
   .error-page h2 { color: #d1242f; margin-bottom: 1rem; font-size: 1.2rem; }
   .error-page ol { text-align: left; display: inline-block; margin-top: 0.5rem; padding-left: 1.5rem; }
 
-  /* ================= 响应式：手机端 ================= */
+  /* 响应式：手机端 */
   @media (max-width: 1000px) {
     .toc { display: none; }
     .menu-btn { display: block; }
@@ -132,7 +113,6 @@
 </head>
 <body>
 
-<!-- 顶部导航栏 -->
 <div class="topbar">
   <button class="menu-btn" id="menuBtn">☰</button>
   <div class="topbar-logo">AcWing 热门内容</div>
@@ -144,10 +124,8 @@
   </div>
 </div>
 
-<!-- 手机端遮罩层 -->
 <div class="overlay" id="overlay"></div>
 
-<!-- 页面三栏布局 -->
 <div class="layout">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-close" id="sidebarClose">✕</div>
@@ -162,58 +140,34 @@
   <aside class="toc" id="toc"></aside>
 </div>
 
+<!-- 弃用 jsDelivr，主用 unpkg，备用 fastly -->
+<script src="https://unpkg.com/markdown-it@14.1.0/dist/markdown-it.min.js"></script>
 <script>
-// ================= 内置超轻量 Markdown 解析器 =================
-// 彻底摒弃外部 CDN，防止 marked is not defined
-const NativeMD = (function() {
-  function esc(str) {
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  if (typeof markdownit === 'undefined') {
+    document.write('<script src="https://fastly.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"><\/script>');
   }
-  function inline(text) {
-    return text
-      .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">')
-      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
-      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*([^*]+)\*/g, '<em>$1</em>');
-  }
-  return {
-    render: function(text) {
-      let html = esc(text);
-      html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
-      html = html.replace(/^###### (.*$)/gm, '<h6>$1</h6>')
-                 .replace(/^##### (.*$)/gm, '<h5>$1</h5>')
-                 .replace(/^#### (.*$)/gm, '<h4>$1</h4>')
-                 .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-                 .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-                 .replace(/^# (.*$)/gm, '<h1>$1</h1>');
-      html = html.replace(/^\s*-\s+(.*$)/gm, '<li>$1</li>');
-      html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
-      html = html.split(/\n{2,}/).map(p => {
-        if (p.trim().startsWith('<') || p.trim() === '') return p;
-        return `<p>${inline(p.trim())}</p>`;
-      }).join('\n');
-      return html;
-    },
-    renderInline: inline
-  };
-})();
+</script>
 
-// ================= 配置区 =================
+<script>
+// ================= 核心逻辑 =================
 const FILES_URL = 'https://lkjy-coding.github.io/AcWingsPopular/files.json';
 const ASSET_BASE = 'https://lkjy-coding.github.io/AcWingPopular/';
 const DEFAULT_PAGE = 'index.md';
 
 let allFiles = [];
 let collectedNotes = [];
+let md = null;
 
-// ================= 工具函数 =================
+// 初始化 Markdown 引擎（开启 html 支持以渲染你的 div 框）
+if (typeof markdownit !== 'undefined') {
+  md = markdownit({ html: true, linkify: true, breaks: true });
+}
+
 function escapeHtml(str) {
   if (str == null) return '';
   return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-// ================= 加载目录数据 =================
 function loadFiles(force) {
   const box = document.getElementById('sidebarContent');
   box.innerHTML = '<div class="sidebar-error">正在加载目录...</div>';
@@ -232,7 +186,6 @@ function loadFiles(force) {
     });
 }
 
-// ================= 构建左侧导航栏 =================
 function buildSidebar() {
   const tree = {};
   allFiles.filter(f => f.type === 'md' || f.type === 'html').forEach(f => {
@@ -273,7 +226,7 @@ function renderTree(node, container) {
   });
 }
 
-// ================= 搜索与彩蛋逻辑 =================
+// ================= 搜索与彩蛋 =================
 const searchBox = document.getElementById('searchBox');
 const searchResults = document.getElementById('searchResults');
 
@@ -302,7 +255,6 @@ document.getElementById('searchConfirm').addEventListener('click', doFinalSearch
 searchResults.addEventListener('click', () => { searchResults.classList.remove('show'); searchBox.value = ''; });
 document.addEventListener('click', (e) => { if (!searchBox.contains(e.target) && !searchResults.contains(e.target) && !e.target.closest('.search-confirm')) searchResults.classList.remove('show'); });
 
-// 彩蛋判定
 function checkEasterEgg(kw) {
   const q = kw.toLowerCase().replace(/\s+/g, '');
   if (['nevergonnagiveyouup', '永远不会放弃你', '永远不会抛弃你'].includes(q)) { window.location.href = 'https://www.bilibili.com/video/BV1GJ411x7h7/'; return 'redirect'; }
@@ -324,29 +276,30 @@ function renderSpecialResult(kw) {
   searchResults.classList.add('show');
 }
 
-// ================= 页面路由与渲染 =================
+// ================= 页面渲染 =================
 function route() {
   const hash = decodeURIComponent(location.hash.slice(1));
   loadPage(hash || DEFAULT_PAGE);
 }
 
 function loadPage(path) {
+  if (!md) {
+    document.getElementById('content').innerHTML = '<div class="error-page"><h2>渲染引擎未加载</h2><p>请检查网络连接，或刷新重试。</p></div>';
+    return;
+  }
+
   document.querySelectorAll('.sidebar-item').forEach(a => a.classList.toggle('active', a.dataset.path === path));
   const fileEntry = allFiles.find(f => f.path === path);
   document.getElementById('breadcrumb').innerHTML = `<a href="#index.md">首页</a>` + (fileEntry ? ` &gt; ${escapeHtml(fileEntry.title)}` : '');
   
   const contentEl = document.getElementById('content');
-
-  if (!fileEntry || !fileEntry.content) {
-    contentEl.innerHTML = renderErrorPage(path);
-    return;
-  }
+  if (!fileEntry || !fileEntry.content) { contentEl.innerHTML = renderErrorPage(path); return; }
 
   try {
     let raw = fileEntry.content;
     raw = processCustomBlocks(raw);
     raw = extractNotes(raw);
-    let html = NativeMD.render(raw);
+    let html = md.render(raw);
     html = processInlineMarks(html);
     html = restoreNotes(html);
     html = fixAssetPaths(html);
@@ -365,7 +318,6 @@ function renderErrorPage(path) {
   return `<div class="error-page"><h2>页面不存在</h2><p>找不到条目：${escapeHtml(path)}</p><p style="margin-top:1.5rem;">请尝试：</p><ol><li>刷新一下</li><li>检查是否有错字漏字</li><li>前往 AcWing 向 lkjy 反馈问题</li></ol><div style="margin-top:1rem;"><button class="retry-btn" onclick="route()">重试</button></div></div>`;
 }
 
-// ================= 核心语法解析 =================
 function processCustomBlocks(text) {
   const blockTypes = { error: 'box-error', warning: 'box-warning', correct: 'box-correct', pro: 'box-pro', needfix: 'box-needfix', predelete: 'box-predelete', repre: 'box-repre', contribution: 'box-contribution' };
   const noArgDefaults = {
@@ -382,7 +334,7 @@ function processCustomBlocks(text) {
   Object.keys(blockTypes).forEach(type => {
     if (noArgDefaults[type]) return;
     const re = new RegExp(`::::${type}\\[([^\\]]*)\\]([\\s\\S]*?)::::`, 'g');
-    text = text.replace(re, (m, name, body) => `<div class="box ${blockTypes[type]}"><span class="box-title">${escapeHtml(name)}</span>${NativeMD.renderInline(body.trim())}</div>`);
+    text = text.replace(re, (m, name, body) => `<div class="box ${blockTypes[type]}"><span class="box-title">${escapeHtml(name)}</span>${md.renderInline(body.trim())}</div>`);
   });
 
   text = text.replace(/::::contribution([\s\S]*?)::::/g, (m, ids) => `<div class="box box-contribution"><span class="box-title">贡献者</span>感谢以下用户对此条目的贡献：${escapeHtml(ids.trim())}</div>`);
@@ -399,7 +351,7 @@ function extractNotes(raw) {
 
 function restoreNotes(html) {
   if (collectedNotes.length) {
-    html += '<hr><div><strong>注释资料</strong><ol>' + collectedNotes.map(o => `<li id="note-${o.n}">${NativeMD.renderInline(o.txt)}</li>`).join('') + '</ol></div>';
+    html += '<hr><div><strong>注释资料</strong><ol>' + collectedNotes.map(o => `<li id="note-${o.n}">${md.renderInline(o.txt)}</li>`).join('') + '</ol></div>';
   }
   return html;
 }
@@ -411,7 +363,6 @@ function processInlineMarks(html) {
   return html;
 }
 
-// ================= 目录锚点与 UI 辅助 =================
 function buildTOC() {
   const toc = document.getElementById('toc');
   toc.innerHTML = '';
@@ -438,7 +389,6 @@ document.getElementById('refreshBtn').addEventListener('click', function() {
     .catch(err => alert('刷新失败：' + err.message));
 });
 
-// ================= 启动！ =================
 loadFiles(false);
 </script>
 </body>
