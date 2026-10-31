@@ -353,8 +353,17 @@
   <aside class="toc" id="toc"></aside>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<!-- 换用更稳定、无问题的 markdown-it -->
+<script src="https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"></script>
 <script>
+// ============ 初始化 Markdown 解析器 ============
+const md = window.markdownit({ 
+  html: true, 
+  linkify: true, 
+  breaks: true,
+  typographer: true 
+});
+
 // ============ 配置 ============
 const FILES_URL = 'https://lkjy-coding.github.io/AcWingsPopular/files.json';
 const ASSET_BASE = 'https://lkjy-coding.github.io/AcWingPopular/';
@@ -592,15 +601,19 @@ function loadPage(path) {
     return;
   }
 
-  let raw = fileEntry.content;
-  raw = processCustomBlocks(raw);
-  raw = extractNotes(raw);          // 提取注释
-  let html = marked.parse(raw);
-  html = processInlineMarks(html);
-  html = restoreNotes(html);        // 恢复注释
-  html = fixAssetPaths(html);
-  contentEl.innerHTML = html;
-  buildTOC();
+  try {
+    let raw = fileEntry.content;
+    raw = processCustomBlocks(raw);
+    raw = extractNotes(raw);          // 提取注释
+    let html = md.render(raw);
+    html = processInlineMarks(html);
+    html = restoreNotes(html);        // 恢复注释
+    html = fixAssetPaths(html);
+    contentEl.innerHTML = html;
+    buildTOC();
+  } catch (e) {
+    contentEl.innerHTML = `<div class="error-page"><h2>渲染出错</h2><p>${escapeHtml(e.message)}</p></div>`;
+  }
 }
 
 // ============ 资源路径修正 ============
@@ -649,7 +662,7 @@ function processCustomBlocks(text) {
     if (noArgDefaults[type]) return;
     const re = new RegExp(`::::${type}\\[([^\\]]*)\\]([\\s\\S]*?)::::`, 'g');
     text = text.replace(re, (m, name, body) =>
-      `<div class="box ${blockTypes[type]}"><span class="box-title">${escapeHtml(name)}</span>${marked.parseInline(body.trim())}</div>`);
+      `<div class="box ${blockTypes[type]}"><span class="box-title">${escapeHtml(name)}</span>${md.renderInline(body.trim())}</div>`);
   });
 
   // ③ 贡献者块
@@ -664,18 +677,15 @@ function extractNotes(raw) {
   collectedNotes = [];
   return raw.replace(/\^\[d(\d+)\]([^\n]*)/g, (m, n, txt) => {
     collectedNotes.push({ n: n, txt: txt.trim() });
-    return `[[NOTE_${n}]]`;
+    return `<sup class="mark-num">${n}</sup>`; // 直接生成上标，避免占位符被 md 吃掉
   });
 }
 
 function restoreNotes(html) {
-  html = html.replace(/\[\[NOTE_(\d+)\]\]/g, (m, n) =>
-    `<sup class="mark-num">${n}</sup>`);
-
   if (collectedNotes.length) {
     html += '<hr><div><strong>注释资料</strong><ol>' +
       collectedNotes.map(o =>
-        `<li id="note-${o.n}">${marked.parseInline(o.txt)}</li>`
+        `<li id="note-${o.n}">${md.renderInline(o.txt)}</li>`
       ).join('') + '</ol></div>';
   }
   return html;
