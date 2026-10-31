@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-31T13:18:41.502Z",
-  "total": 19,
+  "generatedAt": "2026-10-31T13:29:26.440Z",
+  "total": 20,
   "files": [
     {
       "path": "【警告】关于尼日利亚事件.md",
@@ -51,6 +51,16 @@
       "desc": "",
       "tag": "",
       "content": "# OLD INDEX\n\n##### page.type==[\"system\"]\n\n**Please visit [new index](https://lkjy-coding.github.io/AcWingPopular.html#system%2Findex.md).**\n\n::::warning[Reminder]\n\nThis page is only used to handle the old index vulnerability that has ~~not~~ been fixed. Please visit the new index page according to the instructions.\n\n::::\n"
+    },
+    {
+      "path": "OI.md",
+      "name": "OI.md",
+      "title": "OI",
+      "ext": ".md",
+      "type": "md",
+      "desc": "",
+      "tag": "",
+      "content": "# OI\n\n##### 通用称呼\n\n::::warning[消歧义]\n\n请不要将此梗与网络梗**oi**混淆。\n\n::::\n\n**OI** 是对信息学（竞赛）的简称，全称 **Olympiad in Informatics**。\n\n## 衍生梗\n\n**OIer**：即**学习 OI 的人**。通常为学生党。\n\n**AFO**：即 **Away from OI**，可以理解为**不再学习 OI**。一般是一件比较悲伤或者遗憾的事情。\n\n## 梗的来源\n\n::::needfix()\n"
     },
     {
       "path": "PCL&PCL2.md",
