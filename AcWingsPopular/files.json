@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-31T03:39:57.406Z",
+  "generatedAt": "2026-10-31T04:15:08.138Z",
   "total": 19,
   "files": [
     {
@@ -130,7 +130,7 @@
       "type": "md",
       "desc": "",
       "tag": "",
-      "content": "# 帮助文档\n\n##### 平台使用帮助\n\n::::warning[不断更新]\n\n此文档会不断得到更新，如果你有未提及的问题，请参照[问题反馈](https://lkjy-coding.github.io/AcWingPopular.html#system%2F%E9%97%AE%E9%A2%98%E5%8F%8D%E9%A6%88.md)进行反馈。\n\n::::\n\n**1.显示大片空白怎么办？**\n\n请确认：\n\n- 网络是否畅通？\n- 当前是否能够连接到 GitHub？**此问题多半是因为当前网络无法连接到 GitHub 导致的渲染失败。**\n- 是否支持下载在线文件？\n- 当前内存（RAM/ROM，**尤其是 ROM**）是否充足且可用？\n\n解决方案：\n\n- 使用其他网络，或使用热点网络、移动网络、蜂窝网络。\n- 排查路由器问题，检查路由器是否正常工作。\n- 检查网关、DNS等是否配置成功且正确。\n- 如果有使用代理工具等，请关闭；如果没有，可以尝试打开。\n\n::::warning[请注意合规性]\n\n本站不提倡用户违反中国（及当地）的网络管理等法律，使用加速器等网络工具时，您应当知晓其后果，明白其的（潜在）违法性质，并在法律允许的范围内承担全部责任。\n\n::::\n\n- 检查当前内存（RAM/ROM，**尤其是 ROM**）是否充足且可用，如果充足请略过，如果不充足，尝试清理后台、清除某些不必要的文件。\n- 尝试`ping https://github.com/`。\n- 检查浏览器、网络策略的某些设置。\n- **也有可能图片真挂了，届时请查看 GitHub 仓库（lkjy-coding/AcWingPopular）对应页面的 .MD 文件下是否仍然存在图片。**\n\n**2.显示大片乱码怎么办？**\n\n请选择正确的字库。如 UTF-8。\n\n**2. What should I do if a large area of garbled text appears?**\n\nPlease select the correct character encoding. For example, UTF-8.\n"
+      "content": "# 帮助文档\n\n##### 平台使用帮助\n\n::::warning[不断更新]\n\n此文档会不断得到更新，如果你有未提及的问题，请参照[问题反馈](https://lkjy-coding.github.io/AcWingPopular.html#system%2F%E9%97%AE%E9%A2%98%E5%8F%8D%E9%A6%88.md)进行反馈。\n\n::::\n\n**1.显示大片空白怎么办？**\n\n请确认：\n\n- 网络是否畅通？\n- 当前是否能够连接到 GitHub？**此问题多半是因为当前网络无法连接到 GitHub 导致的渲染失败。**\n- 是否支持下载在线文件？\n- 当前内存（RAM/ROM，**尤其是 ROM**）是否充足且可用？\n\n解决方案：\n\n- 使用其他网络，或使用热点网络、移动网络、蜂窝网络。\n- 排查路由器问题，检查路由器是否正常工作。\n- 检查网关、DNS等是否配置成功且正确。\n- 如果有使用代理工具等，请关闭；如果没有，可以尝试打开。\n\n::::warning[请注意合规性]\n\n本站不提倡用户违反中国（及当地）的网络管理等法律，使用加速器等网络工具时，您应当知晓其后果，明白其的（潜在）违法性质，并在法律允许的范围内承担全部责任。\n\n::::\n\n- 检查当前内存（RAM/ROM，**尤其是 ROM**）是否充足且可用，如果充足请略过，如果不充足，尝试清理后台、清除某些不必要的文件。\n- 尝试`ping https://github.com/`。\n- 检查浏览器、网络策略的某些设置。\n- **也有可能图片真挂了，届时请查看 GitHub 仓库（lkjy-coding/AcWingPopular）对应页面的 .MD 文件下是否仍然存在图片。**\n\n**2.显示大片乱码怎么办？**\n\n请选择正确的字库。如 UTF-8。\n\n**2. What should I do if a large area of garbled text appears?**\n\nPlease select the correct character encoding. For example, UTF-8.\n\n**3.我刚访问的页面，怎么就提示不存在了？**\n\n这类情况通常是因为**缓存未刷新而意外加载缓存页面**导致的。\n\n解决方法：点击上方刷新按钮直接刷新，**不要点击“重试”或者直接 F5 刷新。**\n"
     },
     {
       "path": "system/更新日志.md",
