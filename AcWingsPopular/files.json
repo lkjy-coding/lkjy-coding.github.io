@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-30T15:50:29.154Z",
-  "total": 17,
+  "generatedAt": "2026-10-31T03:20:47.472Z",
+  "total": 18,
   "files": [
     {
       "path": "【警告】关于尼日利亚事件.md",
@@ -131,6 +131,16 @@
       "desc": "",
       "tag": "",
       "content": "# 更新日志\n\n##### 日志\n\n#### 2026年10月6日\n\n- 修复了因为 workflows 出错导致返回错误代码 `HTTP 404` 的问题\n"
+    },
+    {
+      "path": "system/问题反馈.md",
+      "name": "问题反馈.md",
+      "title": "问题反馈",
+      "ext": ".md",
+      "type": "md",
+      "desc": "",
+      "tag": "",
+      "content": "# 问题反馈\n\n##### system\n\n::::warning[请认准官方渠道]\n\n目前仅接受 AcWing 渠道反馈，请前往 AcWing 向 [lkjy](https://www.acwing.com/user/myspace/index/504862/) 提出反馈。\n\n::::\n\n目前仅接受以下渠道：\n\n- AcWing 中，回复 lkjy 的帖子，准确提及自己的问题\n- AcWing 中，利用 AC Chat 私信 lkjy，准确提及自己的问题\n- AcWing 中，使用话题“#AcWingPopularReport”发帖，准确提及自己的问题\n\n**不保证处理时效和速度，不保证 lkjy 是否能够及时处理问题。**\n\nlkjy 个人主页：<https://www.acwing.com/user/myspace/index/504862/>\n"
     },
     {
       "path": "XX祭.md",
