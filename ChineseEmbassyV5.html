@@ -123,17 +123,6 @@
         <div style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.85rem;">
             <a href="https://www.fmprc.gov.cn/" target="_blank" rel="noopener noreferrer" style="color: #2c6e9e; text-decoration: none; background: rgba(44,110,158,0.1); padding: 4px 12px; border-radius: 20px;">🌐 中国外交部官网</a>
             <a href="https://cs.mfa.gov.cn/" target="_blank" rel="noopener noreferrer" style="color: #2c6e9e; text-decoration: none; background: rgba(44,110,158,0.1); padding: 4px 12px; border-radius: 20px;">📘 中国领事服务网</a>
-            <a href="https://cs.mfa.gov.cn/gyls/lsgz/lsyj/jszwqw/" target="_blank" rel="noopener noreferrer" style="color: #2c6e9e; text-decoration: none; background: rgba(44,110,158,0.1); padding: 4px 12px; border-radius: 20px;">🚫 安全提醒、暂勿前往专栏</a>
-            <a href="https://cs.mfa.gov.cn/gyls/lsgz/lsyj/zyaq/" target="_blank" rel="noopener noreferrer" style="color: #2c6e9e; text-decoration: none; background: rgba(44,110,158,0.1); padding: 4px 12px; border-radius: 20px;">⚠️ 注意安全专栏</a>
-            <a href="https://cs.mfa.gov.cn/zggmzhw/lsbh/" target="_blank" rel="noopener noreferrer" style="color: #2c6e9e; text-decoration: none; background: rgba(44,110,158,0.1); padding: 4px 12px; border-radius: 20px;">🗃 领事保护专栏</a>
-            <a href="https://cs.mfa.gov.cn/zggmcg/hz/sbhz/" target="_blank" rel="noopener noreferrer" style="color: #2c6e9e; text-decoration: none; background: rgba(44,110,158,0.1); padding: 4px 12px; border-radius: 20px;">📕 申办护照</a>
-            <a href="https://cs.mfa.gov.cn/zggmcg/cgqz/sbcgqz/" target="_blank" rel="noopener noreferrer" style="color: #2c6e9e; text-decoration: none; background: rgba(44,110,158,0.1); padding: 4px 12px; border-radius: 20px;">📘 申报出国签证</a>
-            <a href="https://cs.mfa.gov.cn/wgrlh/lhqz/lhqzjjs/" target="_blank" rel="noopener noreferrer" style="color: #2c6e9e; text-decoration: none; background: rgba(44,110,158,0.1); padding: 4px 12px; border-radius: 20px;">📔 来华签证须知/About Chinese Visa</a>
-            <a href="https://cs.mfa.gov.cn/zggmzhw/hzlxz/sbhzlxz/" target="_blank" rel="noopener noreferrer" style="color: #2c6e9e; text-decoration: none; background: rgba(44,110,158,0.1); padding: 4px 12px; border-radius: 20px;">📙 申办护照/旅行证</a>
-            <a href="https://cs.mfa.gov.cn/zggmzhw/lsgz/sqlsrzxz_660563/" target="_blank" rel="noopener noreferrer" style="color: #2c6e9e; text-decoration: none; background: rgba(44,110,158,0.1); padding: 4px 12px; border-radius: 20px;">✉️ 申办领事认证</a>
-            <a href="https://cs.mfa.gov.cn/gyls/lxfs/" target="_blank" rel="noopener noreferrer" style="color: #2c6e9e; text-decoration: none; background: rgba(44,110,158,0.1); padding: 4px 12px; border-radius: 20px;">📞 领事服务联系方式</a>
-            <a href="https://cs.mfa.gov.cn/zggmcg/apecshlxk/sqapeck_660487/" target="_blank" rel="noopener noreferrer" style="color: #2c6e9e; text-decoration: none; background: rgba(44,110,158,0.1); padding: 4px 12px; border-radius: 20px;">💳 申办APEC卡</a>
-            <a href="https://cs.mfa.gov.cn/wgrlh/lsrz/lsrzjjs/" target="_blank" rel="noopener noreferrer" style="color: #2c6e9e; text-decoration: none; background: rgba(44,110,158,0.1); padding: 4px 12px; border-radius: 20px;">💡 Consular Legalisation/Apostillisation</a>
         </div>
         <div style="font-size: 0.7rem; color: #5c8aa6; margin-top: 8px;">以上为官方机构网站，权威信息请以此为准</div>
     </div>
@@ -169,13 +158,10 @@
 // ========== 管理员配置（直接修改这里即可，无需登录） ==========
 const ADMIN_CONFIG = {
     // 置顶的国家列表（按顺序，最后选择的在最顶部）
-    pinnedCountries: ["伊朗", "泰国", "日本"],
+    pinnedCountries: ["伊朗"],
     
     // 紧急公告内容（支持HTML，留空则不显示红框）
     emergencyNotice: `这里是本站的安全提醒，根据中国领事服务网安全提醒进行更新。<strong>所有列举国家的顺序和内容均为仅列举报道用意，无其他含义。中国领事服务网官方安全提醒请见 <a href="https://cs.mfa.gov.cn/gyls/lsgz/lsyj/jszwqw/" target="_blank" rel="noopener noreferrer">https://cs.mfa.gov.cn/gyls/lsgz/lsyj/jszwqw/</a>。本站不保证更新速率，具体请以官方为准。请时刻关注中国大使馆及中国领事服务网的官方动态。</strong><br><br>
-<strong>【伊朗】根据中国领事服务网安全提醒，近期伊朗局势复杂，请当地中国公民及时联系中国大使馆，保证人身安全。</strong><br><br>
-<strong>【泰国】根据中国领事服务网安全提醒，近期泰国局势复杂，请当地中国公民必要时联系中国大使馆，保证人身安全。</strong><br><br>
-<strong>【日本】根据中国领事服务网安全提醒，近期日本局势复杂，请当地中国公民保护好人身安全，必要时向中国大使馆（+86-10-12308及+86-10-65612308）获取帮助。</strong>`,
 
     // 普通公告
     normalNotice: `<p><strong>本站是民间自发组织维护，仅供信息提供，并非中国外交部与中国领事服务网的官方网站且不存在隶属关系。本站不保证更新速率，请关注官方信息。</strong><br>
