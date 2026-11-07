@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-07T09:44:55.304Z",
+  "generatedAt": "2026-11-07T09:45:24.517Z",
   "total": 22,
   "files": [
     {
@@ -53,10 +53,10 @@
       "content": "# OLD INDEX\n\n##### page.type==[\"system\"]\n\n**Please visit [new index](https://lkjy-coding.github.io/AcWingPopular.html#system%2Findex.md).**\n\n::::warning[Reminder]\n\nThis page is only used to handle the old index vulnerability that has ~~not~~ been fixed. Please visit the new index page according to the instructions.\n\n::::\n"
     },
     {
-      "path": "License",
-      "name": "License",
-      "title": "License",
-      "ext": "",
+      "path": "LicenseFile(CC BY 4.0)",
+      "name": "LicenseFile(CC BY 4.0)",
+      "title": "LicenseFile(CC BY 4.0)",
+      "ext": ".0)",
       "type": "other",
       "desc": "",
       "tag": ""
